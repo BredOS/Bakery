@@ -1,0 +1,4 @@
+[main]
+installer_version = "v0.0.1"
+[gui]
+logo_path= "assets/logo.png"
