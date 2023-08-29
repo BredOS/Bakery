@@ -1,4 +1,31 @@
-[main]
-installer_version = "v0.0.1"
+bakery_conf_ver = 0
+uninstall_upon_completion = false
+headless = false
+
 [gui]
-logo_path= "assets/logo.png"
+logo = false
+
+[settings]
+lang = str
+kb_lanf = []
+
+region = "en_us"
+timezone = "Athens"
+
+use_ntp = true
+
+user = false
+passwd = false
+ssh_pub = false
+root_passwd = false
+
+[apps]
+app_selection = []
+greeter_enable = false
+
+[postint]
+type = 0
+data = false
+
+[about]
+author = "bill88t"
