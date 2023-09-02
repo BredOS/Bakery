@@ -1,0 +1,39 @@
+#! /usr/bin/env bash
+
+# launch DIR/gui.py or DIR/tui.py when --ui gui or tui is specified
+
+ui=""
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # to be changed to future install dir
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --ui)
+            shift
+            ui=$1
+            ;;
+        *)
+            echo "Error: Unknown argument $1"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+if [[ $ui == "gui" ]]; then
+    # python "$script_dir/gui.py"
+    # check if bakery-gui is installed launch
+    if [[ -f "$script_dir/gui.py" ]]; then
+        python "$script_dir/gui.py"
+    else
+        echo "Error: bakery-gui is not installed"
+        echo "Please install bakery-gui with 'sudo pacman -S bakery-gui'"
+        exit 1
+    fi
+
+
+elif [[ $ui == "cli" ]]; then
+    python "$script_dir/bakery-cli.py"
+else
+    echo "Error: Unknown UI $ui"
+fi
+

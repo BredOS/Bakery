@@ -1,6 +1,11 @@
 import toml
 import subprocess
+import os
+import gettext
 from time import sleep
+from pathlib import Path
+from pyrunning import logging, LogMessage, LoggingHandler, Command
+from datetime import datetime
 
 API_VERSION = 1
 
@@ -42,6 +47,81 @@ API_VERSION = 1
 # [about]
 # author = str | Author of this bakery config.
 
+
+
+def setup_translations(lang=None) -> gettext.GNUTranslations:
+    """
+    Setup translations
+    
+        Does the following:
+        - Loads the translations from the locale folder
+        - Sets the translations for the gettext module
+
+        Returns:  A gettext translation object
+    """
+    lang_path = os.path.join(os.path.dirname(__file__), "locale")
+    # Load translations
+    if lang is not None:
+        gettext.bindtextdomain("bakery", lang_path)
+        gettext.textdomain("bakery")
+        translation = gettext.translation("bakery", lang_path , languages=[lang])
+        translation.install()
+        return translation.gettext # type: ignore
+    else:
+        gettext.bindtextdomain("bakery", lang_path)
+        gettext.textdomain("bakery")
+        return gettext.gettext # type: ignore
+
+def setup_logging() -> logging.Logger:
+    """
+    Setup logging
+    
+        Does the following:
+        - Creates a logger with a name
+        - Sets the format for the logs
+        - Sets up logging to a file and future console
+    """
+
+    logger = logging.getLogger("bredos-bakery")
+    logger.setLevel(logging.DEBUG)
+    log_dir = os.path.join(os.path.expanduser("~"), ".bredos", "bakery", "logs")
+    log_file = os.path.join(log_dir, datetime.now().strftime("%Y-%m-%d-%H-%M-%S.log"))
+    try:
+        Path(log_dir).mkdir( parents= True, exist_ok=True )
+        if not os.path.isdir(log_dir):
+            raise FileNotFoundError("The directory {} does not exist".format(log_dir))
+        # get write perms
+        elif not os.access(log_dir, os.W_OK):
+            raise PermissionError("You do not have permission to write to {}".format(log_dir))
+    except Exception as e: 
+        import traceback
+        traceback.print_exception(type(e), e, e.__traceback__)
+        exit(1)
+    
+    print("Logging to:" + str(log_file))
+    rm_old_logs(log_dir, keep=5)
+
+    log_file_handler = logging.FileHandler(log_file)
+    log_file_handler.setLevel(logging.DEBUG)
+    log_file_formatter = logging.Formatter('%(asctime)s [%(levelname)8s] %(message)s (%(pathname)s > %(funcName)s; Line %(lineno)d)', '%Y-%m-%d %H:%M:%S')
+    log_file_handler.setFormatter(log_file_formatter)
+
+    # # For console (when installing)
+    # log_error_handler = logging.StreamHandler()
+    # log_error_handler.setLevel(logging.INFO)
+    # log_error_formatter = logging.Formatter('%(levelname)8s: %(message)s')
+    # log_error_handler.setFormatter(log_error_formatter)
+    # logger.addHandler(log_error_handler)
+    return logger
+
+def rm_old_logs( log_dir_path, keep: int) -> None:
+    subprocess.Popen(
+        "ls -tp * | grep -v '/$' | tail -n +" 
+            + str(keep + 1) 
+            + " | xargs -I {} rm -- {}",
+        shell=True,
+        cwd=log_dir_path
+    )
 
 def check_override_config() -> bool:
     # check if a /boot/override.toml exists.
