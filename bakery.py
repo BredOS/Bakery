@@ -9,6 +9,7 @@ from datetime import datetime
 
 API_VERSION = 1
 
+
 # Config functions
 
 # Config spec
@@ -22,7 +23,7 @@ API_VERSION = 1
 #
 # [settings]
 # lang = str | Main display language ex. "en_us"
-# kb_lanf = list | Languages to be added to the keyboard.
+# kb_lang = list | Languages to be added to the keyboard.
 #
 # region = str | Region identifier.
 # timezone = str | Timezone identifier.
@@ -48,8 +49,7 @@ API_VERSION = 1
 # author = str | Author of this bakery config.
 
 
-
-def setup_translations(lang=None) -> gettext.GNUTranslations:
+def setup_translations(lang: object = None) -> gettext.GNUTranslations:
     """
     Setup translations
     
@@ -58,19 +58,21 @@ def setup_translations(lang=None) -> gettext.GNUTranslations:
         - Sets the translations for the gettext module
 
         Returns:  A gettext translation object
+        :rtype: object
     """
     lang_path = os.path.join(os.path.dirname(__file__), "locale")
     # Load translations
     if lang is not None:
         gettext.bindtextdomain("bakery", lang_path)
         gettext.textdomain("bakery")
-        translation = gettext.translation("bakery", lang_path , languages=[lang])
+        translation = gettext.translation("bakery", lang_path, languages=[lang])
         translation.install()
-        return translation.gettext # type: ignore
+        return translation.gettext  # type: ignore
     else:
         gettext.bindtextdomain("bakery", lang_path)
         gettext.textdomain("bakery")
-        return gettext.gettext # type: ignore
+        return gettext.gettext  # type: ignore
+
 
 def setup_logging() -> logging.Logger:
     """
@@ -87,23 +89,24 @@ def setup_logging() -> logging.Logger:
     log_dir = os.path.join(os.path.expanduser("~"), ".bredos", "bakery", "logs")
     log_file = os.path.join(log_dir, datetime.now().strftime("%Y-%m-%d-%H-%M-%S.log"))
     try:
-        Path(log_dir).mkdir( parents= True, exist_ok=True )
+        Path(log_dir).mkdir(parents=True, exist_ok=True)
         if not os.path.isdir(log_dir):
             raise FileNotFoundError("The directory {} does not exist".format(log_dir))
         # get write perms
         elif not os.access(log_dir, os.W_OK):
             raise PermissionError("You do not have permission to write to {}".format(log_dir))
-    except Exception as e: 
+    except Exception as e:
         import traceback
         traceback.print_exception(type(e), e, e.__traceback__)
         exit(1)
-    
+
     print("Logging to:" + str(log_file))
     rm_old_logs(log_dir, keep=5)
 
     log_file_handler = logging.FileHandler(log_file)
     log_file_handler.setLevel(logging.DEBUG)
-    log_file_formatter = logging.Formatter('%(asctime)s [%(levelname)8s] %(message)s (%(pathname)s > %(funcName)s; Line %(lineno)d)', '%Y-%m-%d %H:%M:%S')
+    log_file_formatter = logging.Formatter(
+        '%(asctime)s [%(levelname)8s] %(message)s (%(pathname)s > %(funcName)s; Line %(lineno)d)', '%Y-%m-%d %H:%M:%S')
     log_file_handler.setFormatter(log_file_formatter)
 
     # # For console (when installing)
@@ -114,14 +117,16 @@ def setup_logging() -> logging.Logger:
     # logger.addHandler(log_error_handler)
     return logger
 
-def rm_old_logs( log_dir_path, keep: int) -> None:
+
+def rm_old_logs(log_dir_path, keep: int) -> None:
     subprocess.Popen(
-        "ls -tp * | grep -v '/$' | tail -n +" 
-            + str(keep + 1) 
-            + " | xargs -I {} rm -- {}",
+        "ls -tp * | grep -v '/$' | tail -n +"
+        + str(keep + 1)
+        + " | xargs -I {} rm -- {}",
         shell=True,
         cwd=log_dir_path
     )
+
 
 def check_override_config() -> bool:
     # check if a /boot/override.toml exists.
@@ -135,12 +140,7 @@ def check_override_config() -> bool:
 
 def load_config(file_path: str = "/bakery/config.toml") -> dict:
     # Load a config file as a dict.
-    if check_override_config() and file_path == "/bakery/config.toml":
-        file_path = "/boot/override.toml"
-    try:
-        return toml.load(file_path)
-    except:
-        return None
+    return toml.load(file_path)
 
 
 def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
@@ -155,10 +155,10 @@ def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
 
 def _ping(ip: str) -> bool:
     return (
-        subprocess.Popen(["/bin/ping", "-c1", "-w1", ip], stdout=subprocess.PIPE)
-        .stdout.read()
-        .find(b"1 received")
-        != -1
+            subprocess.Popen(["/bin/ping", "-c1", "-w1", ip], stdout=subprocess.PIPE)
+            .stdout.read()
+            .find(b"1 received")
+            != -1
     )
 
 

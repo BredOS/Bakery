@@ -2,15 +2,22 @@
 
 """Installer for BredOS written in py"""
 
-from sys import argv, exit
-import locale, os, config, gi, subprocess
+from sys import argv
+
+from pyrunning import LogMessage, LoggingHandler
+
 import bakery
-from pyrunning import logging, LogMessage, LoggingHandler, Command
-from datetime import datetime
+import config
+import gi
+import locale
+import os
+import subprocess
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk,  Gio
+
+from gi.repository import Gtk, Gio
+
 
 class MenuButton(Gtk.MenuButton):
     def __init__(self, xml, name, icon_name="open-menu-symbolic"):
@@ -20,6 +27,7 @@ class MenuButton(Gtk.MenuButton):
         menu = builder.get_object(name)
         self.set_menu_model(menu)
         self.set_icon_name(icon_name)
+
 
 class Window(Gtk.ApplicationWindow):
     def __init__(self, title, width, height, **kwargs):
@@ -59,6 +67,7 @@ class Window(Gtk.ApplicationWindow):
         action.connect("activate", callback)
         self.add_action(action)
 
+
 APP_MENU = """
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
@@ -77,6 +86,8 @@ APP_MENU = """
 </interface>
 """
 
+
+# noinspection PyAttributeOutsideInit
 class MainWindow(Window):
     def __init__(self, title, width, height, **kwargs):
         LogMessage.Info("Initializing main window").write(logging_handler=logger_handler)
@@ -89,7 +100,7 @@ class MainWindow(Window):
         self.create_action("about", self.menu_handler)
         self.create_action("settings", self.menu_handler)
         welcome_page = self.create_welcome_page()
-        self.set_child(welcome_page)  
+        self.set_child(welcome_page)
 
     def create_welcome_page(self) -> Gtk.Box:
         welcome_label = Gtk.Label(label=_("Welcome to BredOS!"))
@@ -99,12 +110,14 @@ class MainWindow(Window):
         image.set_halign(Gtk.Align.CENTER)  # Align the image to the center
         image.set_margin_top(10)  # Add top margin to the image
         image.set_margin_bottom(10)  # Add bottom margin to the image
-        #size 256x256
+        # size 256x256
         image.set_pixel_size(256)
         butbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         butbox.set_halign(Gtk.Align.CENTER)
 
-        buttons ={"offline": [_("Offline Installation"), config.logo_path], "online": [_("Online Installation"), config.logo_path], "custom": [_("Custom Installation"), config.logo_path]}
+        buttons = {"offline": [_("Offline Installation"), config.logo_path],
+                   "online": [_("Online Installation"), config.logo_path],
+                   "custom": [_("Custom Installation"), config.logo_path]}
         for i in buttons:
             # Create the button
             btn = self.create_button(i, buttons[i][0], buttons[i][1])
@@ -129,76 +142,61 @@ class MainWindow(Window):
 
         return welcome_box
 
-    def post_sellection(self, selection) -> Gtk.Box:
-
+    def post_selection(self, selection) -> Gtk.Box:
         stage_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        stage_box.set_vexpand(True)  # Expand vertically
-        stage_list = Gtk.ListBox()
-        stage_list.set_selection_mode(Gtk.SelectionMode.NONE)
-        stage_list.set_vexpand(True)  # Expand vertically
-        stage_box.append(stage_list)
-        if selection == "offline":
-            self.stages = [_("Location"), _("Keyboard"), _("User"), _("Summary"), _("Install")]  # Add more stages
-        elif selection == "online":
-            self.stages= [_("Location"), _("Keyboard"), _("Desktop Environment"), _("Packages"), _("User"), _("Summary"), _("Install")]  # Add more stages
-        self.stage_labels = []  # List to store references to stage labels
+        stage_box.set_vexpand(True)
 
-        for stage in self.stages:
-            row = Gtk.ListBoxRow()
-            stage_label = Gtk.Label(label=_(stage))
-            stage_label.set_halign(Gtk.Align.START)  # Align stage labels to the left
-            stage_label.set_margin_start(10)  # Add left margin to the label
-            stage_label.set_margin_end(10)  # Add right margin to the label
-            stage_label.set_margin_top(5)  # Add top margin to the label
-            stage_label.set_margin_bottom(5)  # Add bottom margin to the label
-            row.set_child(stage_label)
-            stage_list.append(row)
-            self.stage_labels.append(stage_label) # Keep a reference to the labels
+        stages_config = conf.get("stages", {})
 
-        self.stack = Gtk.Stack()
-        self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
-        self.stack.set_vexpand(True)  # Expand vertically
-        # add extra padding to the right 
-        self.stack.set_margin_end(10)  # Add right margin to the stack
+        if selection not in stages_config:
+            raise ValueError(f"Invalid selection: {selection}")
+        print(stages_config[selection])
+        stages = stages_config[selection]
 
-        self.location_page = self.create_location_page()
-        self.keyboard_page = self.create_keyboard_page()
-        # Add more pages as needed
+        selection_notebook = Gtk.Notebook()
 
-        self.stack.add_named(self.location_page, _("Location"))
-        self.stack.add_named(self.keyboard_page, _("Keyboard"))
-        
+        for stage in stages:
+            stage_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            stage_page.set_vexpand(True)
+            stage_label = Gtk.Label(label=stage)
+            stage_page.append(stage_label)
 
-        self.next_button = Gtk.Button(label=_("Next"))
-        self.back_button = Gtk.Button(label=_("Back"))
+            selection_notebook.append_page(stage_page, Gtk.Label(label=stage))
+
+        stage_box.append(selection_notebook)
+
+        # Create back and forward buttons
+        back_button = Gtk.Button(label="Back")
+        forward_button = Gtk.Button(label="Forward")
+
+        # Connect button click events to their respective handlers
+        back_button.connect("clicked", self.on_back_button_clicked)
+        forward_button.connect("clicked", self.on_forward_button_clicked)
 
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        button_box.set_halign(Gtk.Align.END)  # Align buttons to the right
-        button_box.set_valign(Gtk.Align.END)  # Align buttons to the bottom
-        button_box.set_margin_end(10)  # Add right margin to the buttons
-        button_box.set_margin_bottom(10)  # Add bottom margin to the buttons
-        button_box.append(self.back_button)
-        button_box.append(self.next_button)
-        button_box.set_hexpand(True)  # Expand horizontally
+        button_box.set_halign(Gtk.Align.END)
+        button_box.set_valign(Gtk.Align.END)
+        button_box.set_margin_end(10)
+        button_box.set_margin_bottom(10)
+        button_box.append(back_button)
+        button_box.append(forward_button)
+        button_box.set_hexpand(True)
 
-        button_grid = Gtk.Grid()  # Create a grid for buttons and stack
-        button_grid.attach(self.stack, 0, 0, 1, 1)
+        button_grid = Gtk.Grid()
+        # button_grid.attach(stage_box, 0, 0, 1, 1)
         button_grid.attach(button_box, 0, 1, 1, 1)
-        button_grid.set_hexpand(True)  # Expand horizontally
-        
-        self.current_page_index = 0
-        self.stack.set_visible_child_name(_("Location"))
-        self.update_button_states()  # Update button states initially
-
-        self.next_button.connect("clicked", self.on_next_clicked)
-        self.back_button.connect("clicked", self.on_back_clicked)
+        button_grid.set_hexpand(True)
+        # button_grid.set_vexpand(True)
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         vbox.append(stage_box)
-        vbox.append(button_grid)
-        vbox.set_valign(Gtk.Align.CENTER)  # Align the box to the center
+        # vbox.append(button_grid)
+        vbox.set_valign(Gtk.Align.CENTER)
+        vbox.set_hexpand(True)
+
         return vbox
 
+    @staticmethod
     def create_location_page(self) -> Gtk.Box:
         # Create and return widgets for the language selection page
         language_label = Gtk.Label(label=_("Select Language:"))
@@ -206,7 +204,7 @@ class MainWindow(Window):
         language_combo.append_text("English")
         language_combo.append_text("Spanish")
         # Add more languages
-        
+
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         vbox.append(language_label)
         vbox.append(language_combo)
@@ -214,14 +212,15 @@ class MainWindow(Window):
 
         return vbox
 
-    def create_keyboard_page(self) -> Gtk.Box:
+    @staticmethod
+    def create_keyboard_page() -> Gtk.Box:
         # Create and return widgets for the keyboard layout selection page
         keyboard_label = Gtk.Label(label="Select Keyboard Layout:")
         keyboard_combo = Gtk.ComboBoxText()
         keyboard_combo.append_text("US")
         keyboard_combo.append_text("UK")
         # Add more keyboard layouts
-        
+
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         vbox.append(keyboard_label)
         vbox.append(keyboard_combo)
@@ -242,37 +241,6 @@ class MainWindow(Window):
         btn.connect("clicked", self.on_button_clicked, button_id)
         return btn
 
-    def on_button_clicked(self, button, button_id) -> None:
-            main_box = self.post_sellection(button_id)
-            self.set_child(main_box)
-            # trigger next button
-
-    def on_next_clicked(self, button) -> None:
-        self.current_page_index += 1
-        if self.current_page_index >= len(self.stages):
-            self.current_page_index = 0
-        self.stack.set_visible_child_name(self.stages[self.current_page_index])
-        self.update_button_states()
-        self.update_stages_list_selection()
-
-    def on_back_clicked(self, button) -> None:
-        self.current_page_index -= 1
-        if self.current_page_index < 0:
-            self.current_page_index = len(self.stages) - 1
-        self.stack.set_visible_child_name(self.stages[self.current_page_index])
-        self.update_button_states()
-        self.update_stages_list_selection()
-
-    def update_button_states(self) -> None:
-        self.next_button.set_sensitive(self.current_page_index < len(self.stages) - 1)
-        self.back_button.set_sensitive(self.current_page_index > 0)
-    
-    def update_stages_list_selection(self) -> None:
-        for index, stage_label in enumerate(self.stage_labels):
-            if index == self.current_page_index:
-                stage_label.set_state_flags(Gtk.StateFlags.SELECTED, True)
-            else:
-                stage_label.set_state_flags(Gtk.StateFlags.SELECTED, False)
 
     def on_language_changed(self, combo) -> None:
         active_language = combo.get_active_text()
@@ -293,7 +261,7 @@ class MainWindow(Window):
             self.about.set_authors(["Bill Sideris", "Panda"])
             self.about.set_copyright("Copyright 2023 BredOS")
             self.about.set_license_type(Gtk.License.GPL_3_0)
-            self.about.set_website("http://bredos.org")
+            self.about.set_website("https://bredos.org")
             self.about.set_website_label("BredOS.org")
             self.about.set_version(config.installer_version)
             self.about.set_visible(True)
@@ -321,6 +289,7 @@ class MainWindow(Window):
             self.settings.set_visible(True)
             self.settings.connect("close-request", self.close_settings)
 
+
 class Application(Gtk.Application):
     def __init__(self):
         super().__init__(
@@ -333,11 +302,16 @@ class Application(Gtk.Application):
             win = MainWindow("BredOS Installer", 700, 1100, application=self)
         win.present()
 
+
 if __name__ == "__main__":
     _ = bakery.setup_translations()
     logger = bakery.setup_logging()
     logger_handler = LoggingHandler(logger)
+    print(os.path.join(os.path.expanduser("~"), "Bakery") + "/config.toml")
+    conf = bakery.load_config(file_path=os.path.join(os.path.expanduser("~"), "Bakery") + "/config.toml")
+
     if subprocess.check_output(["uname"]).decode().strip() == "Darwin":
         Gtk.Settings.get_default().set_property("gtk-theme-name", "Adwaita-dark")
     app = Application()
     app.run(argv)
+

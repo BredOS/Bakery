@@ -5,9 +5,13 @@ headless = false
 [gui]
 logo = false
 
+[stages]
+offline = ["Location", "Keyboard", "User", "Summary", "Install"]
+online = ["Location", "Keyboard", "Desktop Environment", "Packages", "User", "Summary", "Install"]
+
 [settings]
-lang = str
-kb_lanf = []
+lang = "str"
+kb_lang = ['a', 'b', 'c']
 
 region = "en_us"
 timezone = "Athens"

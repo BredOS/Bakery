@@ -3,32 +3,29 @@ pkgname=('bakery' 'bakery-gui')
 pkgbase="bredos"
 pkgver=0.0.1
 pkgrel=1
-pkgdesc=""
+pkgdesc="BredOS Installer"
 arch=('any')
-_desc="BredOS Installer"
-url="https://github.com/BredOS/BredOS-Bakery"
+url="https://github.com/BredOS/Bakery"
 license=('GPL3')
 options=('!strip')
-source=()
-md5sums=()
+# branch=gui
+source=(git+https://github.com/BredOS/Bakery.git#branch=gui)
+md5sums=('SKIP')
 
-prepare() {
-        cd "$pkgname-$pkgver"
-        patch -p1 -i "$srcdir/$pkgname-$pkgver.patch"
+package_bakery() {
+        # install locale files
+        install -Dm644 "$srcdir/locale/" "$pkgdir/usr/share/locale/"
+        install -Dm644 "$srcdir/Bakery" "$pkgdir/usr/bin/Bakery"
+        # install bakery files
+        install -Dm644 "$srcdir/bakery.py" "$pkgdir/usr/share/bakery/"
+        install -Dm644 "$srcdir/bakery-cli.py" "$pkgdir/usr/share/bakery/"
+        # install license
+        install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/bakery/LICENSE"
 }
 
-build() {
-        cd "$pkgbase-$pkgver"
-        ./configure --prefix=/usr
-        make
-}
+package_bakery-gui() {
+        
+        install -Dm644 "$srcdir/assets/" "$pkgdir/usr/share/bakery/"
+        install -Dm644 "$srcdir/gui.py" "$pkgdir/usr/share/bakery/"
 
-package_pkg1() {
-        cd "$pkgbase-$pkgver"
-        make DESTDIR="$pkgdir/" install-pkg1
-}
-
-package_pkg2() {
-        cd "$pkgbase-$pkgver"
-        make DESTDIR="$pkgdir/" install-pkg2
 }
