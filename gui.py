@@ -29,43 +29,43 @@ class MenuButton(Gtk.MenuButton):
         self.set_icon_name(icon_name)
 
 
-class Window(Gtk.ApplicationWindow):
-    def __init__(self, title, width, height, **kwargs):
-        super(Window, self).__init__(**kwargs)
-        self.set_default_size(width, height)
-        self.headerbar = Gtk.HeaderBar()
-        self.set_titlebar(self.headerbar)
-        label = Gtk.Label()
-        label.set_text(title)
-        self.headerbar.set_title_widget(label)
-        self.css_provider = None
-        # self.set_resizable(False)
+# class Window(Gtk.ApplicationWindow):
+#     def __init__(self, title, width, height, **kwargs):
+#         super(Window, self).__init__(**kwargs)
+#         self.set_default_size(width, height)
+#         self.headerbar = Gtk.HeaderBar()
+#         self.set_titlebar(self.headerbar)
+#         label = Gtk.Label()
+#         label.set_text(title)
+#         self.headerbar.set_title_widget(label)
+#         self.css_provider = None
+#         # self.set_resizable(False)
 
-    def load_css(self, css_fn) -> None:
-        if css_fn and os.path.exists(css_fn):
-            css_provider = Gtk.CssProvider()
-            try:
-                css_provider.load_from_path(css_fn)
-            except GLib.Error as e:
-                print(_("CSS loading failed:", str(e)))
-                return None
-            print("Loaded styling:", str(css_fn))
-            self.css_provider = css_provider
+#     def load_css(self, css_fn) -> None:
+#         if css_fn and os.path.exists(css_fn):
+#             css_provider = Gtk.CssProvider()
+#             try:
+#                 css_provider.load_from_path(css_fn)
+#             except GLib.Error as e:
+#                 print(_("CSS loading failed:", str(e)))
+#                 return None
+#             print("Loaded styling:", str(css_fn))
+#             self.css_provider = css_provider
 
-    def _add_widget_styling(self, widget) -> None:
-        if self.css_provider:
-            context = widget.get_style_context()
-            context.add_provider(self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+#     def _add_widget_styling(self, widget) -> None:
+#         if self.css_provider:
+#             context = widget.get_style_context()
+#             context.add_provider(self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-    def add_custom_styling(self, widget) -> None:
-        self._add_widget_styling(widget)
-        for child in widget:
-            self.add_custom_styling(child)
+#     def add_custom_styling(self, widget) -> None:
+#         self._add_widget_styling(widget)
+#         for child in widget:
+#             self.add_custom_styling(child)
 
-    def create_action(self, name, callback) -> None:
-        action = Gio.SimpleAction.new(name, None)
-        action.connect("activate", callback)
-        self.add_action(action)
+#     def create_action(self, name, callback) -> None:
+#         action = Gio.SimpleAction.new(name, None)
+#         action.connect("activate", callback)
+#         self.add_action(action)
 
 
 APP_MENU = """
@@ -88,19 +88,19 @@ APP_MENU = """
 
 
 # noinspection PyAttributeOutsideInit
-class MainWindow(Window):
-    def __init__(self, title, width, height, **kwargs):
+class MainWindow():
+    def __init__(self):
         LogMessage.Info("Initializing main window").write(logging_handler=logger_handler)
-        super(MainWindow, self).__init__(title, height, width, **kwargs)
-        # self.load_css("main.css")
-        self.load_css("extra.css")
-        self.revealer = Gtk.Revealer()
-        menu = MenuButton(APP_MENU, "app-menu")
-        self.headerbar.pack_end(menu)
-        self.create_action("about", self.menu_handler)
-        self.create_action("settings", self.menu_handler)
-        welcome_page = self.create_welcome_page()
-        self.set_child(welcome_page)
+        
+
+        main_builder = Gtk.Builder()
+        main_builder.add_from_file("ui/bakery.ui")
+
+        self.add(main_builder.get_object("window"))
+        if self.window:
+            self.window.connect("destroy", Gtk.main_quit)
+
+
 
     def create_welcome_page(self) -> Gtk.Box:
         welcome_label = Gtk.Label(label=_("Welcome to BredOS!"))
@@ -289,18 +289,10 @@ class MainWindow(Window):
             self.settings.set_visible(True)
             self.settings.connect("close-request", self.close_settings)
 
-
-class Application(Gtk.Application):
-    def __init__(self):
-        super().__init__(
-            application_id="org.bredos.bakery", flags=Gio.ApplicationFlags.FLAGS_NONE
-        )
-
-    def do_activate(self):
-        win = self.props.active_window
-        if not win:
-            win = MainWindow("BredOS Installer", 700, 1100, application=self)
-        win.present()
+    def run(self):
+        if self.window:
+            self.window.show_all()
+        Gtk.main()
 
 
 if __name__ == "__main__":
@@ -312,6 +304,6 @@ if __name__ == "__main__":
 
     if subprocess.check_output(["uname"]).decode().strip() == "Darwin":
         Gtk.Settings.get_default().set_property("gtk-theme-name", "Adwaita-dark")
-    app = Application()
-    app.run(argv)
 
+    app = MainWindow()
+    app.run()
