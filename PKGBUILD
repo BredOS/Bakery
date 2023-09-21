@@ -12,19 +12,14 @@ options=('!strip')
 source=(git+https://github.com/BredOS/Bakery.git#branch=gui)
 md5sums=('SKIP')
 
+build() {
+        cd "$srcdir/$pkgbase"
+        meson build --prefix=/usr
+}
+
 package_bakery() {
-        # install locale files
-        mkdir -pv "$pkgdir/usr/share/locale/"
-        mkdir -pv "$pkgdir/usr/share/licenses/bakery/"
-        mkdir -pv "$pkgdir/usr/share/bakery/"
-        mkdir -pv "$pkgdir/usr/bin/"
-        cp -rv "$srcdir/Bakery/locale/"* "$pkgdir/usr/share/locale/"
-        install -Dm644 "$srcdir/Bakery/Bakery" "$pkgdir/usr/bin/Bakery"
-        # install bakery filess
-        install -Dm644 "$srcdir/Bakery/bakery.py" "$pkgdir/usr/share/bakery/"
-        install -Dm644 "$srcdir/Bakery/bakery-cli.py" "$pkgdir/usr/share/bakery/"
-        # install license
-        install -Dm644 "$srcdir/Bakery/LICENSE" "$pkgdir/usr/share/licenses/bakery/LICENSE"
+        cd "$srcdir/$pkgbase/build"
+        DESTDIR="$pkgdir" meson install
 }
 
 package_bakery-gui() {

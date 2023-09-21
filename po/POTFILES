@@ -1,0 +1,7 @@
+data/org.bredos.bakery.desktop.in
+data/org.bredos.bakery.appdata.xml.in
+data/org.bredos.bakery.gschema.xml
+bakery-cli.py
+bakery.py
+bakery-gui.py
+data/window.ui

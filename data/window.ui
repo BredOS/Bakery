@@ -1,0 +1,334 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.12.1 -->
+<interface>
+  <!-- interface-name window.ui -->
+  <requires lib="Adw" version="1.0"/>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.3"/>
+  <object class="AdwApplicationWindow" id="main_window">
+    <property name="default-height">300</property>
+    <property name="default-width">600</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkHeaderBar" id="header_bar">
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="icon-name">open-menu-symbolic</property>
+                <!-- Custom fragments -->
+                <property name="menu-model">primary_menu</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkStack" id="main_stk">
+            <property name="transition-type">slide-left</property>
+            <child>
+              <object class="GtkStackPage">
+                <property name="child">
+                  <object class="GtkBox">
+                    <child>
+                      <object class="GtkBox" id="welcome_box">
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="can-focus">False</property>
+                            <property name="can-target">False</property>
+                            <property name="focus-on-click">False</property>
+                            <property name="label">Welcome to the BredOS Installer!</property>
+                            <property name="margin-bottom">7</property>
+                            <property name="margin-top">10</property>
+                            <property name="valign">baseline</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="file">file:///usr/share/bakery/assets/logo.png</property>
+                            <property name="margin-bottom">5</property>
+                            <property name="pixel-size">256</property>
+                            <property name="width-request">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkGrid">
+                            <child>
+                              <object class="GtkComboBoxText" id="language_combo">
+                                <property name="valign">center</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="column-span">1</property>
+                                  <property name="row">0</property>
+                                  <property name="row-span">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="offline_install">
+                                <property name="child">
+                                  <object class="GtkGrid">
+                                    <property name="can-focus">False</property>
+                                    <property name="can-target">False</property>
+                                    <property name="focus-on-click">False</property>
+                                    <property name="halign">center</property>
+                                    <property name="hexpand">True</property>
+                                    <property name="valign">baseline</property>
+                                    <property name="vexpand">True</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="icon-name">application-x-executable</property>
+                                        <property name="pixel-size">128</property>
+                                        <property name="valign">center</property>
+                                        <property name="vexpand">True</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row">0</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="justify">center</property>
+                                        <property name="label">Install offline</property>
+                                        <property name="vexpand">True</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                                <property name="halign">center</property>
+                                <property name="valign">center</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="online_install">
+                                <property name="child">
+                                  <object class="GtkGrid">
+                                    <property name="can-focus">False</property>
+                                    <property name="can-target">False</property>
+                                    <property name="focus-on-click">False</property>
+                                    <property name="halign">center</property>
+                                    <property name="hexpand">True</property>
+                                    <property name="valign">baseline</property>
+                                    <property name="vexpand">True</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="icon-name">application-x-executable</property>
+                                        <property name="pixel-size">128</property>
+                                        <property name="valign">center</property>
+                                        <property name="vexpand">True</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row">0</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="can-focus">False</property>
+                                        <property name="can-target">False</property>
+                                        <property name="justify">center</property>
+                                        <property name="label">Install online</property>
+                                        <property name="vexpand">True</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                                <property name="halign">center</property>
+                                <property name="valign">center</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="column-span">0</property>
+                                  <property name="row">1</property>
+                                  <property name="row-span">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="custom_install">
+                                <property name="child">
+                                  <object class="GtkGrid">
+                                    <property name="can-focus">False</property>
+                                    <property name="can-target">False</property>
+                                    <property name="focus-on-click">False</property>
+                                    <property name="halign">center</property>
+                                    <property name="hexpand">True</property>
+                                    <property name="valign">baseline</property>
+                                    <property name="vexpand">True</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="icon-name">application-x-executable</property>
+                                        <property name="pixel-size">128</property>
+                                        <property name="valign">center</property>
+                                        <property name="vexpand">True</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row">0</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="justify">center</property>
+                                        <property name="label">Custom Install</property>
+                                        <property name="vexpand">True</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                                <property name="halign">center</property>
+                                <property name="valign">center</property>
+                                <layout>
+                                  <property name="column">2</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="child">
+                  <object class="GtkBox">
+                    <child>
+                      <object class="GtkStackSidebar">
+                        <property name="stack">
+                          <object class="GtkStack">
+                            <child>
+                              <object class="GtkStackPage">
+                                <property name="child">
+                                  <object class="GtkLabel">
+                                    <property name="label">Empty Page</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="custom_install_window">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="justify">center</property>
+            <property name="label">You selected custom installation. Please provide a URL or PATH to the Bakery_recipe.conf</property>
+            <property name="lines">3</property>
+            <property name="margin-bottom">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-start">10</property>
+            <property name="margin-top">20</property>
+            <property name="natural-wrap-mode">word</property>
+            <property name="wrap">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkGrid">
+            <property name="margin-end">10</property>
+            <property name="margin-start">10</property>
+            <property name="valign">center</property>
+            <property name="vexpand">True</property>
+            <child>
+              <object class="GtkEntry">
+                <property name="hexpand">True</property>
+                <property name="margin-end">6</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="column-span">1</property>
+                  <property name="row">0</property>
+                  <property name="row-span">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="halign">end</property>
+                <property name="icon-name">document-open</property>
+                <property name="valign">end</property>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="column-span">1</property>
+                  <property name="row">0</property>
+                  <property name="row-span">1</property>
+                </layout>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="custom_install_window_done">
+            <property name="halign">end</property>
+            <property name="label">Done</property>
+            <property name="margin-bottom">10</property>
+            <property name="margin-end">10</property>
+            <property name="valign">end</property>
+            <property name="vexpand">True</property>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="message-type">question</property>
+    <property name="secondary-text">asd</property>
+    <property name="text">asd</property>
+  </object>
+  <!-- Custom fragments -->
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+        <attribute name="action">app.preferences</attribute>
+        <attribute name="name">preferences_menu_item</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About Bakery</attribute>
+        <attribute name="action">app.about</attribute>
+        <attribute name="name">about_menu_item</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

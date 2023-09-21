@@ -5,6 +5,10 @@
 ui=""
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # to be changed to future install dir
 
+if [[ $script_dir == "/usr/bin" ]]; then
+    script_dir="/usr/share/bakery"
+fi
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         --ui)
@@ -22,8 +26,8 @@ done
 if [[ $ui == "gui" ]]; then
     # python "$script_dir/gui.py"
     # check if bakery-gui is installed launch
-    if [[ -f "$script_dir/gui.py" ]]; then
-        python "$script_dir/gui.py"
+    if [[ -f "$script_dir/bakery-gui.py" ]]; then
+        python "$script_dir/bakery-gui.py"
     else
         echo "Error: bakery-gui is not installed"
         echo "Please install bakery-gui with 'sudo pacman -S bakery-gui'"
