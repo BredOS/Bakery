@@ -1,4 +1,6 @@
-bakery_conf_ver = 0
+author = "bill88t"
+title = "Example config"
+config_version = 1
 uninstall_upon_completion = false
 headless = false
 
@@ -31,5 +33,3 @@ greeter_enable = false
 type = 0
 data = false
 
-[about]
-author = "bill88t"

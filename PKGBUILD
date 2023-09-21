@@ -9,7 +9,7 @@ url="https://github.com/BredOS/Bakery"
 license=('GPL3')
 options=('!strip')
 # branch=gui
-source=(git+https://github.com/BredOS/Bakery.git#branch=gui)
+source=(git+https://github.com/BredOS/Bakery.git)
 md5sums=('SKIP')
 
 build() {

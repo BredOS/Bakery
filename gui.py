@@ -88,10 +88,11 @@ APP_MENU = """
 
 
 # noinspection PyAttributeOutsideInit
-class MainWindow():
+class MainWindow:
     def __init__(self):
-        LogMessage.Info("Initializing main window").write(logging_handler=logger_handler)
-        
+        LogMessage.Info("Initializing main window").write(
+            logging_handler=logger_handler
+        )
 
         main_builder = Gtk.Builder()
         main_builder.add_from_file("ui/bakery.ui")
@@ -99,8 +100,6 @@ class MainWindow():
         self.add(main_builder.get_object("window"))
         if self.window:
             self.window.connect("destroy", Gtk.main_quit)
-
-
 
     def create_welcome_page(self) -> Gtk.Box:
         welcome_label = Gtk.Label(label=_("Welcome to BredOS!"))
@@ -115,9 +114,11 @@ class MainWindow():
         butbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         butbox.set_halign(Gtk.Align.CENTER)
 
-        buttons = {"offline": [_("Offline Installation"), config.logo_path],
-                   "online": [_("Online Installation"), config.logo_path],
-                   "custom": [_("Custom Installation"), config.logo_path]}
+        buttons = {
+            "offline": [_("Offline Installation"), config.logo_path],
+            "online": [_("Online Installation"), config.logo_path],
+            "custom": [_("Custom Installation"), config.logo_path],
+        }
         for i in buttons:
             # Create the button
             btn = self.create_button(i, buttons[i][0], buttons[i][1])
@@ -241,7 +242,6 @@ class MainWindow():
         btn.connect("clicked", self.on_button_clicked, button_id)
         return btn
 
-
     def on_language_changed(self, combo) -> None:
         active_language = combo.get_active_text()
         if active_language:
@@ -275,7 +275,9 @@ class MainWindow():
             self.settings_grid.set_column_homogeneous(True)
             self.settings_grid.set_row_spacing(10)
             self.settings_grid.set_column_spacing(10)
-            self.settings_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            self.settings_box = Gtk.Box(
+                orientation=Gtk.Orientation.VERTICAL, spacing=10
+            )
             self.settings_box.append(self.settings_grid)
             self.settings_frame.set_child(self.settings_box)
             self.settings.set_child(self.settings_frame)
@@ -300,7 +302,9 @@ if __name__ == "__main__":
     logger = bakery.setup_logging()
     logger_handler = LoggingHandler(logger)
     print(os.path.join(os.path.expanduser("~"), "Bakery") + "/config.toml")
-    conf = bakery.load_config(file_path=os.path.join(os.path.expanduser("~"), "Bakery") + "/config.toml")
+    conf = bakery.load_config(
+        file_path=os.path.join(os.path.expanduser("~"), "Bakery") + "/config.toml"
+    )
 
     if subprocess.check_output(["uname"]).decode().strip() == "Darwin":
         Gtk.Settings.get_default().set_property("gtk-theme-name", "Adwaita-dark")

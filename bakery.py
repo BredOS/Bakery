@@ -4,17 +4,42 @@ import os
 import gettext
 from time import sleep
 from pathlib import Path
-from pyrunning import logging, LogMessage, LoggingHandler, Command
+import socket
 from datetime import datetime
 
-API_VERSION = 1
+# from pyrunning import logging, LogMessage, LoggingHandler, Command
+import gi
+
+gi.require_version("NM", "1.0")
+from gi.repository import GLib, NM
+
+import config
+
+
+class logging:
+    def Logger():
+        pass
+
+
+def LogMessage():
+    pass
+
+
+def LoggingHandler():
+    pass
+
+
+def Command():
+    pass
 
 
 # Config functions
 
 # Config spec
 #
-# bakery_conf_ver = int | Used to test if this config is compatible.
+# author = str | Author of the config
+# title = str | A title for the config.
+# config_version = int | Used to test if this config is compatible.
 # uninstall_upon_completion = bool | Remove bakery on completion.
 # headless = bool | Do not ask or wait for any user confirmation.
 #
@@ -44,15 +69,12 @@ API_VERSION = 1
 # type = int | Type of post-installation script to run.
 #            | 0 for none, 1 for local / remote script, 2 for a set of commands.
 # data = false / str / list | For 0, 1, 2 respectively.
-#
-# [about]
-# author = str | Author of this bakery config.
 
 
 def setup_translations(lang: object = None) -> gettext.GNUTranslations:
     """
     Setup translations
-    
+
         Does the following:
         - Loads the translations from the locale folder
         - Sets the translations for the gettext module
@@ -77,7 +99,7 @@ def setup_translations(lang: object = None) -> gettext.GNUTranslations:
 def setup_logging() -> logging.Logger:
     """
     Setup logging
-    
+
         Does the following:
         - Creates a logger with a name
         - Sets the format for the logs
@@ -94,9 +116,12 @@ def setup_logging() -> logging.Logger:
             raise FileNotFoundError("The directory {} does not exist".format(log_dir))
         # get write perms
         elif not os.access(log_dir, os.W_OK):
-            raise PermissionError("You do not have permission to write to {}".format(log_dir))
+            raise PermissionError(
+                "You do not have permission to write to {}".format(log_dir)
+            )
     except Exception as e:
         import traceback
+
         traceback.print_exception(type(e), e, e.__traceback__)
         exit(1)
 
@@ -106,7 +131,9 @@ def setup_logging() -> logging.Logger:
     log_file_handler = logging.FileHandler(log_file)
     log_file_handler.setLevel(logging.DEBUG)
     log_file_formatter = logging.Formatter(
-        '%(asctime)s [%(levelname)8s] %(message)s (%(pathname)s > %(funcName)s; Line %(lineno)d)', '%Y-%m-%d %H:%M:%S')
+        "%(asctime)s [%(levelname)8s] %(message)s (%(pathname)s > %(funcName)s; Line %(lineno)d)",
+        "%Y-%m-%d %H:%M:%S",
+    )
     log_file_handler.setFormatter(log_file_formatter)
 
     # # For console (when installing)
@@ -118,13 +145,13 @@ def setup_logging() -> logging.Logger:
     return logger
 
 
-def rm_old_logs(log_dir_path, keep: int) -> None:
+def rm_old_logs(log_dir_path: str, keep: int) -> None:
     subprocess.Popen(
         "ls -tp * | grep -v '/$' | tail -n +"
         + str(keep + 1)
         + " | xargs -I {} rm -- {}",
         shell=True,
-        cwd=log_dir_path
+        cwd=log_dir_path,
     )
 
 
@@ -155,16 +182,78 @@ def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
 
 def _ping(ip: str) -> bool:
     return (
-            subprocess.Popen(["/bin/ping", "-c1", "-w1", ip], stdout=subprocess.PIPE)
-            .stdout.read()
-            .find(b"1 received")
-            != -1
+        subprocess.Popen(["/bin/ping", "-c1", "-w1", ip], stdout=subprocess.PIPE)
+        .stdout.read()
+        .find(b"1 received")
+        != -1
     )
 
 
 # Networking functions
 def networking_up() -> bool:
-    # Tests if an internet connection is configured.
+    # Tests if an interface is connected.
+    client = NM.Client.new(None)
+    devices = client.get_devices()
+    for device in devices:
+        if (
+            device.get_type_description() in ["wifi", "ethernet"]
+            and device.get_state().value_nick == "activated"
+        ):
+            return True
+    return False
+
+
+def internet_up() -> bool:
+    # Tests if we can reach 8.8.8.8.
+    if not networking_up():
+        return False
+    try:
+        socket.setdefaulttimeout(10)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
+        return True
+    except:
+        return False
+
+
+def ethernet_available() -> bool:
+    client = NM.Client.new(None)
+    devices = client.get_devices()
+    for device in devices:
+        if device.get_type_description() == "ethernet":
+            return True
+    return False
+
+
+def ethernet_connected() -> bool:
+    client = NM.Client.new(None)
+    devices = client.get_devices()
+    for device in devices:
+        if (
+            device.get_type_description() == "ethernet"
+            and device.get_state().value_nick == "activated"
+        ):
+            return True
+    return False
+
+
+def wifi_available() -> bool:
+    client = NM.Client.new(None)
+    devices = client.get_devices()
+    for device in devices:
+        if device.get_type_description() == "wifi":
+            return True
+    return False
+
+
+def wifi_connected() -> bool:
+    client = NM.Client.new(None)
+    devices = client.get_devices()
+    for device in devices:
+        if (
+            device.get_type_description() == "wifi"
+            and device.get_state().value_nick == "activated"
+        ):
+            return True
     return False
 
 
