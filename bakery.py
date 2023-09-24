@@ -283,3 +283,23 @@ def localegen(locale_list: list) -> bool:
     Returns True on success.
     """
     return False
+
+
+def localefetch() -> list:
+    """
+    Returns all possible locales.
+
+    Uses
+    """
+    with open("/usr/share/i18n/SUPPORTED") as localef:
+        data = localef.read().split("\n")
+        return data
+
+
+def localelist() -> list:
+    """
+    A formatted list of locales
+    """
+    data = localefetch()
+    for i in range(data):
+        pass
