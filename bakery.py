@@ -7,31 +7,13 @@ from pathlib import Path
 import socket
 from datetime import datetime
 
-# from pyrunning import logging, LogMessage, LoggingHandler, Command
+from pyrunning import logging, LogMessage, LoggingHandler, Command
 import gi
 
 gi.require_version("NM", "1.0")
 from gi.repository import GLib, NM
 
 import config
-
-
-class logging:
-    def Logger():
-        pass
-
-
-def LogMessage():
-    pass
-
-
-def LoggingHandler():
-    pass
-
-
-def Command():
-    pass
-
 
 # Config functions
 
@@ -180,16 +162,20 @@ def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
     return True
 
 
-def _ping(ip: str) -> bool:
-    return (
-        subprocess.Popen(["/bin/ping", "-c1", "-w1", ip], stdout=subprocess.PIPE)
-        .stdout.read()
-        .find(b"1 received")
-        != -1
-    )
-
-
 # Networking functions
+
+
+def test_up(hostport: tuple) -> bool:
+    if not networking_up():
+        return False
+    try:
+        socket.setdefaulttimeout(10)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(hostport)
+        return True
+    except:
+        return False
+
+
 def networking_up() -> bool:
     # Tests if an interface is connected.
     client = NM.Client.new(None)
@@ -204,15 +190,17 @@ def networking_up() -> bool:
 
 
 def internet_up() -> bool:
-    # Tests if we can reach 8.8.8.8.
-    if not networking_up():
-        return False
-    try:
-        socket.setdefaulttimeout(10)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
-        return True
-    except:
-        return False
+    res = False
+    for i in [
+        ("8.8.8.8", 53),
+        ("9.9.9.9", 53),
+        ("1.1.1.1", 53),
+        ("130.61.177.30", 443),
+    ]:
+        res = test_up(i)
+        if res:
+            break
+    return res
 
 
 def ethernet_available() -> bool:
