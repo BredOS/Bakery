@@ -289,10 +289,15 @@ def localefetch() -> list:
     """
     Returns all possible locales.
 
-    Uses
+    Uses /etc/locale.gen since there is no standard on arm.
     """
-    with open("/usr/share/i18n/SUPPORTED") as localef:
+    with open("/etc/locale.gen") as localef:
         data = localef.read().split("\n")
+        for i in range(len(data)-1, -1, -1):
+            if len(data[i]) < 4 or (data[i][2] != "_" and data[i][3] != "_"):
+                data.pop(i) # remove non-locale
+        for i in range(len(data)):
+            data[i] = data[i].replace("#", "").replace("  ", "") # cleanup
         return data
 
 
@@ -301,5 +306,7 @@ def localelist() -> list:
     A formatted list of locales
     """
     data = localefetch()
+    res = dict()
     for i in range(data):
         pass
+    return res
