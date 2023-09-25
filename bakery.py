@@ -457,7 +457,9 @@ def localefetch() -> list:
 
 def localelist() -> list:
     """
-    A formatted list of locales
+    A formatted dict of languages and locales
+
+    {language: [locale1, locale2], ...}
     """
     data = localefetch()
     res = dict()
