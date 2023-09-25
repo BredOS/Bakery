@@ -420,26 +420,14 @@ _langmap = {
     "zu": "Zulu",
 }
 
-
-def set_lang(lang: str) -> bool:
-    """
-    Set the system display language
-
-    Returns True on success.
-    """
-    return False
+_kblangmap = {
+    "al": "Albanian",
+    "at": "Austrian German",
+    "ara": "Arabic",
+}
 
 
-def localegen(locale_list: list) -> bool:
-    """
-    Generate locales from the given list.
-
-    Returns True on success.
-    """
-    return False
-
-
-def localefetch() -> list:
+def locales(only_enabled: bool = False) -> list:
     """
     Returns all possible locales.
 
@@ -448,20 +436,24 @@ def localefetch() -> list:
     with open("/etc/locale.gen") as localef:
         data = localef.read().split("\n")
         for i in range(len(data) - 1, -1, -1):
-            if len(data[i]) < 4 or (data[i][2] != "_" and data[i][3] != "_"):
-                data.pop(i)  # remove non-locale
+            if (
+                len(data[i]) < 4
+                or (data[i][2] != "_" and data[i][3] != "_")
+                or (only_enabled and data[i][0] == "#")
+            ):
+                data.pop(i)  # remove non-locale / disabled locale on only_enabled
         for i in range(len(data)):
             data[i] = data[i].replace("#", "").replace("  ", "")  # cleanup
         return data
 
 
-def localelist() -> list:
+def langs(only_enabled: bool = False) -> list:
     """
     A formatted dict of languages and locales
 
     {language: [locale1, locale2], ...}
     """
-    data = localefetch()
+    data = locales(only_enabled)
     res = dict()
     for i in range(len(data)):
         lang = _langmap[data[i][: data[i].find("_")]]
@@ -470,3 +462,24 @@ def localelist() -> list:
         else:
             res.update({lang: [data[i]]})
     return res
+
+
+def kb_langs(only_enabled: bool = False) -> list:
+    layouts = (
+        subprocess.check_output(
+            "localectl list-x11-keymap-layouts",
+            shell=True,
+        )
+        .decode("UTF-8")
+        .split()
+    )
+    if "custom" in layouts:
+        layouts.pop(layouts.index("custom"))
+    res = {}
+    for i in layouts:
+        lang = _kblangmap[i]
+        if lang in res.keys():
+            res[lang].append(i)
+        else:
+            res.update({lang: [i]})
+    return layouts
