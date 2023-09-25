@@ -420,6 +420,7 @@ _langmap = {
     "zu": "Zulu",
 }
 
+
 def set_lang(lang: str) -> bool:
     """
     Set the system display language
@@ -446,11 +447,11 @@ def localefetch() -> list:
     """
     with open("/etc/locale.gen") as localef:
         data = localef.read().split("\n")
-        for i in range(len(data)-1, -1, -1):
+        for i in range(len(data) - 1, -1, -1):
             if len(data[i]) < 4 or (data[i][2] != "_" and data[i][3] != "_"):
-                data.pop(i) # remove non-locale
+                data.pop(i)  # remove non-locale
         for i in range(len(data)):
-            data[i] = data[i].replace("#", "").replace("  ", "") # cleanup
+            data[i] = data[i].replace("#", "").replace("  ", "")  # cleanup
         return data
 
 
@@ -461,7 +462,7 @@ def localelist() -> list:
     data = localefetch()
     res = dict()
     for i in range(len(data)):
-        lang = _langmap[data[i][:data[i].find("_")]]
+        lang = _langmap[data[i][: data[i].find("_")]]
         if lang in res.keys():
             res[lang].append(data[i])
         else:
