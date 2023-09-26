@@ -421,9 +421,103 @@ _langmap = {
 }
 
 _kblangmap = {
+    "af": "Afrikaans",
     "al": "Albanian",
-    "at": "Austrian German",
+    "am": "Amharic",
     "ara": "Arabic",
+    "at": "Austrian German",
+    "au": "Australian English",
+    "az": "Azerbaijani",
+    "ba": "Bosnian",
+    "bd": "Bangla",
+    "be": "Belgian Dutch",
+    "bg": "Bulgarian",
+    "br": "Portuguese (Brazil)",
+    "brai": "Braille",
+    "bt": "Bhutanese",
+    "bw": "Tswana",
+    "by": "Belarusian",
+    "ca": "Canadian English",
+    "cd": "Congolese",
+    "ch": "Swiss German",
+    "cm": "Cameroonian",
+    "cn": "Chinese",
+    "cz": "Czech",
+    "de": "German",
+    "dk": "Danish",
+    "dz": "Algerian Arabic",
+    "ee": "Estonian",
+    "epo": "Esperanto",
+    "es": "Spanish",
+    "et": "Estonian",
+    "fi": "Finnish",
+    "fo": "Faroese",
+    "fr": "French",
+    "gb": "British English",
+    "ge": "Georgian",
+    "gh": "Ghanaian",
+    "gn": "Guinean",
+    "gr": "Greek",
+    "hr": "Croatian",
+    "hu": "Hungarian",
+    "id": "Indonesian",
+    "ie": "Irish",
+    "il": "Hebrew",
+    "in": "Indian English",
+    "iq": "Iraqi Arabic",
+    "ir": "Persian",
+    "is": "Icelandic",
+    "it": "Italian",
+    "jp": "Japanese",
+    "ke": "Kenyan",
+    "kg": "Kyrgyz",
+    "kh": "Khmer",
+    "kr": "Korean",
+    "kz": "Kazakh",
+    "la": "Lao",
+    "latam": "Latin American Spanish",
+    "lk": "Sinhala",
+    "lt": "Lithuanian",
+    "lv": "Latvian",
+    "ma": "Moroccan Arabic",
+    "mao": "Māori",
+    "md": "Moldovan",
+    "me": "Montenegrin",
+    "mk": "Macedonian",
+    "ml": "Malian",
+    "mm": "Myanmar",
+    "mn": "Mongolian",
+    "mt": "Maltese",
+    "mv": "Dhivehi",
+    "my": "Malay",
+    "ng": "Nigerian Pidgin",
+    "nl": "Dutch",
+    "no": "Norwegian",
+    "np": "Nepali",
+    "ph": "Filipino",
+    "pk": "Pakistani",
+    "pl": "Polish",
+    "pt": "Portuguese",
+    "ro": "Romanian",
+    "rs": "Serbian",
+    "ru": "Russian",
+    "se": "Swedish",
+    "si": "Slovenian",
+    "sk": "Slovak",
+    "sn": "Senegalese",
+    "sy": "Syrian Arabic",
+    "tg": "Tajik",
+    "th": "Thai",
+    "tj": "Tajik",
+    "tm": "Turkmen",
+    "tr": "Turkish",
+    "tw": "Taiwanese",
+    "tz": "Tanzanian",
+    "ua": "Ukrainian",
+    "us": "American English",
+    "uz": "Uzbek",
+    "vn": "Vietnamese",
+    "za": "South African English",
 }
 
 
@@ -476,10 +570,20 @@ def kb_langs(only_enabled: bool = False) -> list:
     if "custom" in layouts:
         layouts.pop(layouts.index("custom"))
     res = {}
+    print("The following output is from subprocess and is normal behaviour.")
+    print("Not all languages support variants.")
     for i in layouts:
         lang = _kblangmap[i]
-        if lang in res.keys():
-            res[lang].append(i)
-        else:
-            res.update({lang: [i]})
-    return layouts
+        try:
+            variants = (
+                subprocess.check_output(
+                    "localectl list-x11-keymap-variants " + i,
+                    shell=True,
+                )
+                .decode("UTF-8")
+                .split()
+            )
+            res.update({lang: [variants]})
+        except:
+            res.update({lang: [None]})
+    return res
