@@ -541,14 +541,14 @@ def locales(only_enabled: bool = False) -> list:
         return data
 
 
-def langs(only_enabled: bool = False) -> list:
+def langs(only_enabled: bool = False) -> dict:
     """
     A formatted dict of languages and locales
 
     {language: [locale1, locale2], ...}
     """
     data = locales(only_enabled)
-    res = dict()
+    res = {}
     for i in range(len(data)):
         lang = _langmap[data[i][: data[i].find("_")]]
         if lang in res.keys():
@@ -558,7 +558,7 @@ def langs(only_enabled: bool = False) -> list:
     return res
 
 
-def kb_langs(only_enabled: bool = False) -> list:
+def kb_langs(only_enabled: bool = False) -> dict:
     res = {}
     if not only_enabled:
         layouts = (
