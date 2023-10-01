@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bakery\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-07 10:31+0300\n"
+"POT-Creation-Date: 2023-10-01 13:00+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,6 +25,67 @@ msgstr ""
 msgid "No description"
 msgstr ""
 
-#: bakery-gui.py:44
-msgid "builder loaded"
+#: data/window.ui:66
+msgid "Cancel"
+msgstr ""
+
+#: data/window.ui:74
+msgid "Back"
+msgstr ""
+
+#: data/window.ui:81
+msgid "Next"
+msgstr ""
+
+#: data/window.ui:108
+msgid "Welcome to the BredOS Installer!"
+msgstr ""
+
+#: data/window.ui:170
+msgid "Install offline"
+msgstr ""
+
+#: data/window.ui:220
+msgid "Install online"
+msgstr ""
+
+#: data/window.ui:270
+msgid "Custom Install"
+msgstr ""
+
+#. Dont change the bakery_recipe.conf name
+#: data/window.ui:311
+msgid ""
+"You selected custom installation. Please provide a URL or PATH to the "
+"Bakery_recipe.conf"
+msgstr ""
+
+#. done button
+#: data/window.ui:357
+msgid "Done"
+msgstr ""
+
+#: data/window.ui:372
+msgid "_Preferences"
+msgstr ""
+
+#: data/window.ui:377
+msgid "_About Bakery"
+msgstr ""
+
+#: data/kb_screen.ui:35
+msgid "Test your layout here!"
+msgstr ""
+
+#: data/kb_screen.ui:45
+msgid ""
+"If your language uses a different script than latin please use English US"
+msgstr ""
+
+#: data/kb_screen.ui:46
+msgid "Select your keyboard layout"
+msgstr ""
+
+#: data/kb_dialog.ui:26
+msgid "Please select a variant for your keyboard layout."
 msgstr ""

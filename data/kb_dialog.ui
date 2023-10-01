@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.16.0 -->
+<interface>
+  <!-- interface-name keyboard_dialog.ui -->
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  <template class="variant_dialog" parent="GtkDialog">
+    <property name="default-height">470</property>
+    <property name="default-width">400</property>
+    <property name="hide-on-close">true</property>
+    <property name="title">Select keyboard variant</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="vexpand">true</property>
+        <child>
+          <object class="AdwStatusPage">
+            <property name="child">
+              <object class="GtkListBox" id="variant_list">
+                <style>
+                  <class name="rounded"/>
+                </style>
+              </object>
+            </property>
+            <property name="hexpand">True</property>
+            <property name="title" translatable="yes">Please select a variant for your keyboard layout.</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="select_variant_btn">
+            <property name="label">Select</property>
+            <property name="margin-bottom">15</property>
+            <property name="margin-end">15</property>
+            <property name="margin-start">15</property>
+            <property name="margin-top">15</property>
+            <property name="valign">GTK_ALIGN_END</property>
+            <property name="vexpand">true</property>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
