@@ -5,3 +5,5 @@ bakery-cli.py
 bakery.py
 bakery-gui.py
 data/window.ui
+data/kb_screen.ui
+data/kb_dialog.ui

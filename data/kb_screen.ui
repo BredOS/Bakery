@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.16.0 -->
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  <template class="kb_screen" parent="AdwBin">
+    <property name="vexpand">True</property>
+    <child>
+      <object class="GtkBox">
+        <property name="homogeneous">True</property>
+        <child>
+          <object class="AdwStatusPage">
+            <property name="child">
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="AdwPreferencesPage">
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="AdwPreferencesGroup">
+                        <child>
+                          <object class="GtkListBox" id="langs_list"/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwPreferencesPage">
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="AdwPreferencesGroup">
+                        <property name="title" translatable="yes">Test your layout here!</property>
+                        <child>
+                          <object class="AdwEntryRow"/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </property>
+            <property name="description" translatable="yes">If your language uses a different script than latin please use English US</property>
+            <property name="title" translatable="yes">Select your keyboard layout</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

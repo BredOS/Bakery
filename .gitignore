@@ -167,3 +167,4 @@ cython_debug/
 launch.py
 *.po~
 .DS_Store
+._DS_Store
