@@ -608,6 +608,22 @@ def kb_langs(only_enabled: bool = False) -> dict:
     return res
 
 
+def tz_list() -> dict:
+    res = {}
+    data = (
+        subprocess.check_output(["timedatectl", "list-timezones"])
+        .decode("UTF-8")
+        .split()
+    )
+    for i in data:
+        if "/" in i:
+            cont = i[: i.find("/")]
+            if cont not in res.keys():
+                res[cont] = []
+            res[cont].append(i[i.find("/") + 1 :])
+    return res
+
+
 # Package functions
 
 
