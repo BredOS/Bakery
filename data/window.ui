@@ -1,12 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Created with Cambalache 0.16.0 -->
-<interface domain="bakery">
+<interface>
   <!-- interface-name window.ui -->
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.0"/>
+  <requires lib="gio" version="2.0"/>
   <template class="BakeryWindow" parent="AdwApplicationWindow">
-    <property name="default-height">450</property>
-    <property name="default-width">650</property>
+    <property name="default-height">600</property>
+    <property name="default-width">800</property>
+    <property name="resizable">False</property>
     <property name="title">BredOS Installer</property>
     <child>
       <object class="GtkBox">
@@ -25,74 +27,6 @@
         <child>
           <object class="GtkStack" id="main_stk">
             <property name="transition-type">slide-left</property>
-            <child>
-              <object class="GtkStackPage" id="install_page">
-                <property name="child">
-                  <object class="AdwBin">
-                    <child>
-                      <object class="GtkBox" id="contents">
-                        <property name="spacing">5</property>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="halign">start</property>
-                            <property name="homogeneous">1</property>
-                            <child>
-                              <object class="GtkStackSidebar" id="stack1_sidebar">
-                                <property name="stack">stack1</property>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="hexpand">True</property>
-                            <property name="orientation">vertical</property>
-                            <child>
-                              <object class="GtkStack" id="stack1">
-                                <property name="vexpand">True</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox">
-                                <property name="halign">end</property>
-                                <property name="hexpand">True</property>
-                                <property name="margin-bottom">5</property>
-                                <property name="margin-end">5</property>
-                                <property name="spacing">5</property>
-                                <property name="valign">end</property>
-                                <child>
-                                  <object class="GtkButton" id="cancel_btn">
-                                    <property name="focusable">1</property>
-                                    <property name="label" translatable="yes">Cancel</property>
-                                    <property name="receives-default">1</property>
-                                    <property name="valign">center</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="back_btn">
-                                    <property name="focusable">1</property>
-                                    <property name="label" translatable="yes">Back</property>
-                                    <property name="receives-default">1</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="next_btn">
-                                    <property name="focusable">1</property>
-                                    <property name="label" translatable="yes">Next</property>
-                                    <property name="receives-default">1</property>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-                <property name="name">install_page</property>
-              </object>
-            </child>
             <child>
               <object class="GtkStackPage" id="main_page">
                 <property name="child">
@@ -125,20 +59,6 @@
                             <property name="margin-bottom">5</property>
                             <property name="margin-end">5</property>
                             <property name="margin-start">5</property>
-                            <child>
-                              <object class="GtkComboBoxText" id="language_combo">
-                                <property name="margin-bottom">5</property>
-                                <property name="margin-top">5</property>
-                                <property name="valign">center</property>
-                                <property name="vexpand">True</property>
-                                <layout>
-                                  <property name="column">1</property>
-                                  <property name="column-span">1</property>
-                                  <property name="row">0</property>
-                                  <property name="row-span">1</property>
-                                </layout>
-                              </object>
-                            </child>
                             <child>
                               <object class="GtkButton" id="offline_install">
                                 <property name="child">
@@ -296,6 +216,74 @@
                 <property name="name">main_page</property>
               </object>
             </child>
+            <child>
+              <object class="GtkStackPage" id="install_page">
+                <property name="child">
+                  <object class="AdwBin">
+                    <child>
+                      <object class="GtkBox" id="contents">
+                        <property name="spacing">5</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">start</property>
+                            <property name="homogeneous">1</property>
+                            <child>
+                              <object class="GtkStackSidebar" id="stack1_sidebar">
+                                <property name="stack">stack1</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="hexpand">True</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkStack" id="stack1">
+                                <property name="vexpand">True</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="halign">end</property>
+                                <property name="hexpand">True</property>
+                                <property name="margin-bottom">5</property>
+                                <property name="margin-end">5</property>
+                                <property name="spacing">5</property>
+                                <property name="valign">end</property>
+                                <child>
+                                  <object class="GtkButton" id="cancel_btn">
+                                    <property name="focusable">1</property>
+                                    <property name="label" translatable="yes">Cancel</property>
+                                    <property name="receives-default">1</property>
+                                    <property name="valign">center</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="back_btn">
+                                    <property name="focusable">1</property>
+                                    <property name="label" translatable="yes">Back</property>
+                                    <property name="receives-default">1</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="next_btn">
+                                    <property name="focusable">1</property>
+                                    <property name="label" translatable="yes">Next</property>
+                                    <property name="receives-default">1</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="name">install_page</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
@@ -369,13 +357,13 @@
   <menu id="primary_menu">
     <section>
       <item>
-        <attribute name="label" translatable="yes">Preferences</attribute>
         <attribute name="action">app.preferences</attribute>
+        <attribute name="label" translatable="yes">Preferences</attribute>
         <attribute name="name">preferences_menu_item</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">About Bakery</attribute>
         <attribute name="action">app.about</attribute>
+        <attribute name="label" translatable="yes">About Bakery</attribute>
         <attribute name="name">about_menu_item</attribute>
       </item>
     </section>
