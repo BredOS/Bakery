@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.16.0 -->
+<interface>
+  <!-- interface-name user_screen.ui -->
+  <requires lib="gtk" version="4.12"/>
+  <requires lib="libadwaita" version="1.3"/>
+  <template class="user_screen" parent="AdwBin">
+    <child>
+      <object class="AdwStatusPage">
+        <property name="child">
+          <object class="GtkBox">
+            <property name="homogeneous">True</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="AdwPreferencesPage">
+                <property name="valign">start</property>
+                <child>
+                  <object class="AdwPreferencesGroup">
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="GtkLabel" id="pass_match">
+                        <property name="halign">start</property>
+                        <property name="margin-top">5</property>
+                        <property name="visible">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwEntryRow" id="user_entry">
+                        <property name="title">Username</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwEntryRow" id="hostname_entry">
+                        <property name="title">Hostname</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwPasswordEntryRow" id="pass_entry">
+                        <property name="title">Password</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwPasswordEntryRow" id="confirm_pass_entry">
+                        <property name="title">Confirm password</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwPreferencesGroup">
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="AdwActionRow">
+                        <property name="activatable">False</property>
+                        <property name="selectable">False</property>
+                        <property name="subtitle">asd</property>
+                        <property name="title">asd</property>
+                        <child>
+                          <object class="GtkSwitch">
+                            <property name="active">True</property>
+                            <property name="state">True</property>
+                            <property name="valign">center</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwActionRow">
+                        <property name="activatable">False</property>
+                        <property name="selectable">False</property>
+                        <property name="title">UID</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="margin-bottom">5</property>
+                            <property name="margin-top">5</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkEntry">
+                                <property name="max-length">5</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton">
+                                <property name="icon-name">list-remove-symbolic</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton">
+                                <property name="icon-name">list-add-symbolic</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+        <property name="title">Create your user account</property>
+      </object>
+    </child>
+  </template>
+</interface>
