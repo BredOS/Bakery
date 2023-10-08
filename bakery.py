@@ -606,3 +606,54 @@ def kb_langs(only_enabled: bool = False) -> dict:
                 if i.startswith("KEYMAP="):
                     res.update({i[7:]: None})
     return res
+
+
+# Package functions
+
+
+def ensure_localdb(retries: int = 3) -> None:
+    if not len(os.listdir("/var/lib/pacman/sync/")):
+        if not internet_up():
+            raise OSError
+        for i in range(retries):
+            try:
+                subprocess.run(["sudo", "pacman", "-Sy"])
+                break
+            except:
+                pass
+
+
+def package_desc(packages: list) -> dict:
+    ensure_localdb()
+    res = {}
+    if len(packages):
+        outp = (
+            subprocess.check_output(["pacman", "-Si"] + packages)
+            .decode("UTF-8")
+            .split()
+        )
+        cindex = 0
+        cur_desc = ""
+        cur_pkg = None
+        in_desc = False
+        while cindex < len(outp):
+            if (not in_desc) and outp[cindex] == "Name" and outp[cindex + 1] == ":":
+                cur_pkg = outp[cindex + 2]
+                cindex += 2
+            if (
+                (not in_desc)
+                and outp[cindex] == "Description"
+                and outp[cindex + 1] == ":"
+            ):
+                cindex += 1
+                in_desc = True
+            elif in_desc:
+                if outp[cindex] == "Architecture" and outp[cindex + 1] == ":":
+                    if cur_pkg in packages:
+                        res[cur_pkg] = cur_desc
+                    in_desc = False
+                    cur_desc = ""
+                else:
+                    cur_desc += (" " if len(cur_desc) else "") + outp[cindex]
+            cindex += 1
+    return res
