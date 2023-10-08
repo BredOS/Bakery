@@ -659,3 +659,44 @@ def package_desc(packages: list) -> dict:
                     cur_desc += (" " if len(cur_desc) else "") + outp[cindex]
             cindex += 1
     return res
+
+
+def enable_services(services: list) -> None:
+    try:
+        subprocess.run(["sudo", "systemctl", "enable", i])
+    except:
+        pass
+
+
+def setup_base() -> None:
+    os.remove("/etc/sudoers.d/g_wheel")
+    os.remove("/etc/polkit-1/rules.d/49-nopasswd_global.rules")
+
+    subprocess.run(["sudo", "systemctl", "disable", "resizefs.service"])
+    enable_services(
+        ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"]
+    )
+
+
+dms = {
+    "sddm": "sddm.service",
+    "lightdm": "lightdm.service",
+    "gdm": "gdm.service",
+    "lxdm": "lxdm.service",
+    "tdm": "tdm.service",
+    "kdm": "kdm.service",
+    "mdm": "mdm.service",
+    "slim": "slim.service",
+    "entrance": "entrance.service",
+}
+
+
+def installed_dms() -> list:
+    pass
+
+
+# Main functions
+
+
+def install(settings) -> None:
+    pass
