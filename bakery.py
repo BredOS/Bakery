@@ -614,13 +614,15 @@ def kb_langs(only_enabled: bool = False) -> dict:
 def ensure_localdb(retries: int = 3) -> None:
     if not len(os.listdir("/var/lib/pacman/sync/")):
         if not internet_up():
-            raise OSError
+            raise OSError("Internet Unavailable.")
         for i in range(retries):
             try:
                 subprocess.run(["sudo", "pacman", "-Sy"])
                 break
             except:
                 pass
+    if not len(os.listdir("/var/lib/pacman/sync/")):
+        raise OSError("Could not update databases.")
 
 
 def package_desc(packages: list) -> dict:
