@@ -552,14 +552,14 @@ def locales(only_enabled: bool = False) -> list:
         return data
 
 
-def langs(only_enabled: bool = False) -> list:
+def langs(only_enabled: bool = False) -> dict:
     """
     A formatted dict of languages and locales
 
     {language: [locale1, locale2], ...}
     """
     data = locales(only_enabled)
-    res = dict()
+    res = {}
     for i in range(len(data)):
         lang = _langmap[data[i][: data[i].find("_")]]
         if lang in res.keys():
@@ -569,32 +569,38 @@ def langs(only_enabled: bool = False) -> list:
     return res
 
 
-def kb_langs(only_enabled: bool = False) -> list:
-    layouts = (
-        subprocess.check_output(
-            "localectl list-x11-keymap-layouts",
-            shell=True,
-        )
-        .decode("UTF-8")
-        .split()
-    )
-    if "custom" in layouts:
-        layouts.pop(layouts.index("custom"))
+def kb_langs(only_enabled: bool = False) -> dict:
     res = {}
-    print("The following output is from subprocess and is normal behaviour.")
-    print("Not all languages support variants.")
-    for i in layouts:
-        lang = _kblangmap[i]
-        try:
-            variants = (
-                subprocess.check_output(
-                    "localectl list-x11-keymap-variants " + i,
-                    shell=True,
-                )
-                .decode("UTF-8")
-                .split()
+    if not only_enabled:
+        layouts = (
+            subprocess.check_output(
+                "localectl list-x11-keymap-layouts",
+                shell=True,
             )
-            res.update({lang: [variants]})
-        except:
-            res.update({lang: [None]})
+            .decode("UTF-8")
+            .split()
+        )
+        if "custom" in layouts:
+            layouts.pop(layouts.index("custom"))
+        print("The following output is from subprocess and is normal behaviour.")
+        print("Not all languages support variants.")
+        for i in layouts:
+            lang = _kblangmap[i]
+            try:
+                variants = (
+                    subprocess.check_output(
+                        "localectl list-x11-keymap-variants " + i,
+                        shell=True,
+                    )
+                    .decode("UTF-8")
+                    .split()
+                )
+                res.update({lang: [variants]})
+            except:
+                res.update({lang: [None]})
+    else:
+        with open("/etc/vconsole.conf") as f:
+            for i in f.read().split():
+                if i.startswith("KEYMAP="):
+                    res.update({i[7:]: None})
     return res
