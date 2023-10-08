@@ -206,11 +206,13 @@ def internet_up() -> bool:
 
 
 def geoip() -> dict:
-    if internet_up():
+    try:
+        if not internet_up():
+            raise OSError
         tz_data = requests.get("https://geoip.kde.org/v1/timezone").json()
         region, zone = tz_data["time_zone"].split("/")
         return {"region": region, "zone": zone}
-    else:
+    except:
         return config.timezone
 
 
