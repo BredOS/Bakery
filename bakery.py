@@ -6,6 +6,8 @@ from time import sleep
 from pathlib import Path
 import socket
 from datetime import datetime
+import requests
+import json
 
 from pyrunning import logging, LogMessage, LoggingHandler, Command
 import gi
@@ -201,6 +203,15 @@ def internet_up() -> bool:
         if res:
             break
     return res
+
+
+def geoip() -> dict:
+    if internet_up():
+        tz_data = requests.get("https://geoip.kde.org/v1/timezone").json()
+        region, zone = tz_data["time_zone"].split("/")
+        return {"region": region, "zone": zone}
+    else:
+        return config.timezone
 
 
 def ethernet_available() -> bool:
