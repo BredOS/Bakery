@@ -641,7 +641,7 @@ def package_desc(packages: list) -> dict:
         while cindex < len(outp):
             if (not in_desc) and outp[cindex] == "Name" and outp[cindex + 1] == ":":
                 cur_pkg = outp[cindex + 2]
-                cindex += 2
+                cindex += 3
             if (
                 (not in_desc)
                 and outp[cindex] == "Description"
