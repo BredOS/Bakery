@@ -12,5 +12,5 @@ pages = {
     "User": "user_screen",
 }
 
-online_pages = ["Keyboard", "Timezone", "Locale", "User"]
 offline_pages = ["Keyboard", "Timezone", "Locale", "User"]
+online_pages = ["Keyboard", "Timezone", "Locale", "User"]
