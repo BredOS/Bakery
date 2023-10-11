@@ -1461,7 +1461,7 @@ def geoip() -> dict:
 
 
 class BakeryApp(Adw.Application):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.connect("activate", self.on_activate)
 
@@ -1477,6 +1477,7 @@ class BakeryApp(Adw.Application):
         win = self.props.active_window
         if not win:
             win = BakeryWindow(application=self)
+            self.win = win
         win.present()
 
     def on_preferences_action(self, widget, _) -> None:
@@ -1499,7 +1500,7 @@ class BakeryApp(Adw.Application):
             website="https://BredOS.org",
         )
         about.present()
-        print(BakeryWindow.collect_data())
+        print(self.win.collect_data())
 
     def create_action(self, name, callback, shortcuts=None) -> None:
         """Add an application action.
@@ -1578,6 +1579,14 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.back_btn.set_sensitive(self.current_page > 0)
 
     def on_cancel_clicked(self, button) -> None:
+        dialog = Gtk.AlertDialog()
+        dialog.set_message("Warning")
+        dialog.set_detail("Are you sure you want to cancel your installation?")
+        dialog.set_modal(True)
+        dialog.set_buttons(["No", "Yes"])
+        dialog.choose(self, None, self.delete_pages, None)
+
+    def delete_pages(self, *_) -> None:
         self.main_stk.set_visible_child_name("main_page")
         # remove all pages from stack1
         for page in self.pages:
@@ -1587,14 +1596,13 @@ class BakeryWindow(Adw.ApplicationWindow):
     def get_page_id(self, page_name) -> str:
         return config.pages[page_name]
 
-    @staticmethod
-    def collect_data() -> dict:
+    def collect_data(self, *_) -> dict:
         data = {}
-        # From kb_screen
-        data["layout"] = layout
-        data["locale"] = locale
-        data["user"] = user_screen.collect_data(user_screen)
-        print(data)
+        data["install_type"] = self.install_type
+        data["layout"] = all_pages["Keyboard"].layout
+        data["locale"] = all_pages["Locale"].locale
+        data["timezone"] = all_pages["Timezone"].timezone
+        data["user"] = all_pages["User"].collect_data()
         return data
 
     def set_list_text(list, string) -> None:
@@ -1604,21 +1612,21 @@ class BakeryWindow(Adw.ApplicationWindow):
         else:
             list.append(string)
 
-    def add_page(self, stack, page) -> None:
-        stack.add_titled(
-            globals()[config.pages[page]](window=self), config.pages[page], page
-        )
+    def add_pages(self, stack, pages) -> None:
+        global all_pages
+        all_pages = {}
+        for page in pages:
+            page_ = globals()[config.pages[page]](window=self)
+            all_pages[page] = page_
+            stack.add_titled(page_, config.pages[page], page)
 
     def init_screens(self, install_type) -> None:
         if install_type == "online":
             self.pages = config.online_pages
-            for page in self.pages:
-                self.add_page(self.stack1, page)
-
+            self.add_pages(self.stack1, self.pages)
         elif install_type == "offline":
-            for page in config.offline_pages:
-                self.pages = config.offline_pages
-                self.add_page(self.stack1, page)
+            self.pages = config.offline_pages
+            self.add_pages(self.stack1, self.pages)
 
         self.current_page = 0
         self.update_buttons()
@@ -1638,8 +1646,9 @@ class kb_screen(Adw.Bin):
         super().__init__(**kwargs)
         self.window = window
         self.kb_data = kb_langs()  # {country: layouts in a list]}
-        global layout
-        layout = None
+
+        self.layout = {"lang": None, "variant": None}
+
         builder = Gtk.Builder.new_from_file(script_dir + "/data/kb_dialog.ui")
 
         self.variant_dialog = builder.get_object("variant_dialog")
@@ -1677,6 +1686,7 @@ class kb_screen(Adw.Bin):
             self.last_selected_row = row
             lang = row.get_child().get_label()
             layouts = self.kb_data[lang]
+            self.layout["lang"] = lang
             if layouts[0] is None:
                 print("no layouts")
             else:
@@ -1697,7 +1707,7 @@ class kb_screen(Adw.Bin):
     def selected_layout(self, widget, row) -> None:
         if row != self.last_selected_layout:
             self.last_selected_layout = row
-            layout = row.get_child().get_label()
+            self.layout["variant"] = row.get_child().get_label().split(" - ")[1]
 
 
 @Gtk.Template.from_file(script_dir + "/data/locale_screen.ui")
@@ -1764,8 +1774,7 @@ class locale_screen(Adw.Bin):
                 the_locale += "." + encoding
         except ValueError:
             the_locale = selected_locale
-        global locale
-        locale = the_locale
+        self.locale = the_locale
         locale_ = babel.Locale.parse(the_locale)
         date = dates.format_date(date=datetime.utcnow(), format="full", locale=locale_)
         time = dates.format_time(time=datetime.utcnow(), format="full", locale=locale_)
@@ -1795,10 +1804,6 @@ class user_screen(Adw.Bin):
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
-
-        self.username = None
-        self.hostname = None
-        self.password = None
 
         self.confirm_pass_entry.connect("changed", self.on_confirm_pass_changed)
         self.pass_match_is_visible = False
@@ -1838,6 +1843,9 @@ class user_screen(Adw.Bin):
         data["username"] = self.get_username()
         data["hostname"] = self.get_hostname()
         data["password"] = self.get_password()
+        data["uid"] = 1000
+        data["shell"] = "/bin/zsh"
+        data["groups"] = ["wheel", "network", "video", "audio", "storage"]
         return data
 
 
@@ -1861,6 +1869,9 @@ class timezone_screen(Adw.Bin):
         self.window = window
 
         current_timezone = geoip()
+        self.timezone = {}
+        self.timezone["region"] = current_timezone["region"]
+        self.timezone["zone"] = current_timezone["zone"]
 
     # def populate_regions_list(self) -> None:
     #     self.
