@@ -143,6 +143,8 @@
 	(2,9,"GtkBox","homogeneous","1",None,None,None,None,None,None,None,None,None),
 	(2,9,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
 	(2,10,"GtkStackSidebar","stack","12",None,None,None,None,None,None,None,None,None),
+	(2,10,"GtkWidget","can-focus","False",None,None,None,None,None,None,None,None,None),
+	(2,10,"GtkWidget","can-target","False",None,None,None,None,None,None,None,None,None),
 	(2,11,"GtkOrientable","orientation","vertical",None,None,None,None,None,None,None,None,None),
 	(2,11,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
 	(2,12,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),

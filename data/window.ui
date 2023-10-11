@@ -229,6 +229,8 @@
                             <property name="homogeneous">1</property>
                             <child>
                               <object class="GtkStackSidebar" id="stack1_sidebar">
+                                <property name="can-focus">False</property>
+                                <property name="can-target">False</property>
                                 <property name="stack">stack1</property>
                               </object>
                             </child>
