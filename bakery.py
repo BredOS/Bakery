@@ -215,6 +215,26 @@ def set_hostname(hostname) -> None:
         lp('Set system hostname: "' + hostname + '"')
 
 
+def set_uid(uid, user) -> None:
+    cmd = "sudo usermod -u " + uid + " " + user
+    if dryrun:
+        lp("Would've run: \"" + cmd + '"')
+    else:
+        lp('Running: "' + cmd + '"')
+        subprocess.run(cmd, shell=True)
+        lp('Set " + user + " uid to: "' + uid + '"')
+
+
+def set_gid(gid, group) -> None:
+    cmd = "sudo groupmod -g " + gid + " " + group
+    if dryrun:
+        lp("Would've run: \"" + cmd + '"')
+    else:
+        lp('Running: "' + cmd + '"')
+        subprocess.run(cmd, shell=True)
+        lp('Set " + group + " gid to: "' + gid + '"')
+
+
 def test_up(hostport: tuple) -> bool:
     if not networking_up():
         return False
