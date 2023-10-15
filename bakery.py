@@ -205,6 +205,16 @@ def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
 # Networking functions
 
 
+def set_hostname(hostname) -> None:
+    cmd = "sudo sh -c 'echo '" + hostname + "' > /testing.txt'"
+    if dryrun:
+        lp("Would've run: \"" + cmd + '"')
+    else:
+        lp('Running: "' + cmd + '"')
+        subprocess.run(cmd, shell=True)
+        lp('Set system hostname: "' + hostname + '"')
+
+
 def test_up(hostport: tuple) -> bool:
     if not networking_up():
         return False
