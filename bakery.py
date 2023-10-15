@@ -55,6 +55,12 @@ import config
 # data = false / str / list | For 0, 1, 2 respectively.
 
 
+dryrun = False if "DO_DRYRUN" not in os.listdir() else True
+
+
+# Translations
+
+
 def setup_translations(lang: object = None) -> gettext.GNUTranslations:
     """
     Setup translations
@@ -80,7 +86,10 @@ def setup_translations(lang: object = None) -> gettext.GNUTranslations:
         return gettext.gettext  # type: ignore
 
 
-def setup_logging(dryrun=False) -> logging.Logger:
+# Logging
+
+
+def setup_logging() -> logging.Logger:
     """
     Setup logging
 
@@ -94,9 +103,7 @@ def setup_logging(dryrun=False) -> logging.Logger:
     logger.setLevel(logging.DEBUG)
     if dryrun:
         log_dir = os.path.join(".")
-        log_file = os.path.join(
-            log_dir, datetime.now().strftime("DRYRUN-%Y-%m-%d-%H-%M-%S.log")
-        )
+        log_file = os.path.join(log_dir, "DRYRUN.log")
     else:
         log_dir = os.path.join(os.path.expanduser("~"), ".bredos", "bakery", "logs")
         log_file = os.path.join(
@@ -118,29 +125,56 @@ def setup_logging(dryrun=False) -> logging.Logger:
         exit(1)
 
     print("Logging to:", log_file)
-    rm_old_logs(log_dir, keep=5, dryrun=dryrun)
+    rm_old_logs(log_dir, keep=5)
 
     log_file_handler = logging.FileHandler(log_file)
-    log_file_handler.setLevel(logging.DEBUG)
+    log_file_handler.setLevel(logging.INFO)
     log_file_formatter = logging.Formatter(
-        "%(asctime)s [%(levelname)8s] %(message)s (%(pathname)s > %(funcName)s; Line %(lineno)d)",
-        "%Y-%m-%d %H:%M:%S",
+        "%(asctime)s [%(levelname)8s] %(message)s",
     )
     log_file_handler.setFormatter(log_file_formatter)
+    logger.addHandler(log_file_handler)
 
-    # # For console (when installing)
-    # log_error_handler = logging.StreamHandler()
-    # log_error_handler.setLevel(logging.INFO)
-    # log_error_formatter = logging.Formatter('%(levelname)8s: %(message)s')
-    # log_error_handler.setFormatter(log_error_formatter)
-    # logger.addHandler(log_error_handler)
+    log_error_handler = logging.StreamHandler()
+    log_error_handler.setLevel(logging.INFO)
+    log_error_formatter = logging.Formatter("%(levelname)8s: %(message)s")
+    log_error_handler.setFormatter(log_error_formatter)
+    logger.addHandler(log_error_handler)
     return logger
 
 
-def rm_old_logs(log_dir_path: str, keep: int, dryrun=False) -> None:
+def rm_old_logs(log_dir_path: str, keep: int) -> None:
     for i in os.listdir(log_dir_path):
         if i.startswith("BAKERY" if not dryrun else "DRYRUN"):
             os.remove(f"{log_dir_path}/{i}")
+
+
+# Logger config
+
+
+print("Starting logger..")
+logger = setup_logging()
+logging_handler = LoggingHandler(logger=logger)
+
+
+def lp(message, write_to_f=True, mode="info") -> None:
+    if not write_to_f:
+        LogMessage.Info(message)
+    elif mode == "info":
+        LogMessage.Info(message).write(logging_handler=logging_handler)
+    elif mode == "warn":
+        LogMessage.Warning(message).write(logging_handler=logging_handler)
+    elif mode == "crit":
+        LogMessage.Critical(message).write(logging_handler=logging_handler)
+    else:
+        raise ValueError("Invalid mode.")
+
+
+lp("Logger initialized.")
+lp("Dry run = " + str(dryrun))
+
+
+# TOML
 
 
 def check_override_config() -> bool:
@@ -721,20 +755,64 @@ def installed_dms() -> list:
 def validate_username(username) -> str:
     res = ""
     if len(username) > 30:
-        res += "Username cannot be longer than 30 characters, "
+        res += "Cannot be longer than 30 characters, "
+    elif not len(username):
+        res += "Cannot be empty, "
+    if len(username) and username[0] in ["-", "_", "."]:
+        res += "Cannot start with special characters"
     for i in range(len(username)):
         if not (
-            username[i].isdigit()
-            or username[i].islower()
-            or username[i] in ["-", "_", "."]
+            (
+                username[i].isdigit()
+                or username[i].islower()
+                or username[i] in ["-", "_", "."]
+            )
+            and username[i].isascii()
         ):
             res += "Invalid characters (Use lowercase latin characters, numbers and '-' '_' '.'), "
             break
     return res[:-2]
 
 
-def install(settings=None, dryrun=True) -> None:
+def validate_fullname(fullname) -> str:
+    res = ""
+    if len(fullname) > 30:
+        res += "Cannot be longer than 30 characters, "
+    elif not len(fullname):
+        res += "Cannot be empty, "
+    for i in range(len(fullname)):
+        if not (
+            fullname[i].isdigit()
+            or fullname[i].islower()
+            or fullname[i].isupper()
+            or fullname[i] in ["'"]
+        ):
+            res += 'Invalid characters (Use characters, numbers and "\'"), '
+            break
+    return res[:-2]
+
+
+def validate_hostname(hostname) -> str:
+    res = ""
+    if len(hostname) > 63:
+        res += "Cannot be longer than 30 characters, "
+    elif not len(hostname):
+        res += "Cannot be empty, "
+    if len(hostname) and hostname[0] == "_":
+        res += "Cannot start with '_'"
+    for i in range(len(hostname)):
+        if not (
+            (hostname[i].isdigit() or hostname[i].islower() or hostname[i] in ["-"])
+            and hostname[i].isascii()
+        ):
+            res += 'Invalid characters (Use characters, numbers and "\'"), '
+            break
+    return res[:-2]
+
+
+def install(settings=None) -> None:
     # Settings validation
+    print("Starting installation..")
     if settings is None:
         if dryrun:
             settings = {
@@ -754,13 +832,12 @@ def install(settings=None, dryrun=True) -> None:
                 },
             }
         else:
-            raise InputError("No data passed with demo disabled.")
-
-    # Logger config
-    print("Starting logger..")
-    logger = setup_logging(dryrun)
-    logging_handler = LoggingHandler(logger=logger)
+            raise ValueError("No data passed with dryrun disabled.")
 
     # Install
-    if settings["install_type"] == "offline":
+    if settings["install_type"] == "online":
+        raise NotImplementedError("Online mode not implemented!")
+    elif settings["install_type"] == "offline":
         pass
+    elif settings["install_type"] == "custom":
+        raise NotImplementedError("Custom mode not implemented!")
