@@ -753,13 +753,12 @@ def installed_dms() -> list:
 
 
 def validate_username(username) -> str:
-    res = ""
     if len(username) > 30:
-        res += "Cannot be longer than 30 characters, "
+        return "Cannot be longer than 30 characters"
     elif not len(username):
-        res += "Cannot be empty, "
+        return "Cannot be empty"
     if len(username) and username[0] in ["-", "_", "."]:
-        res += "Cannot start with special characters"
+        return "Cannot start with special characters"
     for i in range(len(username)):
         if not (
             (
@@ -769,17 +768,15 @@ def validate_username(username) -> str:
             )
             and username[i].isascii()
         ):
-            res += "Invalid characters (Use lowercase latin characters, numbers and '-' '_' '.'), "
-            break
-    return res[:-2]
+            return "Invalid characters (Use lowercase latin characters, numbers and '-' '_' '.')"
+    return ""
 
 
 def validate_fullname(fullname) -> str:
-    res = ""
     if len(fullname) > 30:
-        res += "Cannot be longer than 30 characters, "
+        return "Cannot be longer than 30 characters"
     elif not len(fullname):
-        res += "Cannot be empty, "
+        return "Cannot be empty"
     for i in range(len(fullname)):
         if not (
             fullname[i].isdigit()
@@ -787,27 +784,24 @@ def validate_fullname(fullname) -> str:
             or fullname[i].isupper()
             or fullname[i] in ["'"]
         ):
-            res += 'Invalid characters (Use characters, numbers and "\'"), '
-            break
-    return res[:-2]
+            return 'Invalid characters (Use characters, numbers and "\'")'
+    return ""
 
 
 def validate_hostname(hostname) -> str:
-    res = ""
     if len(hostname) > 63:
-        res += "Cannot be longer than 30 characters, "
+        return "Cannot be longer than 30 characters"
     elif not len(hostname):
-        res += "Cannot be empty, "
+        return "Cannot be empty"
     if len(hostname) and hostname[0] == "_":
-        res += "Cannot start with '_'"
+        return "Cannot start with '_'"
     for i in range(len(hostname)):
         if not (
             (hostname[i].isdigit() or hostname[i].islower() or hostname[i] in ["-"])
             and hostname[i].isascii()
         ):
-            res += 'Invalid characters (Use characters, numbers and "\'"), '
-            break
-    return res[:-2]
+            return 'Invalid characters (Use characters, numbers and "\'")'
+    return ""
 
 
 # Main functions
