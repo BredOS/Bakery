@@ -235,6 +235,10 @@ def set_gid(gid, group) -> None:
         lp('Set " + group + " gid to: "' + gid + '"')
 
 
+def check_uid_gid(uid=None, gid=None):
+    pass
+
+
 def test_up(hostport: tuple) -> bool:
     if not networking_up():
         return False
