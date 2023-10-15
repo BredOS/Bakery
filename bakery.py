@@ -80,7 +80,7 @@ def setup_translations(lang: object = None) -> gettext.GNUTranslations:
         return gettext.gettext  # type: ignore
 
 
-def setup_logging() -> logging.Logger:
+def setup_logging(dryrun=False) -> logging.Logger:
     """
     Setup logging
 
@@ -92,8 +92,16 @@ def setup_logging() -> logging.Logger:
 
     logger = logging.getLogger("bredos-bakery")
     logger.setLevel(logging.DEBUG)
-    log_dir = os.path.join(os.path.expanduser("~"), ".bredos", "bakery", "logs")
-    log_file = os.path.join(log_dir, datetime.now().strftime("%Y-%m-%d-%H-%M-%S.log"))
+    if dryrun:
+        log_dir = os.path.join(".")
+        log_file = os.path.join(
+            log_dir, datetime.now().strftime("DRYRUN-%Y-%m-%d-%H-%M-%S.log")
+        )
+    else:
+        log_dir = os.path.join(os.path.expanduser("~"), ".bredos", "bakery", "logs")
+        log_file = os.path.join(
+            log_dir, datetime.now().strftime("BAKERY-%Y-%m-%d-%H-%M-%S.log")
+        )
     try:
         Path(log_dir).mkdir(parents=True, exist_ok=True)
         if not os.path.isdir(log_dir):
@@ -109,8 +117,8 @@ def setup_logging() -> logging.Logger:
         traceback.print_exception(type(e), e, e.__traceback__)
         exit(1)
 
-    print("Logging to:" + str(log_file))
-    rm_old_logs(log_dir, keep=5)
+    print("Logging to:", log_file)
+    rm_old_logs(log_dir, keep=5, dryrun=dryrun)
 
     log_file_handler = logging.FileHandler(log_file)
     log_file_handler.setLevel(logging.DEBUG)
@@ -129,14 +137,10 @@ def setup_logging() -> logging.Logger:
     return logger
 
 
-def rm_old_logs(log_dir_path: str, keep: int) -> None:
-    subprocess.Popen(
-        "ls -tp * | grep -v '/$' | tail -n +"
-        + str(keep + 1)
-        + " | xargs -I {} rm -- {}",
-        shell=True,
-        cwd=log_dir_path,
-    )
+def rm_old_logs(log_dir_path: str, keep: int, dryrun=False) -> None:
+    for i in os.listdir(log_dir_path):
+        if i.startswith("BAKERY" if not dryrun else "DRYRUN"):
+            os.remove(f"{log_dir_path}/{i}")
 
 
 def check_override_config() -> bool:
@@ -729,5 +733,34 @@ def validate_username(username) -> str:
     return res[:-2]
 
 
-def install(settings) -> None:
-    pass
+def install(settings=None, dryrun=True) -> None:
+    # Settings validation
+    if settings is None:
+        if dryrun:
+            settings = {
+                "install_type": "offline",
+                "layout": {"lang": None, "variant": None},
+                "locale": "en_US",
+                "timezone": {"region": "Europe", "zone": "Sofia"},
+                "hostname": "Panda",
+                "user": {
+                    "fullname": "Bred guy",
+                    "username": "Panda",
+                    "password": "123",
+                    "uid": 1000,
+                    "gid": None,
+                    "shell": "/bin/zsh",
+                    "groups": ["wheel", "network", "video", "audio", "storage"],
+                },
+            }
+        else:
+            raise InputError("No data passed with demo disabled.")
+
+    # Logger config
+    print("Starting logger..")
+    logger = setup_logging(dryrun)
+    logging_handler = LoggingHandler(logger=logger)
+
+    # Install
+    if settings["install_type"] == "offline":
+        pass
