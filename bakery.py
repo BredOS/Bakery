@@ -713,15 +713,21 @@ def installed_dms() -> list:
 
 # Main functions
 
+
 def validate_username(username) -> str:
     res = ""
     if len(username) > 30:
         res += "Username cannot be longer than 30 characters, "
     for i in range(len(username)):
-        if not (username[i].isdigit() or username[i].islower() or username[i] in ["-", "_", "."]):
+        if not (
+            username[i].isdigit()
+            or username[i].islower()
+            or username[i] in ["-", "_", "."]
+        ):
             res += "Invalid characters (Use lowercase latin characters, numbers and '-' '_' '.'), "
             break
     return res[:-2]
+
 
 def install(settings) -> None:
     pass
