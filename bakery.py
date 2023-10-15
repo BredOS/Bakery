@@ -834,6 +834,7 @@ def install(settings=None) -> None:
                     "groups": ["wheel", "network", "video", "audio", "storage", "uucp"],
                 },
                 "root_password": None,
+                "ntp": True,
             }
         else:
             raise ValueError("No data passed with dryrun disabled.")
