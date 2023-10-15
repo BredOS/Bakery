@@ -206,7 +206,7 @@ def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
 
 
 def set_hostname(hostname) -> None:
-    cmd = "sudo sh -c 'echo '" + hostname + "' > /testing.txt'"
+    cmd = "sudo sh -c 'echo '" + hostname + "' > /etc/hostname'"
     if dryrun:
         lp("Would've run: \"" + cmd + '"')
     else:
