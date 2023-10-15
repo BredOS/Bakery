@@ -823,7 +823,7 @@ def install(settings=None) -> None:
                 "layout": {"lang": None, "variant": None},
                 "locale": "en_US",
                 "timezone": {"region": "Europe", "zone": "Sofia"},
-                "hostname": "Panda",
+                "hostname": "breborb",
                 "user": {
                     "fullname": "Bred guy",
                     "username": "Panda",
@@ -831,8 +831,9 @@ def install(settings=None) -> None:
                     "uid": 1000,
                     "gid": None,
                     "shell": "/bin/zsh",
-                    "groups": ["wheel", "network", "video", "audio", "storage"],
+                    "groups": ["wheel", "network", "video", "audio", "storage", "uucp"],
                 },
+                "root_password": None,
             }
         else:
             raise ValueError("No data passed with dryrun disabled.")
