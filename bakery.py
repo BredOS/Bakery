@@ -749,7 +749,7 @@ def installed_dms() -> list:
     pass
 
 
-# Main functions
+# Verification functions
 
 
 def validate_username(username) -> str:
@@ -808,6 +808,9 @@ def validate_hostname(hostname) -> str:
             res += 'Invalid characters (Use characters, numbers and "\'"), '
             break
     return res[:-2]
+
+
+# Main functions
 
 
 def install(settings=None) -> None:
