@@ -55,6 +55,12 @@ install_data('user_screen.ui',
   install_dir: join_paths(get_option('datadir'), 'bakery/data')
 )
 # de_screen.ui summary_screen.ui
+install_data('summary_screen.ui',
+  install_dir: join_paths(get_option('datadir'), 'bakery/data')
+)
+install_data('de_screen.ui',
+  install_dir: join_paths(get_option('datadir'), 'bakery/data')
+)
 
 
 subdir('icons')

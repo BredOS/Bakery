@@ -25,14 +25,16 @@ build() {
 
 package_bakery() {
         cd "$srcdir/$pkgbase/build"
+        depends=('python-pyrunning' 'python-toml')
         DESTDIR="$pkgdir" meson install
         rm -rf "$pkgdir/usr/share/bakery/data/"*.ui
         rm -rf "$pkgdir/usr/share/bakery/bakery-gui.py"
-        rm -rf "$pkgdir/usr/share/"{icons/,appdata/,applications/}
+        rm -rf "$pkgdir/usr/share/"{icons/,appdata/,applications/,glib-2.0}
 }
 
 package_bakery-gui() {
         cd "$srcdir/$pkgbase/build"
+        depends=('bakery' 'python-babel' 'python-pyrunning')
         DESTDIR="$pkgdir" meson install
         rm -rf "$pkgdir/usr/share/bakery/"{bakery-cli.py,bakery.py,config.py}
         rm -rf "$pkgdir/usr/share/licenses/"
