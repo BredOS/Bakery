@@ -39,6 +39,22 @@ endif
 install_data('window.ui',
   install_dir: join_paths(get_option('datadir'), 'bakery/data')
 )
+install_data('kb_dialog.ui',
+  install_dir: join_paths(get_option('datadir'), 'bakery/data')
+)
+install_data('kb_screen.ui',
+  install_dir: join_paths(get_option('datadir'), 'bakery/data')
+)
+install_data('locale_screen.ui',
+  install_dir: join_paths(get_option('datadir'), 'bakery/data')
+)
+install_data('timezone_screen.ui',
+  install_dir: join_paths(get_option('datadir'), 'bakery/data')
+)
+install_data('user_screen.ui',
+  install_dir: join_paths(get_option('datadir'), 'bakery/data')
+)
+# de_screen.ui summary_screen.ui
 
 
 subdir('icons')

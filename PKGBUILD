@@ -9,8 +9,14 @@ url="https://github.com/BredOS/Bakery"
 license=('GPL3')
 options=('!strip')
 # branch=gui
-source=(git+https://github.com/BredOS/Bakery.git)
-md5sums=('SKIP')
+source=()
+md5sums=()
+
+prepare() {
+        cd "$srcdir"
+        mkdir -pv "$srcdir/$pkgbase"
+        cp -rv "$srcdir/../"* "$srcdir/$pkgbase" || true
+}
 
 build() {
         cd "$srcdir/$pkgbase"
@@ -20,12 +26,15 @@ build() {
 package_bakery() {
         cd "$srcdir/$pkgbase/build"
         DESTDIR="$pkgdir" meson install
+        rm -rf "$pkgdir/usr/share/bakery/data/"*.ui
+        rm -rf "$pkgdir/usr/share/bakery/bakery-gui.py"
+        rm -rf "$pkgdir/usr/share/"{icons/,appdata/,applications/}
 }
 
 package_bakery-gui() {
-        mkdir -pv "$pkgdir/usr/share/bakery/assets/"
-        mkdir -pv "$pkgdir/usr/bin/"
-        install -Dm644 "$srcdir/Bakery/assets/"* "$pkgdir/usr/share/bakery/assets/"
-        install -Dm644 "$srcdir/Bakery/gui.py" "$pkgdir/usr/share/bakery/"
-
+        cd "$srcdir/$pkgbase/build"
+        DESTDIR="$pkgdir" meson install
+        rm -rf "$pkgdir/usr/share/bakery/"{bakery-cli.py,bakery.py,config.py}
+        rm -rf "$pkgdir/usr/share/licenses/"
+        rm -rf "$pkgdir/usr/bin"
 }

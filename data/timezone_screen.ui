@@ -1,12 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.16.0 -->
+<!-- Created with Cambalache 0.17.0 -->
 <interface>
-  <!-- interface-name locale_screen.ui -->
+  <!-- interface-name timezone_screen.ui -->
   <requires lib="gtk" version="4.0"/>
-  <requires lib="libadwaita" version="1.4"/>
+  <requires lib="libadwaita" version="1.3"/>
   <template class="timezone_screen" parent="AdwBin">
     <child>
       <object class="AdwStatusPage">
+        <property name="title">Select your timezone</property>
         <child>
           <object class="GtkBox">
             <property name="orientation">vertical</property>
@@ -18,13 +19,39 @@
                       <object class="AdwPreferencesGroup">
                         <child>
                           <object class="AdwActionRow">
+                            <property name="activatable">False</property>
                             <property name="title">Regions</property>
                             <child>
-                              <object class="AdwComboRow" id="regions_list">
+                              <object class="GtkDropDown" id="regions_list">
                                 <property name="margin-bottom">5</property>
                                 <property name="margin-top">5</property>
-                                <property name="selected">0</property>
                               </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwActionRow">
+                            <property name="activatable">False</property>
+                            <property name="title">Zone</property>
+                            <child>
+                              <object class="GtkDropDown" id="zones_list">
+                                <property name="margin-bottom">5</property>
+                                <property name="margin-top">5</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwPreferencesGroup">
+                        <property name="visible">true</property>
+                        <child>
+                          <object class="AdwActionRow" id="preview_row">
+                            <property name="subtitle">Previewing time in -timezone-</property>
+                            <property name="title">Current time:</property>
+                            <child>
+                              <object class="GtkLabel" id="curr_time"/>
                             </child>
                           </object>
                         </child>

@@ -168,3 +168,8 @@ launch.py
 *.po~
 .DS_Store
 ._DS_Store
+/data/window2.ui
+*.cmb.old
+src/
+pkg/
+build/

@@ -10,7 +10,9 @@ pages = {
     "Locale": "locale_screen",
     "Timezone": "timezone_screen",
     "User": "user_screen",
+    "Desktops": "de_screen",
+    "Summary": "summary_screen",
 }
 
-offline_pages = ["Keyboard", "Timezone", "Locale", "User"]
+offline_pages = ["Keyboard", "Timezone", "User", "Locale"]
 online_pages = ["Keyboard", "Timezone", "Locale", "User"]
