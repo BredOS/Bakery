@@ -500,6 +500,7 @@ _kblangmap = {
     "ee": "Estonian",
     "epo": "Esperanto",
     "es": "Spanish",
+    "eg": "Egyptian",
     "et": "Estonian",
     "fi": "Finnish",
     "fo": "Faroese",
