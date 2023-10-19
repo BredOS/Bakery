@@ -172,6 +172,10 @@ class BakeryWindow(Adw.ApplicationWindow):
             print("custom install")
             self.init_screens("custom")
 
+    def on_finish_clicked(self, button) -> None:
+        builder = Gtk.Builder.new_from_file(script_dir + "/data/summary_screen.ui")
+        install_confirm = builder.get_object("install_confirm")
+
     def on_next_clicked(self, button) -> None:
         num_pages = len(self.pages)
         if self.current_page < num_pages - 1:
@@ -607,6 +611,15 @@ class de_screen(Adw.Bin):
 
 class summary_screen(Adw.Bin):
     __gtype_name__ = "summary_screen"
+
+    locale_preview = Gtk.Template.Child()
+    lang_preview = Gtk.Template.Child()
+    variant_preview = Gtk.Template.Child()
+    tz_preview = Gtk.Template.Child()
+
+    name_preview = Gtk.Template.Child()
+    username_preview = Gtk.Template.Child()
+    hostname_preview = Gtk.Template.Child()
 
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
