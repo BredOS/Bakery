@@ -546,6 +546,7 @@ _kblangmap = {
     "nl": "Dutch",
     "no": "Norwegian",
     "np": "Nepali",
+    "nz": "New Zealand",
     "ph": "Filipino",
     "pk": "Pakistani",
     "pl": "Polish",
