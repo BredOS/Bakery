@@ -316,7 +316,9 @@ def nmtui() -> None:
         subprocess.run(["nmtui"])
         while st:
             try:
-                res = input("\nDo you want to run nmtui again? (Y/N): ")
+                if not internet_up():
+                    print("\nWARNING: The internet is still unreachable.")
+                res = input("Do you want to run nmtui again? (Y/N): ")
                 if res in ["n", "N"]:
                     st = False
                 elif res in ["y", "Y"]:
@@ -599,7 +601,7 @@ def locales(only_enabled: bool = False) -> list:
                 data.pop(i)  # remove non-locale / disabled locale on only_enabled
         for i in range(len(data)):
             data[i] = data[i].replace("#", "").replace("  ", "")  # cleanup
-        return data
+        return set(data)
 
 
 def langs(only_enabled: bool = False) -> dict:
@@ -670,6 +672,30 @@ def tz_list() -> dict:
                 res[cont] = []
             res[cont].append(i[i.find("/") + 1 :])
     return res
+
+
+def enable_locales(to_en: list) -> None:
+    to_add = set()
+    enabled = locales(True)
+    all_loc = locales()
+    for locale in to_en:
+        if locale not in enabled:
+            if locale in all_loc:
+                to_add.add(locale)
+            else:
+                raise OSError("Invalid locale: " + locale)
+    if len(to_add):
+        for i in to_add:  # Why fumble with stacked \\n? Just spam a bit.
+            lp("Enabling:" + i)
+            subprocess.run(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
+        lp("Generating locales")
+        subprocess.run(["sudo", "locale-gen"])
+
+
+def set_locale(locale: str) -> None:
+    if locale not in locales(True):
+        raise OSError("Locale not enabled!")
+    subprocess.run(["sudo", "localectl", "set-locale", "LANG=" + locale])
 
 
 # Package functions
