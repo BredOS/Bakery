@@ -695,6 +695,7 @@ def enable_locales(to_en: list) -> None:
 def set_locale(locale: str) -> None:
     if locale not in locales(True):
         raise OSError("Locale not enabled!")
+    lp("Setting locale to: " + locale)
     subprocess.run(["sudo", "localectl", "set-locale", "LANG=" + locale])
 
 
