@@ -189,6 +189,7 @@ def check_override_config() -> bool:
 
 def load_config(file_path: str = "/bakery/config.toml") -> dict:
     # Load a config file as a dict.
+    lp("Loaded config: " + file_path)
     return toml.load(file_path)
 
 
@@ -196,6 +197,7 @@ def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
     # Export a config file from a stored config dict.
     try:
         with open(file_path, "w") as f:
+            lp("Exporting config to: " + file_path)
             f.write(toml.dumps(config))
     except:
         return False
@@ -240,6 +242,7 @@ def internet_up() -> bool:
         res = test_up(i)
         if res:
             break
+    lp("Internet status: " + str(res))
     return res
 
 
@@ -306,15 +309,20 @@ def check_updated() -> bool:
     return False
 
 
-def nmcli_connection(connection_name=None) -> None:
-    # Opens nmcli network settings.
-    try:
-        if connection_name is None:
-            subprocess.run(["nmcli", "con", "edit"])
-        else:
-            subprocess.run(["nmcli", "con", "edit", connection_name])
-    except KeyboardInterrupt:
-        pass
+def nmtui() -> None:
+    # Opens nmtui for network settings configurations.
+    st = True
+    while st:
+        subprocess.run(["nmtui"])
+        while st:
+            try:
+                res = input("\nDo you want to run nmtui again? (Y/N): ")
+                if res in ["n", "N"]:
+                    st = False
+                elif res in ["y", "Y"]:
+                    break
+            except:
+                pass
 
 
 # Locale functions
@@ -804,6 +812,17 @@ def validate_hostname(hostname) -> str:
         ):
             return 'Invalid characters (Use characters, numbers and "\'")'
     return ""
+
+
+# User configuration functions.
+
+
+def adduser(username: str, passwd: str, uid: str) -> None:
+    subprocess.run(["sudo", "useradd", username, "-u", uid, "-m"])
+
+
+def passwd(username: str, passwd: str) -> None:
+    subprocess.run(["sudo", "passwd", username], input=f"{passwd}\n{passwd}", text=True)
 
 
 # Main functions
