@@ -909,10 +909,11 @@ def install(settings=None) -> None:
         if dryrun:
             settings = {
                 "install_type": "offline",
-                "layout": {"lang": False, "variant": False},
+                "layout": {"lang": "American English", "variant": "alt-intl"},
                 "locale": "en_US",
                 "timezone": {"region": "Europe", "zone": "Sofia"},
                 "hostname": "breborb",
+                "sudo_nopasswd": True,
                 "user": {
                     "fullname": "Bred guy",
                     "username": "Panda",
@@ -924,6 +925,11 @@ def install(settings=None) -> None:
                 },
                 "root_password": -1,
                 "ntp": True,
+                "installer": {
+                    "shown_pages": ["Keyboard", "Timezone", "User", "Locale"],
+                    "packages": [],
+                    "de_packages": [],
+                },
             }
         else:
             raise ValueError("No data passed with dryrun disabled.")

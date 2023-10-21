@@ -1,16 +1,18 @@
 install_type = "offline"
-locale = "en_US"
 hostname = "breborb"
 root_password = false
+sudo_nopasswd = true
 ntp = true
+
+locale = "en_US"
 
 [timezone]
 region = "Europe"
 zone = "Sofia"
 
 [layout]
-lang = false
-variant = false
+lang = "American English"
+variant = "alt-intl"
 
 [user]
 fullname = "Bred guy"
@@ -20,4 +22,9 @@ uid = 1000
 gid = false
 shell = "/bin/zsh"
 groups = ["wheel", "network", "video", "audio", "storage", "uucp"]
+autologin = true
 
+[installer]
+shown_pages = ['Keyboard', 'Timezone', 'User', 'Locale']
+packages = []
+de_packages = []
