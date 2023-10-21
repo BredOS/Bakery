@@ -844,6 +844,26 @@ def validate_hostname(hostname) -> str:
 # User configuration functions.
 
 
+def gidc(gid: str) -> bool:
+    with open("/etc/group") as gr:
+        data = gr.read()
+        data = data.split()
+        for i in data:
+            if i.split(":")[-2] == gid:
+                return True
+    return False
+
+
+def uidc(uid: str) -> bool:
+    with open("/etc/passwd") as pw:
+        data = pw.read()
+        data = data.split("\n")
+        for i in data:
+            if i.split(":")[2] == uid:
+                return True
+    return False
+
+
 def adduser(username: str, passwd: str, uid: str, gid: str) -> None:
     # May silently fail, which is fine.
     subprocess.run(["sudo", "groupadd", username, "-g", gid])
