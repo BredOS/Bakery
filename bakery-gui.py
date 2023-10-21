@@ -39,7 +39,14 @@ from bakery import (
 from time import sleep
 from datetime import date, datetime, time
 from babel import dates, numbers
-from pyrunning import Command
+from pyrunning import (
+    LoggingHandler,
+    LogMessage,
+    Command,
+    LoggingLevel,
+    BatchJob,
+    Function,
+)
 from pytz import timezone
 import config
 
@@ -47,7 +54,7 @@ import config
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gio
+from gi.repository import Gtk, Adw, Gio, GLib
 
 # py file path
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -155,15 +162,18 @@ class BakeryWindow(Adw.ApplicationWindow):
     offline_install = Gtk.Template.Child()
     # online_install = Gtk.Template.Child()
     custom_install = Gtk.Template.Child()
+    install_cancel = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # go to the first page of main stack
         self.main_stk.set_visible_child(self.main_page.get_child())
+        self.cancel_dialog = self.install_cancel
         self.install_type = None
         # self.online_install.connect("clicked", self.main_button_clicked)
         self.offline_install.connect("clicked", self.main_button_clicked)
         self.custom_install.connect("clicked", self.main_button_clicked)
+        self.cancel_dialog.connect("response", self.delete_pages)
 
         self.next_btn.connect("clicked", self.on_next_clicked)
         self.back_btn.connect("clicked", self.on_back_clicked)
@@ -222,21 +232,19 @@ class BakeryWindow(Adw.ApplicationWindow):
             self.back_btn.set_sensitive(self.current_page > 0)
 
     def on_cancel_clicked(self, button) -> None:
-        dialog = Gtk.AlertDialog()
-        # dialog.set_message("Warning")
-        # dialog.set_detail("Are you sure you want to cancel your installation?")
-        # dialog.set_modal(True)
-        # dialog.set_buttons(["No", "Yes"])
-        # dialog.choose(self, None, self.delete_pages, None)
-        # dialog = Adw.MessageDialog(
+        # connect the yes button to the delete_pages function
+        self.cancel_dialog.present()
 
-    def delete_pages(self, *_) -> None:
-        self.main_stk.set_visible_child(self.main_page.get_child())
-        # remove all pages from stack1
-        pages = [self.get_page_id(x) for x in self.pages]
-        for page_id in pages:
-            w = self.stack1.get_child_by_name(page_id)
-            self.stack1.remove(w)
+    def delete_pages(self, dialog, resp) -> None:
+        if resp == "yes":
+            self.main_stk.set_visible_child(self.main_page.get_child())
+            # remove all pages from stack1
+
+            pages = [self.get_page_id(x) for x in self.pages]
+            for page_id in pages:
+                w = self.stack1.get_child_by_name(page_id)
+                self.stack1.remove(w)
+        self.cancel_dialog.hide()
 
     def get_page_id(self, page_name) -> str:
         return config.pages[page_name]
@@ -282,6 +290,20 @@ class BakeryWindow(Adw.ApplicationWindow):
         elif install_type == "offline":
             self.pages = config.offline_pages
             self.add_pages(self.stack1, self.pages)
+
+        bakery.logging_handler = LoggingHandler(
+            logger=bakery.logger,
+            logging_functions=[all_pages["Install"].console_logging],
+        )
+        # bakery.lp("Starting installer")
+        # log that 5 times
+        for i in range(5):
+            bakery.lp("Starting installer")
+        bakery.lp("a", mode="crit")
+        bakery.lp("b", mode="warn")
+        bakery.lp("c", mode="info")
+        bakery.lp("d", mode="debug")
+        bakery.lp("e", mode="error")
 
         self.current_page = 0
         self.update_buttons()
@@ -687,6 +709,9 @@ class summary_screen(Adw.Bin):
     username_preview = Gtk.Template.Child()
     hostname_preview = Gtk.Template.Child()
 
+    autologin = Gtk.Template.Child()  # switch
+    nopasswd = Gtk.Template.Child()  # switch
+
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
@@ -695,18 +720,107 @@ class summary_screen(Adw.Bin):
     def page_shown(self) -> None:
         self.data = self.window.collect_data()
         self.locale_preview.set_label(self.data["locale"])
-        if self.data["layout"]["variant"] is None:
-            self.kb_lang.set_label(self.data["layout"]["lang"])
-        else:
-            self.kb_lang.set_label(
-                self.data["layout"]["lang"] + " - " + self.data["layout"]["variant"]
-            )
+        self.kb_lang.set_label(self.data["layout"]["lang"])
+        self.kb_variant.set_label(self.data["layout"]["variant"])
         self.tz_preview.set_label(
             self.data["timezone"]["region"] + "/" + self.data["timezone"]["zone"]
         )
         self.name_preview.set_label(self.data["user"]["fullname"])
         self.username_preview.set_label(self.data["user"]["username"])
         self.hostname_preview.set_label(self.data["hostname"])
+        self.autologin.set_active(self.data["user"]["autologin"])
+        self.nopasswd.set_active(self.data["user"]["sudo_nopasswd"])
+
+
+@Gtk.Template.from_file(script_dir + "/data/install_screen.ui")
+class install_screen(Adw.Bin):
+    __gtype_name__ = "install_screen"
+
+    progress_bar = Gtk.Template.Child()
+    curr_action = Gtk.Template.Child()
+    console_text_view = Gtk.Template.Child()
+
+    def __init__(self, window, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.window = window
+        self.console_buffer = self.console_text_view.get_buffer()
+
+        self.colors = {
+            "CRITICAL": "#a40000",
+            "ERROR": "#ff0000",
+            "EXCEPTION": "#ff0000",
+            "WARNING": "#ffa500",
+            "INFO": "#3584e4",
+            "DEBUG": "#808080",
+            "NOTSET": "#808080",
+            "": "#808080",
+            None: "#808080",
+        }
+
+    def console_logging(
+        self,
+        logging_level: int,
+        message: str,
+        *args,
+        loginfo_filename="",
+        loginfo_line_number=-1,
+        loginfo_function_name="",
+        loginfo_stack_info=None,
+        **kwargs,
+    ):
+        logging_level_name = LoggingLevel(logging_level).name
+
+        GLib.idle_add(
+            lambda: (
+                self.console_buffer.insert_markup(
+                    self.console_buffer.get_end_iter(),
+                    "".join(
+                        (
+                            "- ",
+                            '<span color="{:s}">',
+                            logging_level_name.rjust(8, " "),
+                            ": ",
+                            "</span>",
+                        )
+                    ).format(self.colors[logging_level_name]),
+                    -1,
+                )
+            )
+        )
+
+        if LoggingLevel(logging_level) != LoggingLevel.DEBUG:
+            GLib.idle_add(
+                lambda: (
+                    self.console_buffer.insert(
+                        self.console_buffer.get_end_iter(), "".join((message, "\n"))
+                    )
+                )
+            )
+        else:
+            GLib.idle_add(
+                lambda: (
+                    self.console_buffer.insert_markup(
+                        self.console_buffer.get_end_iter(),
+                        "".join(
+                            (
+                                '<span color="{:s}">',
+                                GLib.markup_escape_text(message),
+                                "</span>" "\n",
+                            )
+                        ).format(self.colors[logging_level_name]),
+                        -1,
+                    )
+                )
+            )
+
+
+@Gtk.Template.from_file(script_dir + "/data/finish_screen.ui")
+class finish_screen(Adw.Bin):
+    __gtype_name__ = "finish_screen"
+
+    def __init__(self, window, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.window = window
 
 
 app = BakeryApp(application_id="org.bredos.bakery")

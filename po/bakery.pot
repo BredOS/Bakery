@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bakery\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-01 13:00+0300\n"
+"POT-Creation-Date: 2023-10-21 23:33+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,67 +25,173 @@ msgstr ""
 msgid "No description"
 msgstr ""
 
-#: data/window.ui:66
-msgid "Cancel"
+#: bakery-gui.py:121
+msgid "Bakery is a simple installer for BredOS"
 msgstr ""
 
-#: data/window.ui:74
-msgid "Back"
-msgstr ""
-
-#: data/window.ui:81
-msgid "Next"
-msgstr ""
-
-#: data/window.ui:108
-msgid "Welcome to the BredOS Installer!"
-msgstr ""
-
-#: data/window.ui:170
+#: data/window.ui:60
 msgid "Install offline"
 msgstr ""
 
-#: data/window.ui:220
-msgid "Install online"
+#. Do not translate literally, come up with a bread/baking related pun that works in the target language. Try to keep the idea that the installer will lead the way
+#: data/window.ui:91
+msgid ""
+"Let the Bakery installer whip up the perfect BredOS recipe for your machine!"
 msgstr ""
 
-#: data/window.ui:270
-msgid "Custom Install"
+#: data/window.ui:92
+msgid "Welcome to BredOS!"
+msgstr ""
+
+#: data/window.ui:128
+msgctxt "Button"
+msgid "Cancel"
+msgstr ""
+
+#: data/window.ui:138
+msgctxt "Button"
+msgid "Back"
+msgstr ""
+
+#: data/window.ui:144
+msgctxt "Button"
+msgid "Next"
 msgstr ""
 
 #. Dont change the bakery_recipe.conf name
-#: data/window.ui:311
+#: data/window.ui:180
 msgid ""
 "You selected custom installation. Please provide a URL or PATH to the "
 "Bakery_recipe.conf"
 msgstr ""
 
 #. done button
-#: data/window.ui:357
+#: data/window.ui:234
 msgid "Done"
 msgstr ""
 
-#: data/window.ui:372
-msgid "_Preferences"
+#: data/window.ui:260
+msgid "Install online"
 msgstr ""
 
-#: data/window.ui:377
-msgid "_About Bakery"
+#: data/window.ui:273
+msgid "_No"
 msgstr ""
 
-#: data/kb_screen.ui:35
+#: data/window.ui:274 data/summary_screen.ui:149
+msgid "Yes"
+msgstr ""
+
+#: data/kb_screen.ui:36
 msgid "Test your layout here!"
 msgstr ""
 
-#: data/kb_screen.ui:45
+#. If the target language doesnt use the latin please kindly tell the user to use english US
+#: data/kb_screen.ui:46
 msgid ""
-"If your language uses a different script than latin please use English US"
+"If your language uses a different script than latin please use English US, "
+"you can always add your keyboard layout after install"
 msgstr ""
 
-#: data/kb_screen.ui:46
+#: data/kb_screen.ui:47
 msgid "Select your keyboard layout"
 msgstr ""
 
-#: data/kb_dialog.ui:26
+#: data/kb_dialog.ui:11 data/locale_screen.ui:70
+msgid "Select keyboard variant"
+msgstr ""
+
+#: data/kb_dialog.ui:27
 msgid "Please select a variant for your keyboard layout."
+msgstr ""
+
+#: data/kb_dialog.ui:32 data/locale_screen.ui:91
+msgid "Select"
+msgstr ""
+
+#: data/locale_screen.ui:38
+msgid "Date and time"
+msgstr ""
+
+#: data/locale_screen.ui:46
+msgid "Numbers and currency"
+msgstr ""
+
+#: data/locale_screen.ui:62
+msgid "Please select your region"
+msgstr ""
+
+#: data/locale_screen.ui:86
+msgid "Please select locale"
+msgstr ""
+
+#: data/timezone_screen.ui:23
+msgid "Regions"
+msgstr ""
+
+#: data/timezone_screen.ui:35
+msgid "Zone"
+msgstr ""
+
+#: data/timezone_screen.ui:52
+msgid "Current time:"
+msgstr ""
+
+#: data/user_screen.ui:31
+msgid "Full name"
+msgstr ""
+
+#: data/user_screen.ui:36
+msgid "Username"
+msgstr ""
+
+#: data/user_screen.ui:41
+msgid "Hostname"
+msgstr ""
+
+#: data/user_screen.ui:46
+msgid "Password"
+msgstr ""
+
+#: data/user_screen.ui:51
+msgid "Confirm password"
+msgstr ""
+
+#: data/user_screen.ui:82
+msgid "Use sudo and polkit without password."
+msgstr ""
+
+#: data/user_screen.ui:94
+msgctxt "Login into the system literally"
+msgid "Log in automatically without asking for password. "
+msgstr ""
+
+#: data/user_screen.ui:108
+msgid "Create your user account"
+msgstr ""
+
+#: data/summary_screen.ui:137
+msgid ""
+"Your selections have been listed below, please confirm and continue with "
+"instillation"
+msgstr ""
+
+#: data/summary_screen.ui:138
+msgid "Please confirm your choices"
+msgstr ""
+
+#: data/summary_screen.ui:148
+msgid "_Cancel"
+msgstr ""
+
+#: data/install_screen.ui:9
+msgid "Please standby while instillation is in progress"
+msgstr ""
+
+#: data/install_screen.ui:10
+msgid "Installing BredOS"
+msgstr ""
+
+#: data/finish_screen.ui:9
+msgid "Installation Complete!"
 msgstr ""

@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.17.0 -->
+<interface>
+  <requires lib="gtk" version="4.12"/>
+  <requires lib="libadwaita" version="1.0"/>
+  <template class="install_screen" parent="AdwBin">
+    <child>
+      <object class="AdwStatusPage">
+        <property name="description" translatable="yes">Please standby while instillation is in progress</property>
+        <property name="title" translatable="yes">Installing BredOS</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkScrolledWindow" id="console">
+                <property name="child">
+                  <object class="GtkViewport">
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="GtkTextView" id="console_text_view">
+                        <property name="editable">False</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="height-request">240</property>
+                <property name="hexpand">True</property>
+                <property name="max-content-width">200</property>
+                <property name="vexpand">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkProgressBar" id="progress">
+                <property name="fraction">0.2</property>
+                <property name="show-text">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="curr_action">
+                <property name="label">Setting up user</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

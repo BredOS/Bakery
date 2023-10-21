@@ -20,7 +20,7 @@
                         <child>
                           <object class="AdwActionRow">
                             <property name="activatable">False</property>
-                            <property name="title">Regions</property>
+                            <property name="title" translatable="yes">Regions</property>
                             <child>
                               <object class="GtkDropDown" id="regions_list">
                                 <property name="margin-bottom">5</property>
@@ -32,7 +32,7 @@
                         <child>
                           <object class="AdwActionRow">
                             <property name="activatable">False</property>
-                            <property name="title">Zone</property>
+                            <property name="title" translatable="yes">Zone</property>
                             <child>
                               <object class="GtkDropDown" id="zones_list">
                                 <property name="margin-bottom">5</property>
@@ -49,7 +49,7 @@
                         <child>
                           <object class="AdwActionRow" id="preview_row">
                             <property name="subtitle">Previewing time in -timezone-</property>
-                            <property name="title">Current time:</property>
+                            <property name="title" translatable="yes">Current time:</property>
                             <child>
                               <object class="GtkLabel" id="curr_time"/>
                             </child>

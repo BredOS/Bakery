@@ -166,6 +166,11 @@ def lp(message, write_to_f=True, mode="info") -> None:
         LogMessage.Warning(message).write(logging_handler=logging_handler)
     elif mode == "crit":
         LogMessage.Critical(message).write(logging_handler=logging_handler)
+    elif mode == "error":
+        LogMessage.Error(message).write(logging_handler=logging_handler)
+    elif mode == "exception":
+        LogMessage.Exception(message).write(logging_handler=logging_handler)
+
     else:
         raise ValueError("Invalid mode.")
 
@@ -687,9 +692,9 @@ def enable_locales(to_en: list) -> None:
     if len(to_add):
         for i in to_add:  # Why fumble with stacked \\n? Just spam a bit.
             lp("Enabling:" + i)
-            subprocess.run(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
+            Command(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
         lp("Generating locales")
-        subprocess.run(["sudo", "locale-gen"])
+        Command(["sudo", "locale-gen"])
 
 
 def set_locale(locale: str) -> None:
@@ -712,7 +717,7 @@ def ensure_localdb(retries: int = 3) -> None:
             raise OSError("Internet Unavailable.")
         for i in range(retries):
             try:
-                subprocess.run(["sudo", "pacman", "-Sy"])
+                Command(["sudo", "pacman", "-Sy"])
                 break
             except:
                 pass
@@ -758,7 +763,7 @@ def package_desc(packages: list) -> dict:
 
 def enable_services(services: list) -> None:
     try:
-        subprocess.run(["sudo", "systemctl", "enable", i])
+        Command(["sudo", "systemctl", "enable", i])
     except:
         pass
 
@@ -767,7 +772,7 @@ def setup_base() -> None:
     os.remove("/etc/sudoers.d/g_wheel")
     os.remove("/etc/polkit-1/rules.d/49-nopasswd_global.rules")
 
-    subprocess.run(["sudo", "systemctl", "disable", "resizefs.service"])
+    Command(["sudo", "systemctl", "disable", "resizefs.service"])
     enable_services(
         ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"]
     )
@@ -894,11 +899,11 @@ def adduser(username: str, passwd: str, uid, gid, shell: str, groups: list) -> N
     if gidc(gid):
         raise OSError("Used GID")
     lp("Making group " + username + " on gid " + gid)
-    subprocess.run(
+    Command(
         ["sudo", "groupadd", username, "-g", gid]
     )  # May silently fail, which is fine.
     lp("Adding user " + username + "on " + uid + ":" + gid + " with shell " + shell)
-    subprocess.run(
+    Command(
         ["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell]
     )
     for i in groups:
@@ -907,7 +912,7 @@ def adduser(username: str, passwd: str, uid, gid, shell: str, groups: list) -> N
 
 def groupadd(username: str, group: str) -> None:
     lp("Adding " + username + " to group " + group)
-    subprocess.run(["sudo", "usermod", "-aG", username, group])
+    Command["sudo", "usermod", "-aG", username, group]
 
 
 def passwd(username: str, passwd: str) -> None:

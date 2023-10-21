@@ -28,27 +28,27 @@
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="fullname_entry">
-                        <property name="title">Full name</property>
+                        <property name="title" translatable="yes">Full name</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="user_entry">
-                        <property name="title">Username</property>
+                        <property name="title" translatable="yes">Username</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="hostname_entry">
-                        <property name="title">Hostname</property>
+                        <property name="title" translatable="yes">Hostname</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwPasswordEntryRow" id="pass_entry">
-                        <property name="title">Password</property>
+                        <property name="title" translatable="yes">Password</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwPasswordEntryRow" id="confirm_pass_entry">
-                        <property name="title">Confirm password</property>
+                        <property name="title" translatable="yes">Confirm password</property>
                         <style/>
                       </object>
                     </child>
@@ -79,7 +79,7 @@
                       <object class="AdwActionRow">
                         <property name="activatable">False</property>
                         <property name="selectable">False</property>
-                        <property name="title">Use sudo and polkit without password.</property>
+                        <property name="title" translatable="yes">Use sudo and polkit without password.</property>
                         <child>
                           <object class="GtkSwitch" id="nopasswd">
                             <property name="valign">center</property>
@@ -91,7 +91,7 @@
                       <object class="AdwActionRow">
                         <property name="activatable">False</property>
                         <property name="selectable">False</property>
-                        <property name="title">Log in automatically without asking for password. </property>
+                        <property name="title" translatable="yes" context="Login into the system literally">Log in automatically without asking for password. </property>
                         <child>
                           <object class="GtkSwitch" id="autologin">
                             <property name="valign">center</property>
@@ -105,7 +105,7 @@
             </child>
           </object>
         </property>
-        <property name="title">Create your user account</property>
+        <property name="title" translatable="yes">Create your user account</property>
       </object>
     </child>
   </template>

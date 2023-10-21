@@ -7,3 +7,10 @@ bakery-gui.py
 data/window.ui
 data/kb_screen.ui
 data/kb_dialog.ui
+data/locale_screen.ui
+data/timezone_screen.ui
+data/user_screen.ui
+data/summary_screen.ui
+data/install_screen.ui
+data/finish_screen.ui
+data/de_screen.ui

@@ -3,7 +3,7 @@
 <interface>
   <!-- interface-name window.ui -->
   <requires lib="gtk" version="4.0"/>
-  <requires lib="libadwaita" version="1.0"/>
+  <requires lib="libadwaita" version="1.2"/>
   <requires lib="gio" version="2.0"/>
   <template class="BakeryWindow" parent="AdwApplicationWindow">
     <property name="default-height">800</property>
@@ -125,7 +125,7 @@
                             <child>
                               <object class="GtkButton" id="cancel_btn">
                                 <property name="halign">end</property>
-                                <property name="label">Cancel</property>
+                                <property name="label" translatable="yes" context="Button">Cancel</property>
                                 <property name="valign">end</property>
                                 <property name="vexpand">True</property>
                                 <style>
@@ -135,13 +135,13 @@
                             </child>
                             <child>
                               <object class="GtkButton" id="back_btn">
-                                <property name="label">Back</property>
+                                <property name="label" translatable="yes" context="Button">Back</property>
                                 <style/>
                               </object>
                             </child>
                             <child>
                               <object class="GtkButton" id="next_btn">
-                                <property name="label">Next</property>
+                                <property name="label" translatable="yes" context="Button">Next</property>
                                 <style/>
                               </object>
                             </child>
@@ -262,5 +262,16 @@
         </child>
       </object>
     </property>
+  </object>
+  <object class="AdwMessageDialog" id="install_cancel">
+    <property name="body">Are you sure you want to cancel your installation?</property>
+    <property name="default-response">no</property>
+    <property name="heading">Warning</property>
+    <property name="transient-for">BakeryWindow</property>
+    <!-- Custom fragments -->
+    <responses>
+      <response id="cancel" translatable="yes">_No</response>
+      <response id="yes" translatable="yes" appearance="destructive">Yes</response>
+    </responses>
   </object>
 </interface>
