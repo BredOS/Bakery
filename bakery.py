@@ -1021,11 +1021,11 @@ def install(settings=None) -> None:
 
     # Install
     if settings["install_type"] == "online":
-        raise NotImplementedError("Online mode not implemented!")
+        raise NotImplementedError("Online mode not yet implemented!")
     elif settings["install_type"] == "offline":
         # Configure locales
         # Configure users
         # Cleanup
-        pass
+        raise NotImplementedError("Code has reached the implementation end!")
     elif settings["install_type"] == "custom":
-        raise NotImplementedError("Custom mode not implemented!")
+        raise NotImplementedError("Custom mode not yet implemented!")
