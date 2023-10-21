@@ -940,7 +940,7 @@ def install(settings=None) -> None:
                     "shell": "/bin/zsh",
                     "groups": ["wheel", "network", "video", "audio", "storage", "uucp"],
                 },
-                "root_password": -1,
+                "root_password": False,
                 "ntp": True,
                 "installer": {
                     "shown_pages": ["Keyboard", "Timezone", "User", "Locale"],
@@ -951,10 +951,50 @@ def install(settings=None) -> None:
         else:
             raise ValueError("No data passed with dryrun disabled.")
 
+    # Parse settings
+    lp("Manifest received:")
+    for i in [
+        "install_type",
+        "layout",
+        "locale",
+        "timezone",
+        "hostname",
+        "sudo_nopasswd",
+        "user",
+        "root_password",
+        "ntp",
+        "installer",
+    ]:
+        if i not in settings.keys():
+            raise TypeError("Invalid manifest, does not contain " + i)
+    if settings["install_type"] not in ["online", "offline", "custom"]:
+        raise TypeError('Invalid install_type, use "online", "offline" or "custom".')
+    for i in ["lang", "variant"]:
+        if i not in settings["layout"].keys():
+            raise TypeError("Invalid layout manifest, does not contain " + i)
+        if (not isinstance(settings["layout"][i], str)) and (
+            settings["layout"][i] != False
+        ):
+            raise TypeError(i + " must be a string or False")
+    for i in ["locale", "root_password"]:
+        if (not isinstance(settings[i], str)) and (settings[i] != False):
+            raise TypeError(i + " must be a string or False")
+    if not isinstance(settings["ntp"], bool):
+        raise TypeError("ntp must be a bool")
+    for i in ["fullname", "username", "password", "uid", "gid", "shell", "groups"]:
+        if i not in settings["user"].keys():
+            raise TypeError("Invalid user manifest, does not contain " + i)
+    for i in ["shown_pages", "packages", "de_packages"]:
+        if i not in settings["installer"].keys():
+            raise TypeError("Invalid installer manifest, does not contain " + i)
+
     # Install
     if settings["install_type"] == "online":
         raise NotImplementedError("Online mode not implemented!")
     elif settings["install_type"] == "offline":
+        # Configure locales
+        # Configure users
+        # Cleanup
         pass
     elif settings["install_type"] == "custom":
         raise NotImplementedError("Custom mode not implemented!")
