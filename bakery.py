@@ -895,6 +895,10 @@ def adduser(username: str, passwd: str, uid, gid, shell: str) -> None:
     )
 
 
+def groupadd(username: str, group: str) -> None:
+    subprocess.run(["sudo", "usermod", "-aG", username, group])
+
+
 def passwd(username: str, passwd: str) -> None:
     subprocess.run(["sudo", "passwd", username], input=f"{passwd}\n{passwd}", text=True)
 
