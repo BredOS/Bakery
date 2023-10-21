@@ -876,7 +876,9 @@ def shells() -> set:
     return res
 
 
-def adduser(username: str, passwd: str, uid: str, gid, shell: str) -> None:
+def adduser(username: str, passwd: str, uid, gid, shell: str) -> None:
+    if isinstance(uid, int):
+        uid = str(uid)
     if gid is None:
         gid = uid
     if shell not in shells():
