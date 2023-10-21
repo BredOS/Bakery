@@ -705,7 +705,8 @@ def set_locale(locale: str) -> None:
 
 
 def set_kb(locale: str) -> None:
-    pass
+    raise NotImplementedError
+    # subprocess.run(["sudo", "localectl", "set-keymap", "LANG=" + locale])
 
 
 # Package functions
