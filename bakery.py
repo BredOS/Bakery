@@ -823,7 +823,8 @@ def validate_fullname(fullname) -> str:
             fullname[i].isdigit()
             or fullname[i].islower()
             or fullname[i].isupper()
-            or fullname[i] in ["'"]
+            or fullname[i].isspace()
+            or fullname[i] in ["'", "-"]
         ):
             return 'Invalid characters (Use characters, numbers and "\'")'
     return ""
@@ -879,7 +880,7 @@ def shells() -> set:
 def adduser(username: str, passwd: str, uid, gid, shell: str) -> None:
     if isinstance(uid, int):
         uid = str(uid)
-    if gid is None:
+    if gid is False:
         gid = uid
     if shell not in shells():
         raise OSError("Invalid shell")
@@ -909,7 +910,7 @@ def install(settings=None) -> None:
         if dryrun:
             settings = {
                 "install_type": "offline",
-                "layout": {"lang": None, "variant": None},
+                "layout": {"lang": False, "variant": False},
                 "locale": "en_US",
                 "timezone": {"region": "Europe", "zone": "Sofia"},
                 "hostname": "breborb",
@@ -918,11 +919,11 @@ def install(settings=None) -> None:
                     "username": "Panda",
                     "password": "123",
                     "uid": 1000,
-                    "gid": None,
+                    "gid": False,
                     "shell": "/bin/zsh",
                     "groups": ["wheel", "network", "video", "audio", "storage", "uucp"],
                 },
-                "root_password": None,
+                "root_password": -1,
                 "ntp": True,
             }
         else:
