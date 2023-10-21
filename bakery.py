@@ -692,16 +692,28 @@ def enable_locales(to_en: list) -> None:
     if len(to_add):
         for i in to_add:  # Why fumble with stacked \\n? Just spam a bit.
             lp("Enabling:" + i)
-            Command(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
+            cmd = ["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"]
+            if dryrun:
+                lp("Would have run: " + str(cmd))
+            else:
+                Command(cmd)
         lp("Generating locales")
-        Command(["sudo", "locale-gen"])
+        cmd = ["sudo", "locale-gen"]
+        if dryrun:
+            lp("Would have run: " + str(cmd))
+        else:
+            Command(cmd)
 
 
 def set_locale(locale: str) -> None:
     if locale not in locales(True):
         raise OSError("Locale not enabled!")
     lp("Setting locale to: " + locale)
-    subprocess.run(["sudo", "localectl", "set-locale", "LANG=" + locale])
+    cmd = ["sudo", "localectl", "set-locale", "LANG=" + locale]
+    if dryrun:
+        lp("Would have run: " + str(cmd))
+    else:
+        subprocess.run(cmd)
 
 
 def set_kb(locale: str) -> None:
@@ -764,12 +776,19 @@ def package_desc(packages: list) -> dict:
 
 def enable_services(services: list) -> None:
     try:
-        Command(["sudo", "systemctl", "enable", i])
+        cmd = ["sudo", "systemctl", "enable", i]
+        if dryrun:
+            lp("Would have run: " + str(cmd))
+        else:
+            Command(cmd)
     except:
         pass
 
 
 def setup_base() -> None:
+    if dryrun:
+        lp("Setup base skipped in dryrun")
+        return
     os.remove("/etc/sudoers.d/g_wheel")
     os.remove("/etc/polkit-1/rules.d/49-nopasswd_global.rules")
 
@@ -900,25 +919,37 @@ def adduser(username: str, passwd: str, uid, gid, shell: str, groups: list) -> N
     if gidc(gid):
         raise OSError("Used GID")
     lp("Making group " + username + " on gid " + gid)
-    Command(
-        ["sudo", "groupadd", username, "-g", gid]
-    )  # May silently fail, which is fine.
+    cmd = ["sudo", "groupadd", username, "-g", gid]
+    if dryrun:
+        lp("Would have run: " + str(cmd))
+    else:
+        Command(cmd)  # May silently fail, which is fine.
     lp("Adding user " + username + "on " + uid + ":" + gid + " with shell " + shell)
-    Command(
-        ["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell]
-    )
+    cmd = ["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell]
+    if dryrun:
+        lp("Would have run: " + str(cmd))
+    else:
+        Command(cmd)
     for i in groups:
         groupadd(username, i)
 
 
 def groupadd(username: str, group: str) -> None:
     lp("Adding " + username + " to group " + group)
-    Command["sudo", "usermod", "-aG", username, group]
+    cmd = ["sudo", "usermod", "-aG", username, group]
+    if dryrun:
+        lp("Would have run: " + str(cmd))
+    else:
+        Command(cmd)
 
 
 def passwd(username: str, passwd: str) -> None:
     lp("Setting user " + username + " password")
-    subprocess.run(["sudo", "passwd", username], input=f"{passwd}\n{passwd}", text=True)
+    cmd = ["sudo", "passwd", username]
+    if dryrun:
+        lp("Would have run: " + str(cmd))
+    else:
+        subprocess.run(cmd, input=f"{passwd}\n{passwd}", text=True)
 
 
 # Main functions
@@ -945,7 +976,7 @@ def install(settings=None) -> None:
                     "shell": "/bin/zsh",
                     "groups": ["wheel", "network", "video", "audio", "storage", "uucp"],
                 },
-                "root_password": -1,
+                "root_password": False,
                 "ntp": True,
                 "installer": {
                     "shown_pages": ["Keyboard", "Timezone", "User", "Locale"],
@@ -956,10 +987,50 @@ def install(settings=None) -> None:
         else:
             raise ValueError("No data passed with dryrun disabled.")
 
+    # Parse settings
+    lp("Manifest received:")
+    for i in [
+        "install_type",
+        "layout",
+        "locale",
+        "timezone",
+        "hostname",
+        "sudo_nopasswd",
+        "user",
+        "root_password",
+        "ntp",
+        "installer",
+    ]:
+        if i not in settings.keys():
+            raise TypeError("Invalid manifest, does not contain " + i)
+    if settings["install_type"] not in ["online", "offline", "custom"]:
+        raise TypeError('Invalid install_type, use "online", "offline" or "custom".')
+    for i in ["lang", "variant"]:
+        if i not in settings["layout"].keys():
+            raise TypeError("Invalid layout manifest, does not contain " + i)
+        if (not isinstance(settings["layout"][i], str)) and (
+            settings["layout"][i] != False
+        ):
+            raise TypeError(i + " must be a string or False")
+    for i in ["locale", "root_password"]:
+        if (not isinstance(settings[i], str)) and (settings[i] != False):
+            raise TypeError(i + " must be a string or False")
+    if not isinstance(settings["ntp"], bool):
+        raise TypeError("ntp must be a bool")
+    for i in ["fullname", "username", "password", "uid", "gid", "shell", "groups"]:
+        if i not in settings["user"].keys():
+            raise TypeError("Invalid user manifest, does not contain " + i)
+    for i in ["shown_pages", "packages", "de_packages"]:
+        if i not in settings["installer"].keys():
+            raise TypeError("Invalid installer manifest, does not contain " + i)
+
     # Install
     if settings["install_type"] == "online":
-        raise NotImplementedError("Online mode not implemented!")
+        raise NotImplementedError("Online mode not yet implemented!")
     elif settings["install_type"] == "offline":
-        pass
+        # Configure locales
+        # Configure users
+        # Cleanup
+        raise NotImplementedError("Code has reached the implementation end!")
     elif settings["install_type"] == "custom":
-        raise NotImplementedError("Custom mode not implemented!")
+        raise NotImplementedError("Custom mode not yet implemented!")
