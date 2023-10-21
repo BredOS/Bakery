@@ -887,19 +887,23 @@ def adduser(username: str, passwd: str, uid, gid, shell: str) -> None:
         raise OSError("Used UID")
     if gidc(gid):
         raise OSError("Used GID")
+    lp("Making group " + username + " on gid " + gid)
     subprocess.run(
         ["sudo", "groupadd", username, "-g", gid]
     )  # May silently fail, which is fine.
+    lp("Adding user " + username + "on " + uid + ":" + gid + " with shell " + shell)
     subprocess.run(
         ["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell]
     )
 
 
 def groupadd(username: str, group: str) -> None:
+    lp("Adding " + username + " to group " + group)
     subprocess.run(["sudo", "usermod", "-aG", username, group])
 
 
 def passwd(username: str, passwd: str) -> None:
+    lp("Setting user " + username + " password")
     subprocess.run(["sudo", "passwd", username], input=f"{passwd}\n{passwd}", text=True)
 
 
