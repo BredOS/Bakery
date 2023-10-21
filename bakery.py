@@ -876,7 +876,7 @@ def shells() -> set:
     return res
 
 
-def adduser(username: str, passwd: str, uid, gid, shell: str) -> None:
+def adduser(username: str, passwd: str, uid, gid, shell: str, groups: list) -> None:
     if isinstance(uid, int):
         uid = str(uid)
     if gid is False:
@@ -895,6 +895,8 @@ def adduser(username: str, passwd: str, uid, gid, shell: str) -> None:
     subprocess.run(
         ["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell]
     )
+    for i in groups:
+        groupadd(username, i)
 
 
 def groupadd(username: str, group: str) -> None:
