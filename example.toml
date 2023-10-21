@@ -1,0 +1,23 @@
+install_type = "offline"
+locale = "en_US"
+hostname = "breborb"
+root_password = false
+ntp = true
+
+[timezone]
+region = "Europe"
+zone = "Sofia"
+
+[layout]
+lang = false
+variant = false
+
+[user]
+fullname = "Bred guy"
+username = "Panda"
+password = "123"
+uid = 1000
+gid = false
+shell = "/bin/zsh"
+groups = ["wheel", "network", "video", "audio", "storage", "uucp"]
+
