@@ -17,7 +17,7 @@
             <child type="end">
               <object class="GtkMenuButton" id="menu_btn">
                 <property name="icon-name">open-menu-symbolic</property>
-                <property name="menu-model">100</property>
+                <property name="menu-model">pop_menu</property>
               </object>
             </child>
             <style/>
@@ -103,7 +103,7 @@
                         <property name="can-focus">False</property>
                         <property name="can-target">False</property>
                         <property name="focus-on-click">False</property>
-                        <property name="stack">99</property>
+                        <property name="stack">stack1</property>
                       </object>
                     </child>
                     <child>
@@ -163,7 +163,7 @@
       <class name="devel"/>
     </style>
   </template>
-  <menu id="menu">
+  <menu id="pop_menu">
     <item>
       <attribute name="action">app.about</attribute>
       <attribute name="label">About Bakery</attribute>

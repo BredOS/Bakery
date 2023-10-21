@@ -27,7 +27,15 @@ import requests
 import json
 import threading
 import bakery
-from bakery import kb_langs, langs, tz_list, geoip, validate_username
+from bakery import (
+    kb_langs,
+    langs,
+    tz_list,
+    geoip,
+    validate_username,
+    validate_fullname,
+    validate_hostname,
+)
 from time import sleep
 from datetime import date, datetime, time
 from babel import dates, numbers
@@ -203,9 +211,13 @@ class BakeryWindow(Adw.ApplicationWindow):
             self.next_btn.set_sensitive(False)
             # start the thread to check when all fields are filled
             self.check_thread.start()
+        elif self.current_page == self.pages.index("Summary"):
+            user_event.set()
+            all_pages["Summary"].page_shown()
+            self.next_btn.set_sensitive(self.current_page < num_pages - 1)
+            self.back_btn.set_sensitive(self.current_page > 0)
         else:
             user_event.set()
-            sleep(0.5)
             self.next_btn.set_sensitive(self.current_page < num_pages - 1)
             self.back_btn.set_sensitive(self.current_page > 0)
 
@@ -232,11 +244,18 @@ class BakeryWindow(Adw.ApplicationWindow):
     def collect_data(self, *_) -> dict:
         data = {}
         if not self.install_type == None:
+            data["installer_version"] = config.installer_version
             data["install_type"] = self.install_type
+            data["shown_pages"] = self.pages
+            data["root_password"] = None
+            data["ntp"] = True
             data["layout"] = all_pages["Keyboard"].layout
             data["locale"] = all_pages["Locale"].locale
             data["timezone"] = all_pages["Timezone"].timezone
+            data["hostname"] = all_pages["User"].get_hostname()
             data["user"] = all_pages["User"].collect_data()
+            data["packages"] = []
+            data["de_packages"] = []
             return data
         else:
             return {"install_type": "None"}
@@ -469,7 +488,37 @@ class user_screen(Adw.Bin):
 
         self.confirm_pass_entry.connect("changed", self.on_confirm_pass_changed)
         self.user_entry.connect("changed", self.on_username_changed)
+        self.hostname_entry.connect("changed", self.on_hostname_changed)
+        self.fullname_entry.connect("changed", self.on_fullname_changed)
         self.user_info_is_visible = False
+
+    def on_fullname_changed(self, entry):
+        fullname = entry.get_text()
+        a = validate_fullname(fullname)
+        if a == "":
+            self.user_info.set_visible(False)
+            self.user_info_is_visible = False
+            self.fullname_entry.get_style_context().remove_class("error")
+        else:
+            self.user_info.set_label(a)
+            self.fullname_entry.get_style_context().add_class("error")
+            if not self.user_info_is_visible:
+                self.user_info.set_visible(True)
+                self.user_info_is_visible = True
+
+    def on_hostname_changed(self, entry):
+        hostname = entry.get_text()
+        a = validate_hostname(hostname)
+        if a == "":
+            self.user_info.set_visible(False)
+            self.user_info_is_visible = False
+            self.hostname_entry.get_style_context().remove_class("error")
+        else:
+            self.user_info.set_label(a)
+            self.hostname_entry.get_style_context().add_class("error")
+            if not self.user_info_is_visible:
+                self.user_info.set_visible(True)
+                self.user_info_is_visible = True
 
     def on_username_changed(self, entry):
         username = entry.get_text()
@@ -494,6 +543,15 @@ class user_screen(Adw.Bin):
         elif pass_text == confirm_pass_text:
             self.confirm_pass_entry.get_style_context().remove_class("error")
 
+    def get_fullname(self) -> str:
+        if self.fullname_entry.get_text() == "":
+            return None
+        else:
+            if validate_fullname(self.fullname_entry.get_text()) == "":
+                return self.fullname_entry.get_text()
+            else:
+                return None
+
     def get_username(self) -> str:
         if self.user_entry.get_text() == "":
             return None
@@ -507,7 +565,10 @@ class user_screen(Adw.Bin):
         if self.hostname_entry.get_text() == "":
             return None
         else:
-            return self.hostname_entry.get_text()
+            if validate_hostname(self.hostname_entry.get_text()) == "":
+                return self.hostname_entry.get_text()
+            else:
+                return None
 
     def get_password(self) -> str:
         if self.pass_entry.get_text() == "":
@@ -522,10 +583,13 @@ class user_screen(Adw.Bin):
 
     def collect_data(self) -> dict:
         data = {}
+        data["fullname"] = self.get_fullname()
         data["username"] = self.get_username()
-        data["hostname"] = self.get_hostname()
         data["password"] = self.get_password()
-        data["uid"] = 1000
+        data["uid"] = int(self.uid_row.get_value())
+        data["gid"] = int(self.uid_row.get_value())
+        data["sudo_nopasswd"] = self.nopasswd.get_active()
+        data["autologin"] = self.autologin.get_active()
         data["shell"] = "/bin/zsh"
         data["groups"] = ["wheel", "network", "video", "audio", "storage"]
         return data
@@ -548,6 +612,7 @@ class timezone_screen(Adw.Bin):
         self.timezone = {}
         self.timezone["region"] = current_timezone["region"]
         self.timezone["zone"] = current_timezone["zone"]
+        print(type(self.curr_time))
 
         self.zones_list.connect("notify::selected-item", self.on_zone_changed)
         self.zone_model = Gtk.StringList()
@@ -609,12 +674,13 @@ class de_screen(Adw.Bin):
         self.window = window
 
 
+@Gtk.Template.from_file(script_dir + "/data/summary_screen.ui")
 class summary_screen(Adw.Bin):
     __gtype_name__ = "summary_screen"
 
     locale_preview = Gtk.Template.Child()
-    lang_preview = Gtk.Template.Child()
-    variant_preview = Gtk.Template.Child()
+    kb_lang = Gtk.Template.Child()
+    kb_variant = Gtk.Template.Child()
     tz_preview = Gtk.Template.Child()
 
     name_preview = Gtk.Template.Child()
@@ -624,6 +690,23 @@ class summary_screen(Adw.Bin):
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
+        # print(type(self.locale_preview))
+
+    def page_shown(self) -> None:
+        self.data = self.window.collect_data()
+        self.locale_preview.set_label(self.data["locale"])
+        if self.data["layout"]["variant"] is None:
+            self.kb_lang.set_label(self.data["layout"]["lang"])
+        else:
+            self.kb_lang.set_label(
+                self.data["layout"]["lang"] + " - " + self.data["layout"]["variant"]
+            )
+        self.tz_preview.set_label(
+            self.data["timezone"]["region"] + "/" + self.data["timezone"]["zone"]
+        )
+        self.name_preview.set_label(self.data["user"]["fullname"])
+        self.username_preview.set_label(self.data["user"]["username"])
+        self.hostname_preview.set_label(self.data["hostname"])
 
 
 app = BakeryApp(application_id="org.bredos.bakery")

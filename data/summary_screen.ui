@@ -100,6 +100,8 @@
             </child>
           </object>
         </property>
+        <property name="description">Your selections have been listed below, please confirm and continue with instillation</property>
+        <property name="title">Please confirm your choices</property>
       </object>
     </child>
   </template>

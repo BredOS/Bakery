@@ -14,5 +14,5 @@ pages = {
     "Summary": "summary_screen",
 }
 
-offline_pages = ["Keyboard", "Timezone", "User", "Locale"]
+offline_pages = ["Locale", "Keyboard", "Timezone", "User", "Summary"]
 online_pages = ["Keyboard", "Timezone", "Locale", "User"]
