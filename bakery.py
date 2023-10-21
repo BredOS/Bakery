@@ -872,10 +872,18 @@ def shells() -> set:
     return res
 
 
-def adduser(username: str, passwd: str, uid: str, gid: str) -> None:
+def adduser(username: str, passwd: str, uid: str, gid: str, shell: str) -> None:
     # May silently fail, which is fine.
+    if shell not in shells():
+        raise OSError("Invalid shell")
+    if uidc(uid):
+        raise OSError("Used UID")
+    if gidc(gid):
+        raise OSError("Used GID")
     subprocess.run(["sudo", "groupadd", username, "-g", gid])
-    subprocess.run(["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m"])
+    subprocess.run(
+        ["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell]
+    )
 
 
 def passwd(username: str, passwd: str) -> None:
