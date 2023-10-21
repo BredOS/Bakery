@@ -839,8 +839,7 @@ def validate_hostname(hostname) -> str:
         return "Cannot start with '_'"
     for i in range(len(hostname)):
         if not (
-            (hostname[i].isdigit() or hostname[i].islower() or hostname[i] in ["-"])
-            and hostname[i].isascii()
+            (hostname[i].isdigit() or hostname[i] in ["-"]) and hostname[i].isascii()
         ):
             return 'Invalid characters (Use characters, numbers and "\'")'
     return ""
