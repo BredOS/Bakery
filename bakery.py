@@ -846,8 +846,7 @@ def validate_hostname(hostname) -> str:
 
 def gidc(gid: str) -> bool:
     with open("/etc/group") as gr:
-        data = gr.read()
-        data = data.split()
+        data = gr.read().split("\n")
         for i in data:
             if i.split(":")[-2] == gid:
                 return True
@@ -856,12 +855,21 @@ def gidc(gid: str) -> bool:
 
 def uidc(uid: str) -> bool:
     with open("/etc/passwd") as pw:
-        data = pw.read()
-        data = data.split("\n")
+        data = pw.read().split("\n")
         for i in data:
             if i.split(":")[2] == uid:
                 return True
     return False
+
+
+def shells() -> set:
+    res = set()
+    with open("/etc/shells") as sh:
+        data = sh.read().split("\n")
+        for i in data:
+            if i.startswith("/"):
+                res.add(i)
+    return res
 
 
 def adduser(username: str, passwd: str, uid: str, gid: str) -> None:
