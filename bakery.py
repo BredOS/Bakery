@@ -612,12 +612,12 @@ def langs(only_enabled: bool = False) -> dict:
     """
     data = locales(only_enabled)
     res = {}
-    for i in range(len(data)):
-        lang = _langmap[data[i][: data[i].find("_")]]
+    for i in data:
+        lang = _langmap[i[: i.find("_")]]
         if lang in res.keys():
-            res[lang].append(data[i])
+            res[lang].append(i)
         else:
-            res.update({lang: [data[i]]})
+            res[lang] = [i]
     return res
 
 
@@ -844,8 +844,10 @@ def validate_hostname(hostname) -> str:
 # User configuration functions.
 
 
-def adduser(username: str, passwd: str, uid: str) -> None:
-    subprocess.run(["sudo", "useradd", username, "-u", uid, "-m"])
+def adduser(username: str, passwd: str, uid: str, gid: str) -> None:
+    # May silently fail, which is fine.
+    subprocess.run(["sudo", "groupadd", username, "-g", gid])
+    subprocess.run(["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m"])
 
 
 def passwd(username: str, passwd: str) -> None:
