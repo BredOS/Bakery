@@ -9,7 +9,7 @@ from datetime import datetime
 import requests
 import json
 
-from pyrunning import logging, LogMessage, LoggingHandler, Command
+from pyrunning import logging, LogMessage, LoggingHandler, Command, LoggingLevel
 import gi
 
 gi.require_version("NM", "1.0")
@@ -88,6 +88,44 @@ def setup_translations(lang: object = None) -> gettext.GNUTranslations:
 
 # Logging
 
+logging_handler = None
+messages = []
+
+
+def lp(message, write_to_f=True, mode="info") -> None:
+    if not write_to_f:
+        LogMessage.Info(message)
+    elif mode == "info":
+        LogMessage.Info(message).write(logging_handler=logging_handler)
+    elif mode == "debug":
+        LogMessage.Debug(message).write(logging_handler=logging_handler)
+    elif mode == "warn":
+        LogMessage.Warning(message).write(logging_handler=logging_handler)
+    elif mode == "crit":
+        LogMessage.Critical(message).write(logging_handler=logging_handler)
+    elif mode == "error":
+        LogMessage.Error(message).write(logging_handler=logging_handler)
+    elif mode == "exception":
+        LogMessage.Exception(message).write(logging_handler=logging_handler)
+
+    else:
+        raise ValueError("Invalid mode.")
+
+
+def console_logging(
+    logging_level: int,
+    message: str,
+    *args,
+    loginfo_filename="",
+    loginfo_line_number=-1,
+    loginfo_function_name="",
+    loginfo_stack_info=None,
+    **kwargs,
+):
+    logging_level_name = LoggingLevel(logging_level).name
+    global messages
+    messages.append(message)
+
 
 def setup_logging() -> logging.Logger:
     """
@@ -154,27 +192,10 @@ def rm_old_logs(log_dir_path: str, keep: int) -> None:
 
 print("Starting logger..")
 logger = setup_logging()
-logging_handler = LoggingHandler(logger=logger)
-
-
-def lp(message, write_to_f=True, mode="info") -> None:
-    if not write_to_f:
-        LogMessage.Info(message)
-    elif mode == "info":
-        LogMessage.Info(message).write(logging_handler=logging_handler)
-    elif mode == "debug":
-        LogMessage.Debug(message).write(logging_handler=logging_handler)
-    elif mode == "warn":
-        LogMessage.Warning(message).write(logging_handler=logging_handler)
-    elif mode == "crit":
-        LogMessage.Critical(message).write(logging_handler=logging_handler)
-    elif mode == "error":
-        LogMessage.Error(message).write(logging_handler=logging_handler)
-    elif mode == "exception":
-        LogMessage.Exception(message).write(logging_handler=logging_handler)
-
-    else:
-        raise ValueError("Invalid mode.")
+logging_handler = LoggingHandler(
+    logger=logger,
+    logging_functions=[console_logging],
+)
 
 
 def lrun(cmd: list, force: bool = False) -> None:
