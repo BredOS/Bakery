@@ -128,7 +128,7 @@ def setup_logging() -> logging.Logger:
     rm_old_logs(log_dir, keep=5)
 
     log_file_handler = logging.FileHandler(log_file)
-    log_file_handler.setLevel(logging.INFO)
+    log_file_handler.setLevel(logging.DEBUG)
     log_file_formatter = logging.Formatter(
         "%(asctime)s [%(levelname)8s] %(message)s",
     )
@@ -162,6 +162,8 @@ def lp(message, write_to_f=True, mode="info") -> None:
         LogMessage.Info(message)
     elif mode == "info":
         LogMessage.Info(message).write(logging_handler=logging_handler)
+    elif mode == "debug":
+        LogMessage.Debug(message).write(logging_handler=logging_handler)
     elif mode == "warn":
         LogMessage.Warning(message).write(logging_handler=logging_handler)
     elif mode == "crit":
