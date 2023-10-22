@@ -175,6 +175,13 @@ def lp(message, write_to_f=True, mode="info") -> None:
         raise ValueError("Invalid mode.")
 
 
+def lrun(cmd: list, force: bool = False) -> None:
+    if dryrun and not force:
+        lp("Would have run: " + str(cmd))
+    else:
+        Command(cmd).run_and_log(logging_handler=logging_handler)
+
+
 lp("Logger initialized.")
 lp("Dry run = " + str(dryrun))
 
@@ -692,28 +699,16 @@ def enable_locales(to_en: list) -> None:
     if len(to_add):
         for i in to_add:  # Why fumble with stacked \\n? Just spam a bit.
             lp("Enabling:" + i)
-            cmd = ["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"]
-            if dryrun:
-                lp("Would have run: " + str(cmd))
-            else:
-                Command(cmd)
+            lrun(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
         lp("Generating locales")
-        cmd = ["sudo", "locale-gen"]
-        if dryrun:
-            lp("Would have run: " + str(cmd))
-        else:
-            Command(cmd)
+        lrun(["sudo", "locale-gen"])
 
 
 def set_locale(locale: str) -> None:
     if locale not in locales(True):
         raise OSError("Locale not enabled!")
     lp("Setting locale to: " + locale)
-    cmd = ["sudo", "localectl", "set-locale", "LANG=" + locale]
-    if dryrun:
-        lp("Would have run: " + str(cmd))
-    else:
-        subprocess.run(cmd)
+    subprocess.run(["sudo", "localectl", "set-locale", "LANG=" + locale])
 
 
 def set_kb(locale: str) -> None:
@@ -725,15 +720,14 @@ def set_kb(locale: str) -> None:
 
 
 def ensure_localdb(retries: int = 3) -> None:
-    if not len(os.listdir("/var/lib/pacman/sync/")):
-        if not internet_up():
-            raise OSError("Internet Unavailable.")
-        for i in range(retries):
-            try:
-                Command(["sudo", "pacman", "-Sy"])
-                break
-            except:
-                pass
+    if not internet_up():
+        raise OSError("Internet Unavailable.")
+    tried = 0
+    while tried < retries:
+        lrun(["sudo", "pacman", "-Sy"], force=True)
+        if len(os.listdir("/var/lib/pacman/sync/")):
+            break
+        tried += 1
     if not len(os.listdir("/var/lib/pacman/sync/")):
         raise OSError("Could not update databases.")
 
@@ -776,11 +770,7 @@ def package_desc(packages: list) -> dict:
 
 def enable_services(services: list) -> None:
     try:
-        cmd = ["sudo", "systemctl", "enable", i]
-        if dryrun:
-            lp("Would have run: " + str(cmd))
-        else:
-            Command(cmd)
+        lrun(["sudo", "systemctl", "enable", i])
     except:
         pass
 
@@ -792,7 +782,7 @@ def setup_base() -> None:
     os.remove("/etc/sudoers.d/g_wheel")
     os.remove("/etc/polkit-1/rules.d/49-nopasswd_global.rules")
 
-    Command(["sudo", "systemctl", "disable", "resizefs.service"])
+    lrun(["sudo", "systemctl", "disable", "resizefs.service"])
     enable_services(
         ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"]
     )
@@ -919,28 +909,16 @@ def adduser(username: str, passwd: str, uid, gid, shell: str, groups: list) -> N
     if gidc(gid):
         raise OSError("Used GID")
     lp("Making group " + username + " on gid " + gid)
-    cmd = ["sudo", "groupadd", username, "-g", gid]
-    if dryrun:
-        lp("Would have run: " + str(cmd))
-    else:
-        Command(cmd)  # May silently fail, which is fine.
+    lrun(["sudo", "groupadd", username, "-g", gid])  # May silently fail, which is fine.
     lp("Adding user " + username + "on " + uid + ":" + gid + " with shell " + shell)
-    cmd = ["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell]
-    if dryrun:
-        lp("Would have run: " + str(cmd))
-    else:
-        Command(cmd)
+    lrun(["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell])
     for i in groups:
         groupadd(username, i)
 
 
 def groupadd(username: str, group: str) -> None:
     lp("Adding " + username + " to group " + group)
-    cmd = ["sudo", "usermod", "-aG", username, group]
-    if dryrun:
-        lp("Would have run: " + str(cmd))
-    else:
-        Command(cmd)
+    lrun(["sudo", "usermod", "-aG", username, group])
 
 
 def passwd(username: str, passwd: str) -> None:
