@@ -8,6 +8,7 @@ import socket
 from datetime import datetime
 import requests
 import json
+from traceback import print_exception
 
 from pyrunning import logging, LogMessage, LoggingHandler, Command, LoggingLevel
 import gi
@@ -122,9 +123,12 @@ def console_logging(
     loginfo_stack_info=None,
     **kwargs,
 ):
-    logging_level_name = LoggingLevel(logging_level).name
-    global messages
-    messages.append(message)
+    try:
+        logging_level_name = LoggingLevel(logging_level).name
+        global messages
+        messages.append(message)
+    except Exception as Err:
+        print_exception(Err)
 
 
 def setup_logging() -> logging.Logger:
@@ -157,9 +161,7 @@ def setup_logging() -> logging.Logger:
                 "You do not have permission to write to {}".format(log_dir)
             )
     except Exception as e:
-        import traceback
-
-        traceback.print_exception(type(e), e, e.__traceback__)
+        print_exception(type(e), e, e.__traceback__)
         exit(1)
 
     print("Logging to:", log_file)
@@ -202,7 +204,7 @@ def lrun(cmd: list, force: bool = False) -> None:
     if dryrun and not force:
         lp("Would have run: " + str(cmd))
     else:
-        Command(cmd).run_and_log(logging_handler=logging_handler)
+        Command(cmd).run_log_and_wait(logging_handler=logging_handler)
 
 
 lp("Logger initialized.")
