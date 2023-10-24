@@ -13,7 +13,16 @@ pages = {
     "Desktops": "de_screen",
     "Summary": "summary_screen",
     "Install": "install_screen",
+    "Finish": "finish_screen",
 }
 
-offline_pages = ["Install", "Locale", "Keyboard", "Timezone", "User", "Summary"]
+offline_pages = [
+    "Locale",
+    "Keyboard",
+    "Timezone",
+    "User",
+    "Summary",
+    "Install",
+    "Finish",
+]
 online_pages = ["Keyboard", "Timezone", "Locale", "User"]

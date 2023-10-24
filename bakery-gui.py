@@ -35,6 +35,7 @@ from bakery import (
     validate_username,
     validate_fullname,
     validate_hostname,
+    lp,
 )
 from time import sleep
 from datetime import date, datetime, time
@@ -291,25 +292,10 @@ class BakeryWindow(Adw.ApplicationWindow):
             self.pages = config.offline_pages
             self.add_pages(self.stack1, self.pages)
 
-        bakery.logging_handler = LoggingHandler(
-            logger=bakery.logger,
-            logging_functions=[all_pages["Install"].console_logging],
-        )
-        # bakery.lp("Starting installer")
-        # log that 5 times
-        for i in range(5):
-            bakery.lp("Starting installer")
-        bakery.lp("a", mode="crit")
-        bakery.lp("b", mode="warn")
-        bakery.lp("c", mode="info")
-        bakery.lp("d", mode="debug")
-        bakery.lp("e", mode="error")
-
         self.current_page = 0
         self.update_buttons()
         self.install_type = install_type
         self.main_stk.set_visible_child(self.install_page.get_child())
-        # for testing
 
 
 @Gtk.Template.from_file(script_dir + "/data/kb_screen.ui")
@@ -322,7 +308,10 @@ class kb_screen(Adw.Bin):
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
-        self.kb_data = kb_langs()  # {country: layouts in a list]}
+        self.kb_data = {
+            k: v for k, v in sorted(kb_langs().items())
+        }  # {country: layouts in a list]}
+        self.lang_to_country = {lang: code for code, lang in bakery._kblangmap.items()}
 
         self.layout = {"lang": None, "variant": None}
 
@@ -349,6 +338,14 @@ class kb_screen(Adw.Bin):
             self.langs_list.connect("row-activated", self.selected_lang)
             self.last_selected_row = None
 
+            # preselect the American English layout
+            if lang == "American English":
+                self.langs_list.select_row(row)
+                self.last_selected_row = row
+                self.layout["lang"] = lang
+                self.layout["variant"] = "normal"
+                self.change_kb_layout(lang, "normal")
+
     def confirm_selection(self, *_) -> None:
         self.variant_dialog.hide()
 
@@ -366,9 +363,20 @@ class kb_screen(Adw.Bin):
             self.layout["lang"] = lang
             if layouts[0] is None:
                 print("no layouts")
+                self.layout["variant"] = "normal"
+                self.change_kb_layout(self.layout["lang"], self.layout["variant"])
             else:
                 # clear the listbox
                 self.variant_list.remove_all()
+                # add normal layout
+                newrow = Gtk.ListBoxRow()
+                # Language - Layout
+                layout_label = Gtk.Label(label=f"{lang} - normal")
+                newrow.set_child(layout_label)
+
+                self.variant_list.append(newrow)
+                self.variant_list.connect("row-activated", self.selected_layout)
+                self.last_selected_layout = None
                 for layout_ in layouts[0]:
                     newrow = Gtk.ListBoxRow()
                     # Language - Layout
@@ -377,7 +385,6 @@ class kb_screen(Adw.Bin):
 
                     self.variant_list.append(newrow)
                     self.variant_list.connect("row-activated", self.selected_layout)
-                    self.last_selected_layout = None
 
                 self.show_dialog()
 
@@ -385,6 +392,14 @@ class kb_screen(Adw.Bin):
         if row != self.last_selected_layout:
             self.last_selected_layout = row
             self.layout["variant"] = row.get_child().get_label().split(" - ")[1]
+            self.change_kb_layout(self.layout["lang"], self.layout["variant"])
+
+    def change_kb_layout(self, lang, layout) -> None:
+        if layout == "normal":
+            layout = ""
+        Command(["setxkbmap", self.lang_to_country[lang], layout]).run_log_and_wait(
+            logging_handler=bakery.logging_handler
+        )
 
 
 @Gtk.Template.from_file(script_dir + "/data/locale_screen.ui")
@@ -402,9 +417,8 @@ class locale_screen(Adw.Bin):
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
-        self.lang_data = langs()  # {country: layouts in a list]}
+        self.lang_data = {k: v for k, v in sorted(langs().items())}
 
-        self.update_previews("en_US")
         self.populate_locales_list()
         self.select_locale_btn.connect("clicked", self.hide_dialog)
 
@@ -417,6 +431,11 @@ class locale_screen(Adw.Bin):
             self.langs_list.append(row)
             self.langs_list.connect("row-activated", self.selected_lang)
             self.last_selected_row = None
+
+            if lang == "English":
+                self.langs_list.select_row(row)
+                self.last_selected_row = row
+                self.update_previews("en_US")
 
     def selected_lang(self, widget, row) -> None:
         if row != self.last_selected_row:
@@ -454,7 +473,7 @@ class locale_screen(Adw.Bin):
         self.locale = the_locale
         locale_ = babel.Locale.parse(the_locale)
         date = dates.format_date(date=datetime.utcnow(), format="full", locale=locale_)
-        time = dates.format_time(time=datetime.utcnow(), format="full", locale=locale_)
+        time = dates.format_time(time=datetime.utcnow(), format="long", locale=locale_)
         currency = numbers.get_territory_currencies(locale_.territory)[0]
         currency_format = numbers.format_currency(1234.56, currency, locale=locale_)
         number_format = numbers.format_decimal(1234567.89, locale=locale_)
@@ -487,6 +506,17 @@ class CheckThread(threading.Thread):
             else:
                 win.next_btn.set_sensitive(False)
             sleep(0.5)
+
+
+class InstallThread(threading.Thread):
+    def __init__(self, window):
+        threading.Thread.__init__(self)
+        self.window = window
+
+    def run(self):
+        install_data = self.window.collect_data()
+        lp("Starting install with data: " + str(install_data))
+        bakery.install(install_data)
 
 
 @Gtk.Template.from_file(script_dir + "/data/user_screen.ui")
@@ -769,7 +799,6 @@ class install_screen(Adw.Bin):
         **kwargs,
     ):
         logging_level_name = LoggingLevel(logging_level).name
-
         GLib.idle_add(
             lambda: (
                 self.console_buffer.insert_markup(
