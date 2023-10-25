@@ -1063,12 +1063,15 @@ def install(settings=None) -> int:
             if (not isinstance(settings["layout"][i], str)) and (
                 settings["layout"][i] != False
             ):
-                raise TypeError(i + " must be a string or False")
+                lp(i + " must be a string or False", mode="error")
+                return 2
         for i in ["locale", "root_password"]:
             if (not isinstance(settings[i], str)) and (settings[i] != False):
-                raise TypeError(i + " must be a string or False")
+                lp(i + " must be a string or False", mode="error")
+                return 2
         if not isinstance(settings["ntp"], bool):
-            raise TypeError("ntp must be a bool")
+            lp("ntp must be a bool", mode="error")
+            return 2
         for i in [
             "fullname",
             "username",
@@ -1081,10 +1084,12 @@ def install(settings=None) -> int:
             "autologin",
         ]:
             if i not in settings["user"].keys():
-                raise TypeError("Invalid user manifest, does not contain " + i)
+                lp("Invalid user manifest, does not contain " + i, mode="error")
+                return 2
         for i in ["shown_pages", "packages", "de_packages"]:
             if i not in settings["installer"].keys():
-                raise TypeError("Invalid installer manifest, does not contain " + i)
+                lp("Invalid installer manifest, does not contain " + i, mode="error")
+                return 2
         lp("Manifest validated")
         lp("Took {:.5f}".format(get_timer()))
         reset_timer()
