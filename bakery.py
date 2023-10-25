@@ -2,7 +2,7 @@ import toml
 import subprocess
 import os
 import gettext
-from time import sleep
+from time import sleep, monotonic
 from pathlib import Path
 import socket
 from datetime import datetime
@@ -57,6 +57,19 @@ import config
 
 
 dryrun = False if "DO_DRYRUN" not in os.listdir() else True
+
+
+# Timer functions
+
+_stimer = monotonic()
+
+
+def reset_timer() -> None:
+    _stimer = monotonic()
+
+
+def get_timer() -> float:
+    return monotonic() - _stimer
 
 
 # Translations
@@ -975,8 +988,15 @@ def passwd(username: str, passwd: str) -> None:
 # Main functions
 
 
-def install(settings=None) -> None:
-    # Settings validation
+def install(settings=None) -> int:
+    """
+    The main install function.
+
+    Returns 0 on success,
+            1 on general error,
+            2 on invalid settings,
+            3 on implementation missing.
+    """
     print("Starting installation..")
     if settings is None:
         if dryrun:
@@ -986,7 +1006,6 @@ def install(settings=None) -> None:
                 "locale": "en_US",
                 "timezone": {"region": "Europe", "zone": "Sofia"},
                 "hostname": "breborb",
-                "sudo_nopasswd": True,
                 "user": {
                     "fullname": "Bred guy",
                     "username": "Panda",
@@ -995,6 +1014,8 @@ def install(settings=None) -> None:
                     "gid": False,
                     "shell": "/bin/zsh",
                     "groups": ["wheel", "network", "video", "audio", "storage", "uucp"],
+                    "sudo_nopasswd": True,
+                    "autologin": True,
                 },
                 "root_password": False,
                 "ntp": True,
@@ -1007,63 +1028,82 @@ def install(settings=None) -> None:
         else:
             raise ValueError("No data passed with dryrun disabled.")
 
-    # Parse settings
-    lp("Manifest received:")
-    for i in [
-        "install_type",
-        "layout",
-        "locale",
-        "timezone",
-        "hostname",
-        "sudo_nopasswd",
-        "user",
-        "root_password",
-        "ntp",
-        "installer",
-    ]:
-        if i not in settings.keys():
-            raise TypeError("Invalid manifest, does not contain " + i)
-    if settings["install_type"] not in ["online", "offline", "custom"]:
-        raise TypeError('Invalid install_type, use "online", "offline" or "custom".')
-    for i in ["lang", "variant"]:
-        if i not in settings["layout"].keys():
-            raise TypeError("Invalid layout manifest, does not contain " + i)
-        if (not isinstance(settings["layout"][i], str)) and (
-            settings["layout"][i] != False
-        ):
-            raise TypeError(i + " must be a string or False")
-    for i in ["locale", "root_password"]:
-        if (not isinstance(settings[i], str)) and (settings[i] != False):
-            raise TypeError(i + " must be a string or False")
-    if not isinstance(settings["ntp"], bool):
-        raise TypeError("ntp must be a bool")
-    for i in ["fullname", "username", "password", "uid", "gid", "shell", "groups"]:
-        if i not in settings["user"].keys():
-            raise TypeError("Invalid user manifest, does not contain " + i)
-    for i in ["shown_pages", "packages", "de_packages"]:
-        if i not in settings["installer"].keys():
-            raise TypeError("Invalid installer manifest, does not contain " + i)
-
-    # Install
     if settings["install_type"] == "online":
-        raise NotImplementedError("Online mode not yet implemented!")
+        lp("Online mode not yet implemented!", mode="error")
+        return 3
     elif settings["install_type"] == "offline":
         lp("%ST0%")  # Preparing
-        sleep(1)
+        # Parse settings
+        reset_timer()
+        lp("Validating manifest")
+        for i in [
+            "install_type",
+            "layout",
+            "locale",
+            "timezone",
+            "hostname",
+            "user",
+            "root_password",
+            "ntp",
+            "installer",
+        ]:
+            if i not in settings.keys():
+                lp("Invalid manifest, does not contain " + i, mode="error")
+                return 2
+        if settings["install_type"] not in ["online", "offline", "custom"]:
+            lp(
+                'Invalid install_type, use "online", "offline" or "custom".',
+                mode="error",
+            )
+            return 2
+        for i in ["lang", "variant"]:
+            if i not in settings["layout"].keys():
+                lp("Invalid layout manifest, does not contain " + i, mode="error")
+                return 2
+            if (not isinstance(settings["layout"][i], str)) and (
+                settings["layout"][i] != False
+            ):
+                raise TypeError(i + " must be a string or False")
+        for i in ["locale", "root_password"]:
+            if (not isinstance(settings[i], str)) and (settings[i] != False):
+                raise TypeError(i + " must be a string or False")
+        if not isinstance(settings["ntp"], bool):
+            raise TypeError("ntp must be a bool")
+        for i in [
+            "fullname",
+            "username",
+            "password",
+            "uid",
+            "gid",
+            "shell",
+            "groups",
+            "sudo_nopasswd",
+            "autologin",
+        ]:
+            if i not in settings["user"].keys():
+                raise TypeError("Invalid user manifest, does not contain " + i)
+        for i in ["shown_pages", "packages", "de_packages"]:
+            if i not in settings["installer"].keys():
+                raise TypeError("Invalid installer manifest, does not contain " + i)
+        lp("Manifest validated")
+        lp("Took {:.5f}".format(get_timer()))
+        reset_timer()
+        sleep(0.5)
         lp("%ST1%")  # Locales
-        sleep(1)
+        sleep(0.5)
         lp("%ST2%")  # keyboard
-        sleep(1)
+        sleep(0.5)
         lp("%ST3%")  # TZ
-        sleep(1)
+        sleep(0.5)
         lp("%ST4%")  # Configure users
-        sleep(1)
+        sleep(0.5)
         # Cleanup
         lp("%ST5%")
-        sleep(1)
+        sleep(0.5)
         # Done
         lp("Quitting due to Implementation end.", mode="error")
         sleep(0.2)
-        raise NotImplementedError("Quitting due to Implementation end.")
+        return 0
     elif settings["install_type"] == "custom":
-        raise NotImplementedError("Custom mode not yet implemented!")
+        lp("Custom mode not yet implemented!", mode="error")
+        return 3

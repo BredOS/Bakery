@@ -1,7 +1,6 @@
 install_type = "offline"
 hostname = "breborb"
 root_password = false
-sudo_nopasswd = true
 ntp = true
 
 locale = "en_US"
@@ -22,7 +21,8 @@ uid = 1000
 gid = false
 shell = "/bin/zsh"
 groups = ["wheel", "network", "video", "audio", "storage", "uucp"]
-autologin = true
+sudo_nopasswd = false
+autologin = false
 
 [installer]
 shown_pages = ['Keyboard', 'Timezone', 'User', 'Locale']
