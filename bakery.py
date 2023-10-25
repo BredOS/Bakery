@@ -87,10 +87,28 @@ def setup_translations(lang: object = None) -> gettext.GNUTranslations:
         return gettext.gettext  # type: ignore
 
 
+_ = None
+
 # Logging
 
 logging_handler = None
 messages = []
+
+st_msgs = []
+
+
+def populate_messages(lang=None) -> None:
+    global _
+    _ = setup_translations(lang=lang)
+    global st_msgs
+    st_msgs += [
+        [_("Preparing for installation"), 0],  # 0
+        [_("Applying Locale Settings"), 10],  # 1
+        [_("Applying Keyboard Settings"), 20],  # 2
+        [_("Applying Timezone Settings"), 30],  # 3
+        [_("Creating User account"), 40],  # 4
+        [_("Cleaning up installation"), 100],  # 5
+    ]
 
 
 def lp(message, write_to_f=True, mode="info") -> None:
@@ -122,13 +140,16 @@ def console_logging(
     loginfo_function_name="",
     loginfo_stack_info=None,
     **kwargs,
-):
-    try:
-        logging_level_name = LoggingLevel(logging_level).name
-        global messages
-        messages.append(message)
-    except Exception as Err:
-        print_exception(Err)
+) -> None:
+    logging_level_name = LoggingLevel(logging_level).name
+    pos = message.find("%ST")
+    if pos != -1:
+        prs = message.rfind("%")
+        stm = st_msgs[int(message[pos + 3 : prs])]
+        lp("STATUS  : " + stm[0])
+        lp("PROGRESS: " + str(stm[1]) + "%")
+    global messages
+    messages.append(message)
 
 
 def setup_logging() -> logging.Logger:
@@ -733,7 +754,7 @@ def set_locale(locale: str) -> None:
     if locale not in locales(True):
         raise OSError("Locale not enabled!")
     lp("Setting locale to: " + locale)
-    subprocess.run(["sudo", "localectl", "set-locale", "LANG=" + locale])
+    lrun(["sudo", "localectl", "set-locale", "LANG=" + locale])
 
 
 def set_kb(locale: str) -> None:
@@ -824,10 +845,6 @@ dms = {
     "slim": "slim.service",
     "entrance": "entrance.service",
 }
-
-
-def installed_dms() -> list:
-    pass
 
 
 # Verification functions
@@ -1031,9 +1048,22 @@ def install(settings=None) -> None:
     if settings["install_type"] == "online":
         raise NotImplementedError("Online mode not yet implemented!")
     elif settings["install_type"] == "offline":
-        # Configure locales
-        # Configure users
+        lp("%ST0%")  # Preparing
+        sleep(1)
+        lp("%ST1%")  # Locales
+        sleep(1)
+        lp("%ST2%")  # keyboard
+        sleep(1)
+        lp("%ST3%")  # TZ
+        sleep(1)
+        lp("%ST4%")  # Configure users
+        sleep(1)
         # Cleanup
-        raise NotImplementedError("Code has reached the implementation end!")
+        lp("%ST5%")
+        sleep(1)
+        # Done
+        lp("Quitting due to Implementation end.", mode="error")
+        sleep(0.2)
+        raise NotImplementedError("Quitting due to Implementation end.")
     elif settings["install_type"] == "custom":
         raise NotImplementedError("Custom mode not yet implemented!")

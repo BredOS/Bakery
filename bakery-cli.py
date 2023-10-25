@@ -4,5 +4,7 @@ import bakery
 from time import sleep
 
 if __name__ == "__main__":
-    bakery.ensure_localdb()
+    sleep(1)
+    bakery.populate_messages()
+    bakery.install()
     print(bakery.messages)
