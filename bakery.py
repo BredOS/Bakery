@@ -143,13 +143,13 @@ def console_logging(
 ) -> None:
     logging_level_name = LoggingLevel(logging_level).name
     pos = message.find("%ST")
+    global messages
+    messages.append(message)
     if pos != -1:
         prs = message.rfind("%")
         stm = st_msgs[int(message[pos + 3 : prs])]
         lp("STATUS  : " + stm[0])
         lp("PROGRESS: " + str(stm[1]) + "%")
-    global messages
-    messages.append(message)
 
 
 def setup_logging() -> logging.Logger:
