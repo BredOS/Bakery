@@ -1,9 +1,9 @@
 install_type = "offline"
 hostname = "breborb"
 root_password = false
-ntp = true
 
-locale = "en_US"
+all_locales = ["en_US.UTF-8 UTF-8"]
+main_locale = "en_US.UTF-8 UTF-8"
 
 packages = []
 de_packages = []
@@ -11,18 +11,20 @@ de_packages = []
 [timezone]
 region = "Europe"
 zone = "Sofia"
+ntp = true
 
 [layout]
-lang = "American English"
+model = "pc105"
+layout = "us"
 variant = "alt-intl"
 
 [user]
 fullname = "Bred guy"
 username = "Panda"
 password = "123"
-uid = 1000
+uid = 1005
 gid = false
-shell = "/bin/zsh"
+shell = "/bin/bash"
 groups = ["wheel", "network", "video", "audio", "storage", "uucp"]
 sudo_nopasswd = false
 autologin = false

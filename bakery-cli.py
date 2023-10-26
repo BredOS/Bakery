@@ -5,10 +5,9 @@ from time import sleep
 
 if __name__ == "__main__":
     sleep(0.5)
+    if not bakery.dryrun:
+        raise OSError("Protection against dum!")
     bakery.populate_messages()
-    langs, models = bakery.kb_supported()
-    langs, models = bakery.kb_supported()
-    # res = bakery.install()
+    res = bakery.install()
     sleep(0.5)
-    print(bakery.messages)
-    # print("Exited with exit code:", res)
+    print("Exited with exit code:", res)

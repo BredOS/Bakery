@@ -108,8 +108,6 @@ _ = None
 # Logging
 
 logging_handler = None
-messages = []
-
 st_msgs = []
 
 
@@ -147,6 +145,12 @@ def lp(message, write_to_f=True, mode="info") -> None:
         raise ValueError("Invalid mode.")
 
 
+def st(msg_id: int) -> None:
+    sleep(0.2)
+    lp("%ST" + str(msg_id) + "%")
+    sleep(0.2)
+
+
 def console_logging(
     logging_level: int,
     message: str,
@@ -159,8 +163,6 @@ def console_logging(
 ) -> None:
     logging_level_name = LoggingLevel(logging_level).name
     pos = message.find("%ST")
-    global messages
-    messages.append(message)
     if pos != -1:
         prs = message.rfind("%")
         stm = st_msgs[int(message[pos + 3 : prs])]
@@ -875,6 +877,38 @@ def locales(only_enabled: bool = False) -> list:
         return set(data)
 
 
+def enable_locales(to_en: list) -> None:
+    to_add = set()
+    enabled = locales(True)
+    all_loc = locales()
+    for locale in to_en:
+        if locale not in enabled:
+            if locale in all_loc:
+                to_add.add(locale)
+            else:
+                raise OSError("Invalid locale: " + locale)
+        else:
+            lp("Locale " + locale + " already enabled")
+    if len(to_add):
+        for i in to_add:  # Why fumble with stacked \\n? Just spam a bit.
+            lp("Enabling locale: " + i)
+            lrun(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
+        lp("Generating locales")
+        lrun(["sudo", "locale-gen"])
+    else:
+        lp("No locales were enabled, not regenerating locale database.")
+
+
+def set_locale(locale: str) -> None:
+    if locale not in locales(True):
+        if dryrun:
+            lp("The locale " + locale + " is not enabled, but this is a dryrun.")
+        else:
+            raise OSError("Locale " + locale + " not enabled!")
+    lp("Setting locale to: " + locale)
+    lrun(["sudo", "localectl", "set-locale", "LANG=" + locale])
+
+
 def langs(only_enabled: bool = False) -> dict:
     """
     A formatted dict of languages and locales
@@ -929,9 +963,9 @@ def kb_supported() -> list:
                     .decode("UTF-8")
                     .split()
                 )
-                res.update({lang: [variants]})
+                res.update({i: variants})
             except:
-                res.update({lang: [None]})
+                res.update({i: [None]})
         mdl = (
             subprocess.check_output(
                 "localectl list-x11-keymap-models",
@@ -947,6 +981,24 @@ def kb_supported() -> list:
                 lp(i + " not in _kbmodelmap", mode="warn")
         _kb_sup_cache = [res, models]
     return _kb_sup_cache
+
+
+def kb_set(model: str, layout: str, variant: str) -> None:
+    lp("Setting keyboard layout to: " + model + " - " + layout + " - " + variant)
+    kb_supported()
+    if model not in _kb_sup_cache[1]:
+        lp("Keyboard model " + model + " not found!")
+        raise TypeError("Keyboard model " + model + " not found!")
+    if layout not in _kb_sup_cache[0].keys():
+        lp("Keyboard layout " + layout + " not found!")
+        raise TypeError("Keyboard layout " + layout + " not found!")
+    if variant not in _kb_sup_cache[0][layout]:
+        lp("Keyboard layout variant " + variant + " not found!")
+        raise TypeError("Keyboard layout variant " + variant + " not found!")
+    cmd = ["sudo", "localectl", "set-x11-keymap", layout, model]
+    if variant is not None:
+        cmd.append(variant)
+    lrun(cmd)
 
 
 def tz_list() -> dict:
@@ -965,50 +1017,18 @@ def tz_list() -> dict:
     return res
 
 
-def tz_set(tz: str) -> None:
-    if tz in tz_list():
-        lrun(["sudo", "timedatectl", "set-timezone", tz])
+def tz_set(region: str, zone: str) -> None:
+    tzs = tz_list()
+    if region in tzs.keys() and zone in tzs[region]:
+        lrun(["sudo", "timedatectl", "set-timezone", region + "/" + zone])
     else:
-        lp("Not a valid timezone!")
-        raise TypeError("Not a valid timezone!")
+        lp("Timezone " + region + "/" + zone + " not a valid timezone!")
+        raise TypeError("Timezone " + region + "/" + zone + " not a valid timezone!")
 
 
 def tz_ntp(ntp: bool) -> None:
     lp("Setting ntp to " + str(ntp))
     lrun(["sudo", "timedatectl", "set-ntp", str(int(ntp))])
-
-
-def enable_locales(to_en: list) -> None:
-    to_add = set()
-    enabled = locales(True)
-    all_loc = locales()
-    for locale in to_en:
-        if locale not in enabled:
-            if locale in all_loc:
-                to_add.add(locale)
-            else:
-                raise OSError("Invalid locale: " + locale)
-    if len(to_add):
-        for i in to_add:  # Why fumble with stacked \\n? Just spam a bit.
-            lp("Enabling:" + i)
-            lrun(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
-        lp("Generating locales")
-        lrun(["sudo", "locale-gen"])
-
-
-def set_locale(locale: str) -> None:
-    if locale not in locales(True):
-        raise OSError("Locale not enabled!")
-    lp("Setting locale to: " + locale)
-    lrun(["sudo", "localectl", "set-locale", "LANG=" + locale])
-
-
-def kb_set(layout: str, model: str, variant: str = None) -> None:
-    lp("Setting keyboard layout to: " + locale)
-    cmd = ["sudo", "localectl", "set-x11-keymap", layout, model]
-    if variant is not None:
-        cmd.append(variant)
-    lrun(cmd)
 
 
 # Package functions
@@ -1164,8 +1184,11 @@ def gidc(gid: str) -> bool:
     with open("/etc/group") as gr:
         data = gr.read().split("\n")
         for i in data:
-            if i.split(":")[-2] == gid:
-                return True
+            try:
+                if i.split(":")[-2] == gid:
+                    return True
+            except IndexError:
+                pass
     return False
 
 
@@ -1173,8 +1196,11 @@ def uidc(uid: str) -> bool:
     with open("/etc/passwd") as pw:
         data = pw.read().split("\n")
         for i in data:
-            if i.split(":")[2] == uid:
-                return True
+            try:
+                if i.split(":")[2] == uid:
+                    return True
+            except IndexError:
+                pass
     return False
 
 
@@ -1188,11 +1214,17 @@ def shells() -> set:
     return res
 
 
-def adduser(username: str, passwd: str, uid, gid, shell: str, groups: list) -> None:
+def adduser(username: str, password: str, uid, gid, shell: str, groups: list) -> None:
     if isinstance(uid, int):
         uid = str(uid)
+    elif not uid.isdigit():
+        raise TypeError("UID not a number!")
     if gid is False:
         gid = uid
+    elif isinstance(gid, int):
+        gid = str(gid)
+    elif not gid.isdigit():
+        raise TypeError("GID not a number!")
     if shell not in shells():
         raise OSError("Invalid shell")
     if uidc(uid):
@@ -1205,6 +1237,7 @@ def adduser(username: str, passwd: str, uid, gid, shell: str, groups: list) -> N
     lrun(["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell])
     for i in groups:
         groupadd(username, i)
+    passwd(username, password)
 
 
 def groupadd(username: str, group: str) -> None:
@@ -1212,13 +1245,13 @@ def groupadd(username: str, group: str) -> None:
     lrun(["sudo", "usermod", "-aG", username, group])
 
 
-def passwd(username: str, passwd: str) -> None:
+def passwd(username: str, password: str) -> None:
     lp("Setting user " + username + " password")
     cmd = ["sudo", "passwd", username]
     if dryrun:
-        lp("Would have run: " + str(cmd))
+        lp("Would have run: " + str(cmd) + ", with the password via stdin.")
     else:
-        subprocess.run(cmd, input=f"{passwd}\n{passwd}", text=True)
+        subprocess.run(cmd, input=f"{password}\n{password}", text=True)
 
 
 # Gui support functions
@@ -1264,28 +1297,27 @@ def install(settings=None) -> int:
             2 on invalid settings,
             3 on implementation missing.
     """
-    print("Starting installation..")
     if settings is None:
         if dryrun:
             settings = {
                 "install_type": "offline",
-                "layout": {"lang": "American English", "variant": "alt-intl"},
-                "locale": "en_US",
-                "timezone": {"region": "Europe", "zone": "Sofia"},
+                "layout": {"model": "pc105", "layout": "us", "variant": "alt-intl"},
+                "all_locales": ["en_US.UTF-8 UTF-8"],
+                "main_locale": "en_US.UTF-8 UTF-8",
+                "timezone": {"region": "Europe", "zone": "Sofia", "ntp": True},
                 "hostname": "breborb",
                 "user": {
                     "fullname": "Bred guy",
                     "username": "Panda",
                     "password": "123",
-                    "uid": 1000,
+                    "uid": 1005,
                     "gid": False,
-                    "shell": "/bin/zsh",
+                    "shell": "/bin/bash",
                     "groups": ["wheel", "network", "video", "audio", "storage", "uucp"],
                     "sudo_nopasswd": True,
                     "autologin": True,
                 },
                 "root_password": False,
-                "ntp": True,
                 "installer": {
                     "shown_pages": ["Keyboard", "Timezone", "User", "Locale"],
                     "installer_version": "0.1.0",
@@ -1302,14 +1334,16 @@ def install(settings=None) -> int:
         return 3
     elif settings["install_type"] == "offline":
         lp("%ST0%")  # Preparing
+        sleep(0.15)
         # Parse settings
         reset_timer()
+
         lp("Validating manifest")
         if "installer" in settings.keys():
             if "installer_version" in settings["installer"].keys():
                 if (
                     settings["installer"]["installer_version"]
-                    < config["installer_version"]
+                    < config.installer_version
                 ):
                     lp("Toml installer version lower than current.", mode="warn")
                 else:
@@ -1323,12 +1357,12 @@ def install(settings=None) -> int:
         for i in [
             "install_type",
             "layout",
-            "locale",
+            "all_locales",
+            "main_locale",
             "timezone",
             "hostname",
             "user",
             "root_password",
-            "ntp",
             "packages",
             "de_packages",
         ]:
@@ -1341,7 +1375,7 @@ def install(settings=None) -> int:
                 mode="error",
             )
             return 2
-        for i in ["lang", "variant"]:
+        for i in ["model", "layout", "variant"]:
             if i not in settings["layout"].keys():
                 lp("Invalid layout manifest, does not contain " + i, mode="error")
                 return 2
@@ -1350,13 +1384,29 @@ def install(settings=None) -> int:
             ):
                 lp(i + " must be a string or False", mode="error")
                 return 2
-        for i in ["locale", "root_password"]:
+        for i in ["region", "zone", "ntp"]:
+            if i not in settings["timezone"].keys():
+                lp("Invalid timezone manifest, does not contain " + i, mode="error")
+                return 2
+        for i in ["region", "zone"]:
+            if not isinstance(settings["timezone"][i], str):
+                lp(i + " must be a string", mode="error")
+                return 2
+        if not isinstance(settings["timezone"]["ntp"], bool):
+            lp("ntp must be a bool", mode="error")
+            return 2
+        for i in ["root_password"]:
             if (not isinstance(settings[i], str)) and (settings[i] != False):
                 lp(i + " must be a string or False", mode="error")
                 return 2
-        if not isinstance(settings["ntp"], bool):
-            lp("ntp must be a bool", mode="error")
-            return 2
+        for i in ["main_locale"]:
+            if not isinstance(settings[i], str):
+                lp(i + " must be a string", mode="error")
+                return 2
+        for i in ["all_locales"]:
+            if not isinstance(settings[i], list):
+                lp(i + " must be a list", mode="error")
+                return 2
         for i in [
             "fullname",
             "username",
@@ -1376,23 +1426,54 @@ def install(settings=None) -> int:
                 lp("Invalid installer manifest, does not contain " + i, mode="error")
                 return 2
         lp("Manifest validated")
+
         lp("Took {:.5f}".format(get_timer()))
+        st(1)  # Locales
         reset_timer()
-        sleep(0.5)
-        lp("%ST1%")  # Locales
-        sleep(0.5)
-        lp("%ST2%")  # keyboard
-        sleep(0.5)
-        lp("%ST3%")  # TZ
-        sleep(0.5)
-        lp("%ST4%")  # Configure users
-        sleep(0.5)
-        # Cleanup
-        lp("%ST5%")
-        sleep(0.5)
+
+        enable_locales(settings["all_locales"])
+        enable_locales([settings["main_locale"]])
+        set_locale(settings["main_locale"])
+
+        lp("Took {:.5f}".format(get_timer()))
+        st(2)  # keyboard
+        reset_timer()
+
+        kb_set(
+            settings["layout"]["model"],
+            settings["layout"]["layout"],
+            settings["layout"]["variant"],
+        )
+
+        lp("Took {:.5f}".format(get_timer()))
+        st(3)  # TZ
+        reset_timer()
+
+        tz_set(settings["timezone"]["region"], settings["timezone"]["zone"])
+        tz_ntp(settings["timezone"]["ntp"])
+
+        lp("Took {:.5f}".format(get_timer()))
+        st(4)  # Configure users
+        reset_timer()
+
+        adduser(
+            settings["user"]["username"],
+            settings["user"]["password"],
+            settings["user"]["uid"],
+            settings["user"]["gid"],
+            settings["user"]["shell"],
+            settings["user"]["groups"],
+        )
+        # TODO: nopasswd
+        # TODO: autologin for tty
+
+        lp("Took {:.5f}".format(get_timer()))
+        st(5)  # Cleanup
+        reset_timer()
+
         # Done
-        lp("Quitting due to Implementation end.", mode="error")
-        sleep(0.2)
+        lp("Installation finished.")
+        sleep(0.15)
         return 0
     elif settings["install_type"] == "custom":
         lp("Custom mode not yet implemented!", mode="error")
