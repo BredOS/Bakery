@@ -984,9 +984,12 @@ def set_locale(locale: str) -> None:
     lrun(["sudo", "localectl", "set-locale", "LANG=" + locale])
 
 
-def set_kb(locale: str) -> None:
+def kb_set(layout: str, model: str, variant: str = None) -> None:
     lp("Setting keyboard layout to: " + locale)
-    lrun(["sudo", "localectl", "set-keymap", "LANG=" + locale])
+    cmd = ["sudo", "localectl", "set-x11-keymap", layout, model]
+    if variant is not None:
+        cmd.append(variant)
+    lrun(cmd)
 
 
 # Package functions
