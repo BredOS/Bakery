@@ -9,6 +9,8 @@ from datetime import datetime
 import requests
 import json
 from traceback import print_exception
+from threading import Lock
+from functools import wraps
 
 from pyrunning import logging, LogMessage, LoggingHandler, Command, LoggingLevel
 import gi
@@ -17,6 +19,7 @@ gi.require_version("NM", "1.0")
 from gi.repository import GLib, NM
 
 import config
+
 
 # Config functions
 
@@ -983,6 +986,37 @@ def passwd(username: str, passwd: str) -> None:
         lp("Would have run: " + str(cmd))
     else:
         subprocess.run(cmd, input=f"{passwd}\n{passwd}", text=True)
+
+
+# Gui support functions
+
+
+def debounce(wait):
+    """
+    Decorator that will postpone a function's
+    execution until after wait seconds
+    have elapsed since the last time it was invoked.
+    """
+
+    def decorator(func):
+        last_time_called = 0
+        lock = Lock()
+
+        @wraps(func)
+        def debounced(*args, **kwargs):
+            nonlocal last_time_called
+            with lock:
+                elapsed = monotonic() - last_time_called
+                remaining = wait - elapsed
+                if remaining <= 0:
+                    last_time_called = monotonic()
+                    return func(*args, **kwargs)
+                else:
+                    return None
+
+        return debounced
+
+    return decorator
 
 
 # Main functions
