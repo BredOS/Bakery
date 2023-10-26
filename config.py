@@ -1,4 +1,4 @@
-"""Settings for the installer"""
+"Settings for the installer"
 
 supported_languages = {"English": "en_US.UTF-8"}
 timezone = {"region": "Europe", "zone": "London"}
