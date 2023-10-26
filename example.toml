@@ -5,6 +5,9 @@ ntp = true
 
 locale = "en_US"
 
+packages = []
+de_packages = []
+
 [timezone]
 region = "Europe"
 zone = "Sofia"
@@ -26,5 +29,5 @@ autologin = false
 
 [installer]
 shown_pages = ['Keyboard', 'Timezone', 'User', 'Locale']
-packages = []
-de_packages = []
+installer_version = "0.1.0"
+ui = "tui"

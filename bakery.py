@@ -1055,9 +1055,11 @@ def install(settings=None) -> int:
                 "ntp": True,
                 "installer": {
                     "shown_pages": ["Keyboard", "Timezone", "User", "Locale"],
-                    "packages": [],
-                    "de_packages": [],
+                    "installer_version": "0.1.0",
+                    "ui": "tui",
                 },
+                "packages": [],
+                "de_packages": [],
             }
         else:
             raise ValueError("No data passed with dryrun disabled.")
@@ -1080,6 +1082,8 @@ def install(settings=None) -> int:
             "root_password",
             "ntp",
             "installer",
+            "packages",
+            "de_packages",
         ]:
             if i not in settings.keys():
                 lp("Invalid manifest, does not contain " + i, mode="error")
@@ -1120,7 +1124,7 @@ def install(settings=None) -> int:
             if i not in settings["user"].keys():
                 lp("Invalid user manifest, does not contain " + i, mode="error")
                 return 2
-        for i in ["shown_pages", "packages", "de_packages"]:
+        for i in ["shown_pages"]:
             if i not in settings["installer"].keys():
                 lp("Invalid installer manifest, does not contain " + i, mode="error")
                 return 2
