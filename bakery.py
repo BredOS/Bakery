@@ -965,6 +965,19 @@ def tz_list() -> dict:
     return res
 
 
+def tz_set(tz: str) -> None:
+    if tz in tz_list():
+        lrun(["sudo", "timedatectl", "set-timezone", tz])
+    else:
+        lp("Not a valid timezone!")
+        raise TypeError("Not a valid timezone!")
+
+
+def tz_ntp(ntp: bool) -> None:
+    lp("Setting ntp to " + str(ntp))
+    lrun(["sudo", "timedatectl", "set-ntp", str(int(ntp))])
+
+
 def enable_locales(to_en: list) -> None:
     to_add = set()
     enabled = locales(True)
