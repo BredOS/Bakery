@@ -1072,6 +1072,21 @@ def install(settings=None) -> int:
         # Parse settings
         reset_timer()
         lp("Validating manifest")
+        if "installer" in settings.keys():
+            if "installer_version" in settings["installer"].keys():
+                if (
+                    settings["installer"]["installer_version"]
+                    < config["installer_version"]
+                ):
+                    lp("Toml installer version lower than current.", mode="warn")
+                else:
+                    lp("Toml installer version matches.")
+            else:
+                lp("Did not find version specification, cannot continue.", mode="error")
+                return 2
+        else:
+            lp("Not a bakery manifest", mode="error")
+            return 2
         for i in [
             "install_type",
             "layout",
@@ -1081,7 +1096,6 @@ def install(settings=None) -> int:
             "user",
             "root_password",
             "ntp",
-            "installer",
             "packages",
             "de_packages",
         ]:
@@ -1124,7 +1138,7 @@ def install(settings=None) -> int:
             if i not in settings["user"].keys():
                 lp("Invalid user manifest, does not contain " + i, mode="error")
                 return 2
-        for i in ["shown_pages"]:
+        for i in ["shown_pages", "ui"]:
             if i not in settings["installer"].keys():
                 lp("Invalid installer manifest, does not contain " + i, mode="error")
                 return 2
