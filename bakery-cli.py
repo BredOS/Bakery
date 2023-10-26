@@ -4,8 +4,10 @@ import bakery
 from time import sleep
 
 if __name__ == "__main__":
-    sleep(1)
+    sleep(0.5)
     bakery.populate_messages()
-    res = bakery.install()
+    langs, models = bakery.kb_supported()
+    # res = bakery.install()
+    sleep(0.5)
     print(bakery.messages)
-    print("Result:", res)
+    # print("Exited with exit code:", res)
