@@ -7,6 +7,7 @@ if __name__ == "__main__":
     sleep(0.5)
     bakery.populate_messages()
     langs, models = bakery.kb_supported()
+    langs, models = bakery.kb_supported()
     # res = bakery.install()
     sleep(0.5)
     print(bakery.messages)
