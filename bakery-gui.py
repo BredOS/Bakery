@@ -28,7 +28,7 @@ import json
 import threading
 import bakery
 from bakery import (
-    kb_langs,
+    kb_supported,
     langs,
     tz_list,
     geoip,
@@ -36,6 +36,10 @@ from bakery import (
     validate_fullname,
     validate_hostname,
     lp,
+    setup_translations,
+    debounce,
+    _kblangmap,
+    _,
 )
 from time import sleep
 from datetime import date, datetime, time
@@ -61,31 +65,6 @@ from gi.repository import Gtk, Adw, Gio, GLib
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
 
-def setup_translations(lang: object = None) -> gettext.GNUTranslations:
-    """
-    Setup translations
-
-        Does the following:
-        - Loads the translations from the locale folder
-        - Sets the translations for the gettext module
-
-        Returns:  A gettext translation object
-        :rtype: object
-    """
-    lang_path = os.path.join(os.path.dirname(__file__), "locale")
-    # Load translations
-    if lang is not None:
-        gettext.bindtextdomain("bakery", lang_path)
-        gettext.textdomain("bakery")
-        translation = gettext.translation("bakery", lang_path, languages=[lang])
-        translation.install()
-        return translation.gettext  # type: ignore
-    else:
-        gettext.bindtextdomain("bakery", lang_path)
-        gettext.textdomain("bakery")
-        return gettext.gettext  # type: ignore
-
-
 class BakeryApp(Adw.Application):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -100,8 +79,6 @@ class BakeryApp(Adw.Application):
         We raise the application's main window, creating it if
         necessary.
         """
-        global _
-        _ = setup_translations()
         global win
         win = self.props.active_window
         if not win:
@@ -164,12 +141,14 @@ class BakeryWindow(Adw.ApplicationWindow):
     # online_install = Gtk.Template.Child()
     custom_install = Gtk.Template.Child()
     install_cancel = Gtk.Template.Child()
+    install_confirm = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # go to the first page of main stack
         self.main_stk.set_visible_child(self.main_page.get_child())
         self.cancel_dialog = self.install_cancel
+        self.cancel_dialog.set_property("hide-on-close", True)
         self.install_type = None
         # self.online_install.connect("clicked", self.main_button_clicked)
         self.offline_install.connect("clicked", self.main_button_clicked)
@@ -180,36 +159,66 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.back_btn.connect("clicked", self.on_back_clicked)
         self.cancel_btn.connect("clicked", self.on_cancel_clicked)
 
+    @debounce(2)
     def main_button_clicked(self, button) -> None:
         if button == self.offline_install:
-            print("offline install")
+            lp("offline install")
             self.init_screens("offline")
         # elif button == self.online_install:
-        #     print("online install")
+        #     lp("online install")
         #     self.init_screens("online")
         elif button == self.custom_install:
-            print("custom install")
+            lp("custom install")
             self.init_screens("custom")
 
-    def on_finish_clicked(self, button) -> None:
-        builder = Gtk.Builder.new_from_file(script_dir + "/data/summary_screen.ui")
-        install_confirm = builder.get_object("install_confirm")
+    def on_install_btn_clicked(self, button) -> None:
+        # connect the yes button to the install function
+        self.install_confirm.connect("response", self.on_install_dialog_response)
+        self.install_confirm.set_property("hide-on-close", True)
+        self.install_confirm.show()
 
+    def on_install_dialog_response(self, dialog, resp) -> None:
+        if resp == "yes":
+            self.install_confirm.hide()
+            self.current_page = self.pages.index("Install")
+            page_name = self.pages[self.current_page]
+            page_id = self.get_page_id(page_name)
+            self.stack1.set_visible_child_name(page_id)
+            self.install_thread = InstallThread(self, all_pages["Install"])
+            self.install_thread.start()
+        else:
+            self.install_confirm.hide()
+
+    @debounce(0.3)
     def on_next_clicked(self, button) -> None:
         num_pages = len(self.pages)
         if self.current_page < num_pages - 1:
             self.current_page += 1
-            page_name = self.pages[self.current_page]
-            page_id = self.get_page_id(page_name)
-            self.stack1.set_visible_child_name(page_id)
-            self.update_buttons()
+            if self.current_page == self.pages.index("Summary"):
+                print("changing to install")
+                self.next_btn.disconnect_by_func(self.on_next_clicked)
+                self.next_btn.connect("clicked", self.on_install_btn_clicked)
+                self.update_buttons()
+                page_name = self.pages[self.current_page]
+                page_id = self.get_page_id(page_name)
+                self.stack1.set_visible_child_name(page_id)
+            elif self.current_page == self.pages.index("Install"):
+                # self.current_page -= 1
+                print("install page")
+            else:
+                page_name = self.pages[self.current_page]
+                page_id = self.get_page_id(page_name)
+                self.stack1.set_visible_child_name(page_id)
+                self.update_buttons()
 
     def on_back_clicked(self, button) -> None:
         if self.current_page > 0:
             self.current_page -= 1
+            print(self.current_page)
             page_name = self.pages[self.current_page]
             page_id = self.get_page_id(page_name)
             self.stack1.set_visible_child_name(page_id)
+            self.next_btn.connect("clicked", self.on_next_clicked)
             self.update_buttons()
 
     def update_buttons(self) -> None:
@@ -218,16 +227,27 @@ class BakeryWindow(Adw.ApplicationWindow):
         global user_event
         user_event = threading.Event()
         self.check_thread = CheckThread(all_pages["User"])
+        print("current page: " + str(self.current_page))
+        print(self.pages[self.current_page])
         if self.current_page == self.pages.index("User"):
             self.next_btn.set_sensitive(False)
             # start the thread to check when all fields are filled
+            self.next_btn.set_label(_("Next"))
             self.check_thread.start()
         elif self.current_page == self.pages.index("Summary"):
             user_event.set()
             all_pages["Summary"].page_shown()
+            # change the next button to install
+            self.next_btn.set_label(_("Install"))
+
             self.next_btn.set_sensitive(self.current_page < num_pages - 1)
             self.back_btn.set_sensitive(self.current_page > 0)
+        elif self.current_page == self.pages.index("Install"):
+            self.back_btn.set_sensitive(False)
+            self.next_btn.set_sensitive(False)
+            self.cancel_btn.set_sensitive(False)
         else:
+            self.next_btn.set_label(_("Next"))
             user_event.set()
             self.next_btn.set_sensitive(self.current_page < num_pages - 1)
             self.back_btn.set_sensitive(self.current_page > 0)
@@ -253,16 +273,18 @@ class BakeryWindow(Adw.ApplicationWindow):
     def collect_data(self, *_) -> dict:
         data = {}
         if not self.install_type == None:
-            data["installer_version"] = config.installer_version
             data["install_type"] = self.install_type
-            data["shown_pages"] = self.pages
-            data["root_password"] = None
-            data["ntp"] = True
+            data["root_password"] = False
             data["layout"] = all_pages["Keyboard"].layout
             data["locale"] = all_pages["Locale"].locale
             data["timezone"] = all_pages["Timezone"].timezone
             data["hostname"] = all_pages["User"].get_hostname()
             data["user"] = all_pages["User"].collect_data()
+            installer = {}
+            installer["installer_version"] = config.installer_version
+            installer["ui"] = "gui"
+            installer["shown_pages"] = self.pages
+            data["installer"] = installer
             data["packages"] = []
             data["de_packages"] = []
             return data
@@ -292,6 +314,11 @@ class BakeryWindow(Adw.ApplicationWindow):
             self.pages = config.offline_pages
             self.add_pages(self.stack1, self.pages)
 
+        bakery.logging_handler = LoggingHandler(
+            logger=bakery.logger,
+            logging_functions=[all_pages["Install"].console_logging],
+        )
+
         self.current_page = 0
         self.update_buttons()
         self.install_type = install_type
@@ -304,16 +331,34 @@ class kb_screen(Adw.Bin):
 
     event_controller = Gtk.EventControllerKey.new()
     langs_list = Gtk.Template.Child()  # GtkListBox
+    models_list = Gtk.Template.Child()  # GtkDropDown
 
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
-        self.kb_data = {
-            k: v for k, v in sorted(kb_langs().items())
-        }  # {country: layouts in a list]}
-        self.lang_to_country = {lang: code for code, lang in bakery._kblangmap.items()}
+        self.kb_data, self.kb_models = kb_supported()
+        # Map language codes to language names
+        self.kb_data = {_kblangmap[lang]: value for lang, value in self.kb_data.items()}
 
-        self.layout = {"lang": None, "variant": None}
+        # Sort the language names alphabetically
+        self.kb_data = {k: v for k, v in sorted(self.kb_data.items())}
+
+        # Map language names to country codes
+        self.lang_to_country = {lang: code for code, lang in _kblangmap.items()}
+        # Map pretty kb models to their backend equiv
+        self.prettymodel_to_model = {
+            model: code for code, model in self.kb_models.items()
+        }
+
+        self.layout = {"model": "pc105", "layout": None, "variant": None}
+
+        self.models_model = Gtk.StringList()
+        self.models_list.set_model(self.models_model)
+        for model in self.kb_models.keys():
+            self.models_model.append(self.kb_models[model])
+        # set pc105 as default
+
+        self.models_list.set_selected(list(self.kb_models.keys()).index("pc105"))
 
         builder = Gtk.Builder.new_from_file(script_dir + "/data/kb_dialog.ui")
 
@@ -326,7 +371,12 @@ class kb_screen(Adw.Bin):
         self.variant_list = builder.get_object("variant_list")  # GtkListBox
 
         self.select_variant_btn.connect("clicked", self.confirm_selection)
+        self.models_list.connect("notify::selected-item", self.on_model_changed)
         self.populate_layout_list()
+
+    def on_model_changed(self, dropdown, *_):
+        selected = dropdown.props.selected_item
+        self.layout["model"] = self.prettymodel_to_model[selected]
 
     def populate_layout_list(self) -> None:
         for lang in self.kb_data:
@@ -342,7 +392,7 @@ class kb_screen(Adw.Bin):
             if lang == "American English":
                 self.langs_list.select_row(row)
                 self.last_selected_row = row
-                self.layout["lang"] = lang
+                self.layout["layout"] = "us"
                 self.layout["variant"] = "normal"
                 self.change_kb_layout(lang, "normal")
 
@@ -360,11 +410,11 @@ class kb_screen(Adw.Bin):
             self.last_selected_row = row
             lang = row.get_child().get_label()
             layouts = self.kb_data[lang]
-            self.layout["lang"] = lang
+            self.layout["layout"] = self.lang_to_country[lang]
             if layouts[0] is None:
                 print("no layouts")
                 self.layout["variant"] = "normal"
-                self.change_kb_layout(self.layout["lang"], self.layout["variant"])
+                self.change_kb_layout(self.layout["layout"], self.layout["variant"])
             else:
                 # clear the listbox
                 self.variant_list.remove_all()
@@ -376,8 +426,13 @@ class kb_screen(Adw.Bin):
 
                 self.variant_list.append(newrow)
                 self.variant_list.connect("row-activated", self.selected_layout)
+
                 self.last_selected_layout = None
-                for layout_ in layouts[0]:
+                # preselect the normal layout
+                self.variant_list.select_row(newrow)
+                self.selected_layout(None, newrow)
+
+                for layout_ in layouts:
                     newrow = Gtk.ListBoxRow()
                     # Language - Layout
                     layout_label = Gtk.Label(label=f"{lang} - {layout_}")
@@ -392,12 +447,12 @@ class kb_screen(Adw.Bin):
         if row != self.last_selected_layout:
             self.last_selected_layout = row
             self.layout["variant"] = row.get_child().get_label().split(" - ")[1]
-            self.change_kb_layout(self.layout["lang"], self.layout["variant"])
+            self.change_kb_layout(self.layout["layout"], self.layout["variant"])
 
     def change_kb_layout(self, lang, layout) -> None:
         if layout == "normal":
             layout = ""
-        Command(["setxkbmap", self.lang_to_country[lang], layout]).run_log_and_wait(
+        Command(["setxkbmap", lang, layout]).run_log_and_wait(
             logging_handler=bakery.logging_handler
         )
 
@@ -435,7 +490,7 @@ class locale_screen(Adw.Bin):
             if lang == "English":
                 self.langs_list.select_row(row)
                 self.last_selected_row = row
-                self.update_previews("en_US")
+                self.update_previews("en_US.UTF-8 UTF-8")
 
     def selected_lang(self, widget, row) -> None:
         if row != self.last_selected_row:
@@ -470,7 +525,7 @@ class locale_screen(Adw.Bin):
                 the_locale += "." + encoding
         except ValueError:
             the_locale = selected_locale
-        self.locale = the_locale
+        self.locale = selected_locale
         locale_ = babel.Locale.parse(the_locale)
         date = dates.format_date(date=datetime.utcnow(), format="full", locale=locale_)
         time = dates.format_time(time=datetime.utcnow(), format="long", locale=locale_)
@@ -501,7 +556,6 @@ class CheckThread(threading.Thread):
                 and (self.window.get_hostname() is not None)
                 and (self.window.get_password() is not None)
             ):
-                print("All good")
                 win.next_btn.set_sensitive(True)
             else:
                 win.next_btn.set_sensitive(False)
@@ -509,14 +563,16 @@ class CheckThread(threading.Thread):
 
 
 class InstallThread(threading.Thread):
-    def __init__(self, window):
+    def __init__(self, window, install_window):
         threading.Thread.__init__(self)
         self.window = window
+        self.install_window = install_window
 
     def run(self):
         install_data = self.window.collect_data()
         lp("Starting install with data: " + str(install_data))
-        bakery.install(install_data)
+        res = bakery.install(install_data)
+        print(res)
 
 
 @Gtk.Template.from_file(script_dir + "/data/user_screen.ui")
@@ -642,7 +698,7 @@ class user_screen(Adw.Bin):
         data["gid"] = int(self.uid_row.get_value())
         data["sudo_nopasswd"] = self.nopasswd.get_active()
         data["autologin"] = self.autologin.get_active()
-        data["shell"] = "/bin/zsh"
+        data["shell"] = "/bin/bash"
         data["groups"] = ["wheel", "network", "video", "audio", "storage"]
         return data
 
@@ -664,7 +720,7 @@ class timezone_screen(Adw.Bin):
         self.timezone = {}
         self.timezone["region"] = current_timezone["region"]
         self.timezone["zone"] = current_timezone["zone"]
-        print(type(self.curr_time))
+        self.timezone["ntp"] = True
 
         self.zones_list.connect("notify::selected-item", self.on_zone_changed)
         self.zone_model = Gtk.StringList()
@@ -750,7 +806,7 @@ class summary_screen(Adw.Bin):
     def page_shown(self) -> None:
         self.data = self.window.collect_data()
         self.locale_preview.set_label(self.data["locale"])
-        self.kb_lang.set_label(self.data["layout"]["lang"])
+        self.kb_lang.set_label(self.data["layout"]["layout"])
         self.kb_variant.set_label(self.data["layout"]["variant"])
         self.tz_preview.set_label(
             self.data["timezone"]["region"] + "/" + self.data["timezone"]["zone"]
@@ -799,32 +855,13 @@ class install_screen(Adw.Bin):
         **kwargs,
     ):
         logging_level_name = LoggingLevel(logging_level).name
-        GLib.idle_add(
-            lambda: (
-                self.console_buffer.insert_markup(
-                    self.console_buffer.get_end_iter(),
-                    "".join(
-                        (
-                            "- ",
-                            '<span color="{:s}">',
-                            logging_level_name.rjust(8, " "),
-                            ": ",
-                            "</span>",
-                        )
-                    ).format(self.colors[logging_level_name]),
-                    -1,
-                )
-            )
-        )
 
-        if LoggingLevel(logging_level) != LoggingLevel.DEBUG:
-            GLib.idle_add(
-                lambda: (
-                    self.console_buffer.insert(
-                        self.console_buffer.get_end_iter(), "".join((message, "\n"))
-                    )
-                )
-            )
+        pos = message.find("%ST")
+        if pos != -1:
+            prs = message.rfind("%")
+            stm = bakery.st_msgs[int(message[pos + 3 : prs])]
+            self.progress_bar.set_fraction(stm[1] / 100)
+            self.curr_action.set_label(stm[0])
         else:
             GLib.idle_add(
                 lambda: (
@@ -832,15 +869,42 @@ class install_screen(Adw.Bin):
                         self.console_buffer.get_end_iter(),
                         "".join(
                             (
+                                "- ",
                                 '<span color="{:s}">',
-                                GLib.markup_escape_text(message),
-                                "</span>" "\n",
+                                logging_level_name.rjust(8, " "),
+                                ": ",
+                                "</span>",
                             )
                         ).format(self.colors[logging_level_name]),
                         -1,
                     )
                 )
             )
+
+            if LoggingLevel(logging_level) != LoggingLevel.DEBUG:
+                GLib.idle_add(
+                    lambda: (
+                        self.console_buffer.insert(
+                            self.console_buffer.get_end_iter(), "".join((message, "\n"))
+                        )
+                    )
+                )
+            else:
+                GLib.idle_add(
+                    lambda: (
+                        self.console_buffer.insert_markup(
+                            self.console_buffer.get_end_iter(),
+                            "".join(
+                                (
+                                    '<span color="{:s}">',
+                                    GLib.markup_escape_text(message),
+                                    "</span>" "\n",
+                                )
+                            ).format(self.colors[logging_level_name]),
+                            -1,
+                        )
+                    )
+                )
 
 
 @Gtk.Template.from_file(script_dir + "/data/finish_screen.ui")
