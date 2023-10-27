@@ -1298,6 +1298,7 @@ def install(settings=None) -> int:
             2 on invalid settings,
             3 on implementation missing.
     """
+    start_time = monotonic()
     if settings is None:
         if dryrun:
             settings = {
@@ -1473,7 +1474,7 @@ def install(settings=None) -> int:
         reset_timer()
 
         # Done
-        lp("Installation finished.")
+        lp("Installation finished. Total time: {:.5f}".format(monotonic() - start_time))
         sleep(0.15)
         return 0
     elif settings["install_type"] == "custom":
