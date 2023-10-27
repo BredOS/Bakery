@@ -996,11 +996,11 @@ def kb_set(model: str, layout: str, variant: str) -> None:
     if layout not in _kb_sup_cache[0].keys():
         lp("Keyboard layout " + layout + " not found!")
         raise TypeError("Keyboard layout " + layout + " not found!")
-    if variant not in _kb_sup_cache[0][layout]:
+    if variant not in _kb_sup_cache[0][layout] and variant != "normal":
         lp("Keyboard layout variant " + variant + " not found!")
         raise TypeError("Keyboard layout variant " + variant + " not found!")
     cmd = ["sudo", "localectl", "set-x11-keymap", layout, model]
-    if variant is not None:
+    if variant != "normal":
         cmd.append(variant)
     lrun(cmd)
 

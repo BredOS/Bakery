@@ -274,7 +274,7 @@ class BakeryWindow(Adw.ApplicationWindow):
         data = {}
         if not self.install_type == None:
             data["install_type"] = self.install_type
-            data["root_password"] = None
+            data["root_password"] = False
             data["layout"] = all_pages["Keyboard"].layout
             data["locale"] = all_pages["Locale"].locale
             data["timezone"] = all_pages["Timezone"].timezone
@@ -490,7 +490,7 @@ class locale_screen(Adw.Bin):
             if lang == "English":
                 self.langs_list.select_row(row)
                 self.last_selected_row = row
-                self.update_previews("en_US")
+                self.update_previews("en_US.UTF-8 UTF-8")
 
     def selected_lang(self, widget, row) -> None:
         if row != self.last_selected_row:
@@ -525,7 +525,7 @@ class locale_screen(Adw.Bin):
                 the_locale += "." + encoding
         except ValueError:
             the_locale = selected_locale
-        self.locale = the_locale
+        self.locale = selected_locale
         locale_ = babel.Locale.parse(the_locale)
         date = dates.format_date(date=datetime.utcnow(), format="full", locale=locale_)
         time = dates.format_time(time=datetime.utcnow(), format="long", locale=locale_)
@@ -698,7 +698,7 @@ class user_screen(Adw.Bin):
         data["gid"] = int(self.uid_row.get_value())
         data["sudo_nopasswd"] = self.nopasswd.get_active()
         data["autologin"] = self.autologin.get_active()
-        data["shell"] = "/bin/zsh"
+        data["shell"] = "/bin/bash"
         data["groups"] = ["wheel", "network", "video", "audio", "storage"]
         return data
 
