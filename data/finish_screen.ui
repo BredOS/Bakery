@@ -3,7 +3,7 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.0"/>
-  <object class="AdwBin">
+  <template class="finish_screen" parent="AdwBin">
     <child>
       <object class="AdwStatusPage">
         <property name="title" translatable="yes">Installation Complete!</property>
@@ -12,5 +12,5 @@
         </child>
       </object>
     </child>
-  </object>
+  </template>
 </interface>

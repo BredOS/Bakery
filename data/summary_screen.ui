@@ -139,14 +139,4 @@
       </object>
     </child>
   </template>
-  <object class="AdwMessageDialog" id="install_confirm">
-    <property name="body">Are you sure you want to start the installation?</property>
-    <property name="default-response">confirm</property>
-    <property name="heading">Start Installation</property>
-    <!-- Custom fragments -->
-    <responses>
-      <response id="cancel" translatable="yes">_Cancel</response>
-      <response id="yes" translatable="yes" appearance="suggested">Yes</response>
-    </responses>
-  </object>
 </interface>
