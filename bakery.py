@@ -115,6 +115,7 @@ def populate_messages(lang=None) -> None:
     global _
     _ = setup_translations(lang=lang)
     global st_msgs
+    st_msgs.clear()
     st_msgs += [
         [_("Preparing for installation"), 0],  # 0
         [_("Applying Locale Settings"), 10],  # 1
