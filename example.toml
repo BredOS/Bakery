@@ -2,8 +2,7 @@ install_type = "offline"
 hostname = "breborb"
 root_password = false
 
-all_locales = ["en_US.UTF-8 UTF-8"]
-main_locale = "en_US.UTF-8 UTF-8"
+locale = "en_US.UTF-8 UTF-8"
 
 packages = []
 de_packages = []

@@ -1304,8 +1304,7 @@ def install(settings=None) -> int:
             settings = {
                 "install_type": "offline",
                 "layout": {"model": "pc105", "layout": "us", "variant": "alt-intl"},
-                "all_locales": ["en_US.UTF-8 UTF-8"],
-                "main_locale": "en_US.UTF-8 UTF-8",
+                "locale": "en_US.UTF-8 UTF-8",
                 "timezone": {"region": "Europe", "zone": "Sofia", "ntp": True},
                 "hostname": "breborb",
                 "user": {
@@ -1359,8 +1358,7 @@ def install(settings=None) -> int:
         for i in [
             "install_type",
             "layout",
-            "all_locales",
-            "main_locale",
+            "locale",
             "timezone",
             "hostname",
             "user",
@@ -1390,8 +1388,12 @@ def install(settings=None) -> int:
             if i not in settings["timezone"].keys():
                 lp("Invalid timezone manifest, does not contain " + i, mode="error")
                 return 2
-        for i in ["region", "zone"]:
-            if not isinstance(settings["timezone"][i], str):
+        for i in [
+            settings["timezone"]["region"],
+            settings["timezone"]["zone"],
+            settings["locale"],
+        ]:
+            if not isinstance(i, str):
                 lp(i + " must be a string", mode="error")
                 return 2
         if not isinstance(settings["timezone"]["ntp"], bool):
@@ -1400,14 +1402,6 @@ def install(settings=None) -> int:
         for i in ["root_password"]:
             if (not isinstance(settings[i], str)) and (settings[i] != False):
                 lp(i + " must be a string or False", mode="error")
-                return 2
-        for i in ["main_locale"]:
-            if not isinstance(settings[i], str):
-                lp(i + " must be a string", mode="error")
-                return 2
-        for i in ["all_locales"]:
-            if not isinstance(settings[i], list):
-                lp(i + " must be a list", mode="error")
                 return 2
         for i in [
             "fullname",
@@ -1433,9 +1427,8 @@ def install(settings=None) -> int:
         st(1)  # Locales
         reset_timer()
 
-        enable_locales(settings["all_locales"])
-        enable_locales([settings["main_locale"]])
-        set_locale(settings["main_locale"])
+        enable_locales([settings["locale"]])
+        set_locale(settings["locale"])
 
         lp("Took {:.5f}".format(get_timer()))
         st(2)  # keyboard
