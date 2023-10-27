@@ -126,9 +126,6 @@ def populate_messages(lang=None) -> None:
     ]
 
 
-populate_messages()
-
-
 def lp(message, write_to_f=True, mode="info") -> None:
     if not write_to_f:
         LogMessage.Info(message)
