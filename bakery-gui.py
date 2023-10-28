@@ -28,7 +28,9 @@ import json
 import threading
 import bakery
 from bakery import (
-    kb_supported,
+    kb_models,
+    kb_layouts,
+    kb_variants,
     langs,
     tz_list,
     geoip,
@@ -38,8 +40,6 @@ from bakery import (
     lp,
     setup_translations,
     debounce,
-    _kblangmap,
-    _kbmodelmap,
     _,
     uidc,
     gidc,
@@ -342,19 +342,10 @@ class kb_screen(Adw.Bin):
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
-        self.kb_data, self.kb_models = kb_supported()
-        # Map language codes to language names
-        self.kb_data = {_kblangmap[lang]: value for lang, value in self.kb_data.items()}
-
-        # Sort the language names alphabetically
-        self.kb_data = {k: v for k, v in sorted(self.kb_data.items())}
-
-        # Map language names to country codes
-        self.lang_to_country = {lang: code for code, lang in _kblangmap.items()}
-        # Map pretty kb models to their backend equiv
-        self.prettymodel_to_model = {
-            model: code for code, model in self.kb_models.items()
-        }
+        self.kb_prettylayouts = kb_layouts(True)
+        self.kb_prettymodels = kb_models(True)
+        self.kb_layouts = kb_layouts()
+        self.kb_models = kb_models()
 
         self.layout = {"model": "pc105", "layout": None, "variant": None}
 
@@ -362,8 +353,8 @@ class kb_screen(Adw.Bin):
         self.models_list.set_model(self.models_model)
         for model in self.kb_models.keys():
             self.models_model.append(self.kb_models[model])
-        # set pc105 as default
 
+        # set pc105 as default
         self.models_list.set_selected(list(self.kb_models.keys()).index("pc105"))
 
         self.variant_dialog.set_transient_for(self.window)
@@ -375,10 +366,11 @@ class kb_screen(Adw.Bin):
 
     def on_model_changed(self, dropdown, *_):
         selected = dropdown.props.selected_item
-        self.layout["model"] = self.prettymodel_to_model[selected]
+        if selected is not None:
+            self.layout["model"] = self.kb_prettymodels[selected.props.string]
 
     def populate_layout_list(self) -> None:
-        for lang in self.kb_data:
+        for lang in self.kb_layouts:
             row = Gtk.ListBoxRow()
             lang_label = Gtk.Label(label=lang)
             row.set_child(lang_label)
@@ -405,9 +397,9 @@ class kb_screen(Adw.Bin):
         if row != self.last_selected_row:
             self.last_selected_row = row
             lang = row.get_child().get_label()
-            layouts = self.kb_data[lang]
-            self.layout["layout"] = self.lang_to_country[lang]
-            if layouts[0] is None:
+            layouts = kb_variants(lang)
+            self.layout["layout"] = self.kb_layouts[lang]
+            if not len(layouts):
                 print("no layouts")
                 self.layout["variant"] = "normal"
                 self.change_kb_layout(self.layout["layout"], self.layout["variant"])
@@ -827,9 +819,9 @@ class summary_screen(Adw.Bin):
     def page_shown(self) -> None:
         self.data = self.window.collect_data()
         self.locale_preview.set_label(self.data["locale"])
-        self.kb_lang.set_label(_kblangmap[self.data["layout"]["layout"]])
+        self.kb_lang.set_label(kb_layouts(True)[self.data["layout"]["layout"]])
         self.kb_variant.set_label(self.data["layout"]["variant"])
-        self.kb_model.set_label(_kbmodelmap[self.data["layout"]["model"]])
+        self.kb_model.set_label(kb_models()[self.data["layout"]["model"]])
         self.tz_preview.set_label(
             self.data["timezone"]["region"] + "/" + self.data["timezone"]["zone"]
         )

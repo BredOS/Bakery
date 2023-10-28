@@ -874,6 +874,7 @@ def locales(only_enabled: bool = False) -> list:
                 len(data[i]) < 4
                 or (data[i][2] != "_" and data[i][3] != "_")
                 or (only_enabled and data[i][0] == "#")
+                or "@" in data[i]
             ):
                 data.pop(i)  # remove non-locale / disabled locale on only_enabled
         for i in range(len(data)):
@@ -930,61 +931,86 @@ def langs(only_enabled: bool = False) -> dict:
     return res
 
 
-_kb_sup_cache = None
-
-
-def kb_supported() -> list:
-    global _kb_sup_cache
-    if _kb_sup_cache is None:
-        res = {}
-        models = {}
-        layouts = (
+def kb_variants(lang: str) -> list:
+    try:
+        variants = (
             subprocess.check_output(
-                "localectl list-x11-keymap-layouts",
+                "localectl list-x11-keymap-variants " + lang,
                 shell=True,
             )
             .decode("UTF-8")
             .split()
         )
-        if "custom" in layouts:
-            layouts.pop(layouts.index("custom"))
-        if "custom" in models:
-            models.pop(models.index("custom"))
-        print("The following output is from subprocess and is normal behaviour.")
-        print("Not all languages support variants.")
-        for i in layouts:
-            try:
-                lang = _kblangmap[i]
-            except:
-                lp(i + " not in _kblangmap", mode="warn")
-                continue
-            try:
-                variants = (
-                    subprocess.check_output(
-                        "localectl list-x11-keymap-variants " + i,
-                        shell=True,
-                    )
-                    .decode("UTF-8")
-                    .split()
-                )
-                res.update({i: variants})
-            except:
-                res.update({i: [None]})
-        mdl = (
-            subprocess.check_output(
-                "localectl list-x11-keymap-models",
-                shell=True,
-            )
-            .decode("UTF-8")
-            .split()
+        return variants
+    except:
+        return []
+
+
+_kb_modcf = None
+_kb_modct = None
+
+
+def kb_models(flip: bool = False) -> dict:
+    res = {}
+    global _kb_modcf, _kb_modct
+    if (not flip) and _kb_modcf is not None:
+        return _kb_modcf
+    elif flip and _kb_modct is not None:
+        return _kb_modct
+    models = (
+        subprocess.check_output(
+            "localectl list-x11-keymap-models",
+            shell=True,
         )
-        for i in mdl:
-            try:
-                models[i] = _kbmodelmap[i]
-            except:
-                lp(i + " not in _kbmodelmap", mode="warn")
-        _kb_sup_cache = [res, models]
-    return _kb_sup_cache
+        .decode("UTF-8")
+        .split()
+    )
+    for i in models:
+        try:
+            res[i] = _kbmodelmap[i]
+        except:
+            lp(i + " not in _kbmodelmap", mode="warn")
+    if flip:
+        res = {model: code for code, model in res.items()}
+        _kb_modct = res
+    else:
+        _kb_modcf = res
+    return res
+
+
+_kb_laycf = None
+_kb_layct = None
+
+
+def kb_layouts(flip: bool = False) -> dict:
+    res = {}
+    global _kb_laycf, _kb_layct
+    if (not flip) and _kb_laycf is not None:
+        return _kb_laycf
+    elif flip and _kb_layct is not None:
+        return _kb_layct
+    layouts = (
+        subprocess.check_output(
+            "localectl list-x11-keymap-layouts",
+            shell=True,
+        )
+        .decode("UTF-8")
+        .split()
+    )
+    if "custom" in layouts:
+        layouts.pop(layouts.index("custom"))
+
+    for i in layouts:
+        try:
+            res[i] = _kblangmap[i]
+        except:
+            lp(i + " not in _kblangmap", mode="warn")
+    if flip:
+        res = {lang: code for code, lang in res.items()}
+        _kb_layct = res
+    else:
+        _kb_laycf = res
+    return res
 
 
 def kb_set(model: str, layout: str, variant) -> None:
