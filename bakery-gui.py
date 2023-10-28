@@ -594,6 +594,7 @@ class user_screen(Adw.Bin):
         super().__init__(**kwargs)
         self.window = window
 
+        self.pass_entry.connect("changed", self.on_confirm_pass_changed)
         self.confirm_pass_entry.connect("changed", self.on_confirm_pass_changed)
         self.user_entry.connect("changed", self.on_username_changed)
         self.hostname_entry.connect("changed", self.on_hostname_changed)
@@ -659,7 +660,11 @@ class user_screen(Adw.Bin):
 
         if not pass_text == confirm_pass_text:
             self.confirm_pass_entry.get_style_context().add_class("error")
-        elif pass_text == confirm_pass_text:
+        elif (
+            pass_text == confirm_pass_text
+            or not len(pass_text)
+            or not len(confirm_pass_text)
+        ):
             self.confirm_pass_entry.get_style_context().remove_class("error")
 
     def get_fullname(self) -> str:
