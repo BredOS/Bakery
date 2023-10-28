@@ -28,6 +28,7 @@ import json
 import threading
 import bakery
 from bakery import (
+    dryrun,
     kb_models,
     kb_layouts,
     kb_variants,
@@ -370,7 +371,7 @@ class kb_screen(Adw.Bin):
             self.layout["model"] = self.kb_prettymodels[selected.props.string]
 
     def populate_layout_list(self) -> None:
-        for lang in self.kb_layouts:
+        for lang in self.kb_prettylayouts:
             row = Gtk.ListBoxRow()
             lang_label = Gtk.Label(label=lang)
             row.set_child(lang_label)
@@ -397,8 +398,8 @@ class kb_screen(Adw.Bin):
         if row != self.last_selected_row:
             self.last_selected_row = row
             lang = row.get_child().get_label()
-            layouts = kb_variants(lang)
-            self.layout["layout"] = self.kb_layouts[lang]
+            layouts = kb_variants(self.kb_prettylayouts[lang])
+            self.layout["layout"] = self.kb_prettylayouts[lang]
             if not len(layouts):
                 print("no layouts")
                 self.layout["variant"] = "normal"
@@ -440,9 +441,11 @@ class kb_screen(Adw.Bin):
     def change_kb_layout(self, lang, layout) -> None:
         if layout == "normal":
             layout = ""
-        Command(["setxkbmap", lang, layout]).run_log_and_wait(
-            logging_handler=bakery.logging_handler
-        )
+        cmd = ["setxkbmap", lang, layout]
+        if not dryrun:
+            Command(cmd).run_log_and_wait(logging_handler=bakery.logging_handler)
+        else:
+            lp("Would have run: " + str(cmd))
 
 
 @Gtk.Template.from_file(script_dir + "/data/locale_screen.ui")
@@ -819,7 +822,7 @@ class summary_screen(Adw.Bin):
     def page_shown(self) -> None:
         self.data = self.window.collect_data()
         self.locale_preview.set_label(self.data["locale"])
-        self.kb_lang.set_label(kb_layouts(True)[self.data["layout"]["layout"]])
+        self.kb_lang.set_label(kb_layouts()[self.data["layout"]["layout"]])
         self.kb_variant.set_label(self.data["layout"]["variant"])
         self.kb_model.set_label(kb_models()[self.data["layout"]["model"]])
         self.tz_preview.set_label(
