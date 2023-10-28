@@ -934,5 +934,6 @@ class finish_screen(Adw.Bin):
         self.window = window
 
 
-app = BakeryApp(application_id="org.bredos.bakery")
-app.run(sys.argv)
+if __name__ == "__main__":
+    app = BakeryApp(application_id="org.bredos.bakery")
+    app.run(sys.argv)
