@@ -1184,7 +1184,13 @@ def validate_hostname(hostname) -> str:
 # User configuration functions.
 
 
-def gidc(gid: str) -> bool:
+def gidc(gid) -> bool:
+    if gid is False:
+        return True
+    elif isinstance(gid, int):
+        gid = str(gid)
+    elif not gid.isdigit():
+        raise TypeError("GID not a number!")
     with open("/etc/group") as gr:
         data = gr.read().split("\n")
         for i in data:
@@ -1197,6 +1203,12 @@ def gidc(gid: str) -> bool:
 
 
 def uidc(uid: str) -> bool:
+    if uid is False:
+        return True
+    if isinstance(uid, int):
+        uid = str(uid)
+    elif not uid.isdigit():
+        raise TypeError("UID not a number!")
     with open("/etc/passwd") as pw:
         data = pw.read().split("\n")
         for i in data:
