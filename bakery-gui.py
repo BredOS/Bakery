@@ -18,13 +18,9 @@
 import faulthandler
 
 faulthandler.enable()
-import sys
+from sys import argv
 import gi
-import os
-import gettext
-import babel
-import requests
-import json
+from os import path
 import threading
 import bakery
 from bakery import (
@@ -45,10 +41,10 @@ from bakery import (
     uidc,
     gidc,
 )
-import pwd, grp
 from time import sleep
 from datetime import date, datetime, time
 from babel import dates, numbers
+from babel import Locale as bLocale
 from pyrunning import (
     LoggingHandler,
     LogMessage,
@@ -67,7 +63,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, Gio, GLib
 
 # py file path
-script_dir = os.path.dirname(os.path.realpath(__file__))
+script_dir = path.dirname(path.realpath(__file__))
 
 
 class BakeryApp(Adw.Application):
@@ -517,7 +513,7 @@ class locale_screen(Adw.Bin):
         except ValueError:
             the_locale = selected_locale
         self.locale = selected_locale
-        locale_ = babel.Locale.parse(the_locale)
+        locale_ = bLocale.parse(the_locale)
         date = dates.format_date(date=datetime.utcnow(), format="full", locale=locale_)
         time = dates.format_time(time=datetime.utcnow(), format="long", locale=locale_)
         currency = numbers.get_territory_currencies(locale_.territory)[0]
@@ -936,4 +932,4 @@ class finish_screen(Adw.Bin):
 
 if __name__ == "__main__":
     app = BakeryApp(application_id="org.bredos.bakery")
-    app.run(sys.argv)
+    app.run(argv)
