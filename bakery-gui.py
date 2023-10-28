@@ -39,8 +39,12 @@ from bakery import (
     setup_translations,
     debounce,
     _kblangmap,
+    _kbmodelmap,
     _,
+    uidc,
+    gidc,
 )
+import pwd, grp
 from time import sleep
 from datetime import date, datetime, time
 from babel import dates, numbers
@@ -130,6 +134,7 @@ class BakeryWindow(Adw.ApplicationWindow):
 
     stack1 = Gtk.Template.Child()
     stack1_sidebar = Gtk.Template.Child()
+    button_box = Gtk.Template.Child()
     cancel_btn = Gtk.Template.Child()
     back_btn = Gtk.Template.Child()
     next_btn = Gtk.Template.Child()
@@ -184,10 +189,15 @@ class BakeryWindow(Adw.ApplicationWindow):
             page_name = self.pages[self.current_page]
             page_id = self.get_page_id(page_name)
             self.stack1.set_visible_child_name(page_id)
+            self.button_box.set_visible(False)
             self.install_thread = InstallThread(self, all_pages["Install"])
             self.install_thread.start()
         else:
             self.install_confirm.hide()
+
+    def on_done_clicked(self, button) -> None:
+        # quit the app
+        self.close()
 
     @debounce(0.3)
     def on_next_clicked(self, button) -> None:
@@ -195,16 +205,12 @@ class BakeryWindow(Adw.ApplicationWindow):
         if self.current_page < num_pages - 1:
             self.current_page += 1
             if self.current_page == self.pages.index("Summary"):
-                print("changing to install")
                 self.next_btn.disconnect_by_func(self.on_next_clicked)
                 self.next_btn.connect("clicked", self.on_install_btn_clicked)
                 self.update_buttons()
                 page_name = self.pages[self.current_page]
                 page_id = self.get_page_id(page_name)
                 self.stack1.set_visible_child_name(page_id)
-            elif self.current_page == self.pages.index("Install"):
-                # self.current_page -= 1
-                print("install page")
             else:
                 page_name = self.pages[self.current_page]
                 page_id = self.get_page_id(page_name)
@@ -214,7 +220,6 @@ class BakeryWindow(Adw.ApplicationWindow):
     def on_back_clicked(self, button) -> None:
         if self.current_page > 0:
             self.current_page -= 1
-            print(self.current_page)
             page_name = self.pages[self.current_page]
             page_id = self.get_page_id(page_name)
             self.stack1.set_visible_child_name(page_id)
@@ -227,8 +232,6 @@ class BakeryWindow(Adw.ApplicationWindow):
         global user_event
         user_event = threading.Event()
         self.check_thread = CheckThread(all_pages["User"])
-        print("current page: " + str(self.current_page))
-        print(self.pages[self.current_page])
         if self.current_page == self.pages.index("User"):
             self.next_btn.set_sensitive(False)
             # start the thread to check when all fields are filled
@@ -239,7 +242,6 @@ class BakeryWindow(Adw.ApplicationWindow):
             all_pages["Summary"].page_shown()
             # change the next button to install
             self.next_btn.set_label(_("Install"))
-
             self.next_btn.set_sensitive(self.current_page < num_pages - 1)
             self.back_btn.set_sensitive(self.current_page > 0)
         elif self.current_page == self.pages.index("Install"):
@@ -333,6 +335,10 @@ class kb_screen(Adw.Bin):
     langs_list = Gtk.Template.Child()  # GtkListBox
     models_list = Gtk.Template.Child()  # GtkDropDown
 
+    variant_dialog = Gtk.Template.Child()
+    variant_list = Gtk.Template.Child()  # GtkListBox
+    select_variant_btn = Gtk.Template.Child()
+
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
@@ -360,15 +366,8 @@ class kb_screen(Adw.Bin):
 
         self.models_list.set_selected(list(self.kb_models.keys()).index("pc105"))
 
-        builder = Gtk.Builder.new_from_file(script_dir + "/data/kb_dialog.ui")
-
-        self.variant_dialog = builder.get_object("variant_dialog")
-
         self.variant_dialog.set_transient_for(self.window)
         self.variant_dialog.set_modal(self.window)
-
-        self.select_variant_btn = builder.get_object("select_variant_btn")
-        self.variant_list = builder.get_object("variant_list")  # GtkListBox
 
         self.select_variant_btn.connect("clicked", self.confirm_selection)
         self.models_list.connect("notify::selected-item", self.on_model_changed)
@@ -398,9 +397,6 @@ class kb_screen(Adw.Bin):
 
     def confirm_selection(self, *_) -> None:
         self.variant_dialog.hide()
-
-    def set_layout(self, layout) -> None:
-        raise NotImplementedError
 
     def show_dialog(self, *_) -> None:
         self.variant_dialog.present()
@@ -555,6 +551,8 @@ class CheckThread(threading.Thread):
                 (self.window.get_username() is not None)
                 and (self.window.get_hostname() is not None)
                 and (self.window.get_password() is not None)
+                and (self.window.get_fullname() is not None)
+                and (self.window.validate_uid(self.window.uid_row) is not None)
             ):
                 win.next_btn.set_sensitive(True)
             else:
@@ -572,7 +570,18 @@ class InstallThread(threading.Thread):
         install_data = self.window.collect_data()
         lp("Starting install with data: " + str(install_data))
         res = bakery.install(install_data)
-        print(res)
+        if res == 0:
+            # Change to finish page
+            self.window.current_page = self.window.pages.index("Finish")
+            page_name = self.window.pages[self.window.current_page]
+            page_id = self.window.get_page_id(page_name)
+            self.window.stack1.set_visible_child_name(page_id)
+            self.window.button_box.set_visible(True)
+            self.window.cancel_btn.set_visible(False)
+            self.window.back_btn.set_visible(False)
+            self.window.next_btn.disconnect_by_func(self.window.on_install_btn_clicked)
+            self.window.next_btn.connect("clicked", self.window.on_done_clicked)
+            self.window.next_btn.set_label(_("Done"))
 
 
 @Gtk.Template.from_file(script_dir + "/data/user_screen.ui")
@@ -598,6 +607,8 @@ class user_screen(Adw.Bin):
         self.user_entry.connect("changed", self.on_username_changed)
         self.hostname_entry.connect("changed", self.on_hostname_changed)
         self.fullname_entry.connect("changed", self.on_fullname_changed)
+        self.uid_row.connect("changed", self.validate_uid)
+        self.validate_uid(self.uid_row)
         self.user_info_is_visible = False
 
     def on_fullname_changed(self, entry):
@@ -613,6 +624,15 @@ class user_screen(Adw.Bin):
             if not self.user_info_is_visible:
                 self.user_info.set_visible(True)
                 self.user_info_is_visible = True
+
+    def validate_uid(self, spin_entry):
+        uid = int(spin_entry.get_value())
+        if not uidc(uid) and not gidc(uid):
+            spin_entry.get_style_context().remove_class("error")
+            return uid
+        else:
+            spin_entry.get_style_context().add_class("error")
+            return None
 
     def on_hostname_changed(self, entry):
         hostname = entry.get_text()
@@ -694,8 +714,8 @@ class user_screen(Adw.Bin):
         data["fullname"] = self.get_fullname()
         data["username"] = self.get_username()
         data["password"] = self.get_password()
-        data["uid"] = int(self.uid_row.get_value())
-        data["gid"] = int(self.uid_row.get_value())
+        data["uid"] = self.validate_uid(self.uid_row)
+        data["gid"] = self.validate_uid(self.uid_row)
         data["sudo_nopasswd"] = self.nopasswd.get_active()
         data["autologin"] = self.autologin.get_active()
         data["shell"] = "/bin/bash"
@@ -789,6 +809,7 @@ class summary_screen(Adw.Bin):
     locale_preview = Gtk.Template.Child()
     kb_lang = Gtk.Template.Child()
     kb_variant = Gtk.Template.Child()
+    kb_model = Gtk.Template.Child()
     tz_preview = Gtk.Template.Child()
 
     name_preview = Gtk.Template.Child()
@@ -806,8 +827,9 @@ class summary_screen(Adw.Bin):
     def page_shown(self) -> None:
         self.data = self.window.collect_data()
         self.locale_preview.set_label(self.data["locale"])
-        self.kb_lang.set_label(self.data["layout"]["layout"])
+        self.kb_lang.set_label(_kblangmap[self.data["layout"]["layout"]])
         self.kb_variant.set_label(self.data["layout"]["variant"])
+        self.kb_model.set_label(_kbmodelmap[self.data["layout"]["model"]])
         self.tz_preview.set_label(
             self.data["timezone"]["region"] + "/" + self.data["timezone"]["zone"]
         )
@@ -825,6 +847,7 @@ class install_screen(Adw.Bin):
     progress_bar = Gtk.Template.Child()
     curr_action = Gtk.Template.Child()
     console_text_view = Gtk.Template.Child()
+    console = Gtk.Template.Child()  # GtkScrolledWindow
 
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)

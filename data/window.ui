@@ -115,7 +115,7 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkBox">
+                          <object class="GtkBox" id="button_box">
                             <property name="halign">end</property>
                             <property name="margin-bottom">5</property>
                             <property name="margin-end">5</property>
@@ -244,6 +244,7 @@
       </object>
     </property>
     <property name="message-type">question</property>
+    <property name="transient-for">BakeryWindow</property>
   </object>
   <object class="GtkButton">
     <property name="child">
@@ -267,6 +268,7 @@
     <property name="body">Are you sure you want to cancel your installation?</property>
     <property name="default-response">no</property>
     <property name="heading">Warning</property>
+    <property name="transient-for">BakeryWindow</property>
     <!-- Custom fragments -->
     <responses>
       <response id="cancel" translatable="yes">_No</response>
@@ -277,6 +279,7 @@
     <property name="body">Are you sure you want to start the installation?</property>
     <property name="default-response">confirm</property>
     <property name="heading">Start Installation</property>
+    <property name="transient-for">BakeryWindow</property>
     <!-- Custom fragments -->
     <responses>
       <response id="cancel" translatable="yes">_Cancel</response>

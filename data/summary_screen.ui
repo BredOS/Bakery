@@ -45,6 +45,14 @@
                         </child>
                       </object>
                     </child>
+                    <child>
+                      <object class="AdwActionRow">
+                        <property name="title">Model</property>
+                        <child>
+                          <object class="GtkLabel" id="kb_model"/>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child>
