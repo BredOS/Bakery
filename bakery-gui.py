@@ -145,6 +145,8 @@ class BakeryWindow(Adw.ApplicationWindow):
     install_cancel = Gtk.Template.Child()
     install_confirm = Gtk.Template.Child()
 
+    suspend_buttons = False
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # go to the first page of main stack
@@ -198,6 +200,8 @@ class BakeryWindow(Adw.ApplicationWindow):
 
     @debounce(0.3)
     def on_next_clicked(self, button) -> None:
+        if self.suspend_buttons:
+            return
         num_pages = len(self.pages)
         if self.current_page < num_pages - 1:
             self.current_page += 1
@@ -215,6 +219,8 @@ class BakeryWindow(Adw.ApplicationWindow):
                 self.update_buttons()
 
     def on_back_clicked(self, button) -> None:
+        if self.suspend_buttons:
+            return
         if self.current_page > 0:
             self.current_page -= 1
             page_name = self.pages[self.current_page]
@@ -253,6 +259,7 @@ class BakeryWindow(Adw.ApplicationWindow):
 
     def on_cancel_clicked(self, button) -> None:
         # connect the yes button to the delete_pages function
+        self.suspend_buttons = True
         self.cancel_dialog.present()
 
     def delete_pages(self, dialog, resp) -> None:
@@ -265,6 +272,7 @@ class BakeryWindow(Adw.ApplicationWindow):
                 w = self.stack1.get_child_by_name(page_id)
                 self.stack1.remove(w)
         self.cancel_dialog.hide()
+        self.suspend_buttons = False
 
     def get_page_id(self, page_name) -> str:
         return config.pages[page_name]
@@ -386,8 +394,10 @@ class kb_screen(Adw.Bin):
 
     def confirm_selection(self, *_) -> None:
         self.variant_dialog.hide()
+        app.win.suspend_buttons = False
 
     def show_dialog(self, *_) -> None:
+        app.win.suspend_buttons = True
         self.variant_dialog.present()
 
     def selected_lang(self, widget, row) -> None:
@@ -397,7 +407,6 @@ class kb_screen(Adw.Bin):
             layouts = kb_variants(self.kb_prettylayouts[lang])
             self.layout["layout"] = self.kb_prettylayouts[lang]
             if not len(layouts):
-                print("no layouts")
                 self.layout["variant"] = "normal"
                 self.change_kb_layout(self.layout["layout"], self.layout["variant"])
             else:
@@ -483,7 +492,6 @@ class locale_screen(Adw.Bin):
         if row != self.last_selected_row:
             self.last_selected_row = row
             lang = row.get_child().get_label()
-            print(lang)
             if len(self.lang_data[lang]) == 1:
                 self.update_previews(self.lang_data[lang][0])
             else:
@@ -524,8 +532,10 @@ class locale_screen(Adw.Bin):
 
     def hide_dialog(self, *_) -> None:
         self.locale_dialog.hide()
+        app.win.suspend_buttons = False
 
     def show_dialog(self, *_) -> None:
+        app.win.suspend_buttons = True
         self.locale_dialog.present()
 
 
