@@ -1312,6 +1312,27 @@ def passwd(username: str, password: str) -> None:
         subprocess.run(cmd, input=f"{password}\n{password}", text=True)
 
 
+def sudo_nopasswd(no_passwd: bool) -> None:
+    if no_passwd:
+        lrun(
+            [
+                "sudo",
+                "sh",
+                "-c",
+                "echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/10-installer",
+            ]
+        )
+    else:
+        lrun(
+            [
+                "sudo",
+                "sh",
+                "-c",
+                "echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/10-installer",
+            ]
+        )
+
+
 # Gui support functions
 
 
@@ -1516,7 +1537,7 @@ def install(settings=None) -> int:
             settings["user"]["shell"],
             settings["user"]["groups"],
         )
-        # TODO: nopasswd
+        sudo_nopasswd(settings["user"]["sudo_nopasswd"])
         # TODO: autologin for tty
 
         lp("Took {:.5f}".format(get_timer()))
@@ -1529,4 +1550,10 @@ def install(settings=None) -> int:
         return 0
     elif settings["install_type"] == "custom":
         lp("Custom mode not yet implemented!", mode="error")
+        return 3
+    elif settings["install_type"] == "on_device":
+        lp("On device mode not yet implemented!", mode="error")
+        return 3
+    elif settings["install_type"] == "from_iso":
+        lp("From iso mode not yet implemented!", mode="error")
         return 3
