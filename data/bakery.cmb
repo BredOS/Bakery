@@ -3,7 +3,7 @@
 <cambalache-project version="0.13.1" target_tk="gtk-4.0">
   <ui>
 	(2,43,"window.ui","window.ui",None,None,None,None,None,None,None),
-	(3,None,"kb_dialog.ui","kb_dialog.ui",None,None,None,None,None,None,None),
+	(3,None,"kb_dialog.ui",None,None,None,None,None,None,None,None),
 	(4,1,"kb_screen.ui","kb_screen.ui",None,None,None,None,None,None,None),
 	(5,1,None,"locale_screen.ui",None,None,None,None,None,None,None),
 	(6,1,"timezone_screen.ui","timezone_screen.ui",None,None,None,None,None,None,None),
@@ -324,7 +324,7 @@
 	(4,18,"GtkWidget","valign","GTK_ALIGN_END",None,None,None,None,None,None,None,None,None),
 	(4,18,"GtkWidget","vexpand","true",None,None,None,None,None,None,None,None,None),
 	(5,2,"AdwStatusPage","child",None,None,None,None,None,3,None,None,None,None),
-	(5,2,"AdwStatusPage","title","Please select your region",1,None,None,None,None,None,None,None,None),
+	(5,2,"AdwStatusPage","title","Please select your language",1,None,None,None,None,None,None,None,None),
 	(5,3,"GtkOrientable","orientation","vertical",None,None,None,None,None,None,None,None,None),
 	(5,14,"AdwStatusPage","child",None,None,None,None,None,15,None,None,None,None),
 	(5,15,"GtkOrientable","orientation","vertical",None,None,None,None,None,None,None,None,None),

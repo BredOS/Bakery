@@ -40,6 +40,7 @@ from bakery import (
     _,
     uidc,
     gidc,
+    lrun,
 )
 from time import sleep
 from datetime import date, datetime, time
@@ -179,16 +180,20 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.install_confirm.set_property("hide-on-close", True)
         self.install_confirm.show()
 
+    @debounce(0.3)
+    def start_install(self) -> None:
+        self.current_page = self.pages.index("Install")
+        page_name = self.pages[self.current_page]
+        page_id = self.get_page_id(page_name)
+        self.stack1.set_visible_child_name(page_id)
+        self.button_box.set_visible(False)
+        self.install_thread = InstallThread(self, all_pages["Install"])
+        self.install_thread.start()
+
     def on_install_dialog_response(self, dialog, resp) -> None:
         if resp == "yes":
             self.install_confirm.hide()
-            self.current_page = self.pages.index("Install")
-            page_name = self.pages[self.current_page]
-            page_id = self.get_page_id(page_name)
-            self.stack1.set_visible_child_name(page_id)
-            self.button_box.set_visible(False)
-            self.install_thread = InstallThread(self, all_pages["Install"])
-            self.install_thread.start()
+            self.start_install()
         else:
             self.install_confirm.hide()
 
@@ -220,7 +225,11 @@ class BakeryWindow(Adw.ApplicationWindow):
             page_name = self.pages[self.current_page]
             page_id = self.get_page_id(page_name)
             self.stack1.set_visible_child_name(page_id)
-            self.next_btn.connect("clicked", self.on_next_clicked)
+            try:
+                self.next_btn.disconnect_by_func(self.on_install_btn_clicked)
+                self.next_btn.connect("clicked", self.on_next_clicked)
+            except:
+                pass
             self.update_buttons()
 
     def update_buttons(self) -> None:
@@ -339,7 +348,7 @@ class kb_screen(Adw.Bin):
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
-        self.kb_prettylayouts = kb_layouts(True)
+        self.kb_prettylayouts = {k: v for k, v in sorted(kb_layouts(True).items())}
         self.kb_prettymodels = kb_models(True)
         self.kb_layouts = kb_layouts()
         self.kb_models = kb_models()
@@ -382,7 +391,7 @@ class kb_screen(Adw.Bin):
                 self.last_selected_row = row
                 self.layout["layout"] = "us"
                 self.layout["variant"] = "normal"
-                self.change_kb_layout(lang, "normal")
+                self.change_kb_layout("us", "pc105", "normal")
 
     def confirm_selection(self, *_) -> None:
         self.variant_dialog.hide()
@@ -399,7 +408,9 @@ class kb_screen(Adw.Bin):
             if not len(layouts):
                 print("no layouts")
                 self.layout["variant"] = "normal"
-                self.change_kb_layout(self.layout["layout"], self.layout["variant"])
+                self.change_kb_layout(
+                    self.layout["layout"], self.layout["model"], self.layout["variant"]
+                )
             else:
                 # clear the listbox
                 self.variant_list.remove_all()
@@ -432,16 +443,14 @@ class kb_screen(Adw.Bin):
         if row != self.last_selected_layout:
             self.last_selected_layout = row
             self.layout["variant"] = row.get_child().get_label().split(" - ")[1]
-            self.change_kb_layout(self.layout["layout"], self.layout["variant"])
+            self.change_kb_layout(
+                self.layout["layout"], self.layout["model"], self.layout["variant"]
+            )
 
-    def change_kb_layout(self, lang, layout) -> None:
+    def change_kb_layout(self, lang, model, layout) -> None:
         if layout == "normal":
             layout = ""
-        cmd = ["setxkbmap", lang, layout]
-        if not dryrun:
-            Command(cmd).run_log_and_wait(logging_handler=bakery.logging_handler)
-        else:
-            lp("Would have run: " + str(cmd))
+        lrun(["setxkbmap", lang, model, layout])
 
 
 @Gtk.Template.from_file(script_dir + "/data/locale_screen.ui")
@@ -460,6 +469,9 @@ class locale_screen(Adw.Bin):
         super().__init__(**kwargs)
         self.window = window
         self.lang_data = {k: v for k, v in sorted(langs().items())}
+
+        self.locale_dialog.set_transient_for(self.window)
+        self.locale_dialog.set_modal(self.window)
 
         self.populate_locales_list()
         self.select_locale_btn.connect("clicked", self.hide_dialog)
@@ -499,11 +511,13 @@ class locale_screen(Adw.Bin):
                     self.locales_list.connect("row-activated", self.selected_locale)
                     self.show_dialog()
                     self.last_selected_locale = None
+                    self.select_locale_btn.set_sensitive(False)
 
     def selected_locale(self, widget, row) -> None:
         if row != self.last_selected_locale:
             self.last_selected_locale = row
             self.update_previews(row.get_child().get_label())
+            self.select_locale_btn.set_sensitive(True)
 
     def update_previews(self, selected_locale) -> None:
         try:
@@ -526,6 +540,7 @@ class locale_screen(Adw.Bin):
         self.locale_dialog.hide()
 
     def show_dialog(self, *_) -> None:
+        self.locales_list.unselect_all()
         self.locale_dialog.present()
 
 

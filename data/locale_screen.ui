@@ -59,7 +59,7 @@
             </child>
           </object>
         </property>
-        <property name="title" translatable="yes">Please select your region</property>
+        <property name="title" translatable="yes">Please select your language</property>
       </object>
     </child>
   </template>
