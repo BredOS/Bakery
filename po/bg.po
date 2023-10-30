@@ -1,21 +1,21 @@
-# Bulgarian translations for bakery package.
-# Copyright (C) 2023 THE bakery'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the bakery package.
-# Automatically generated, 2023.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: bakery\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-30 13:44+0000\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
-"Language: bg\n"
+"PO-Revision-Date: 2023-10-30 18:05\n"
+"Last-Translator: \n"
+"Language-Team: Bulgarian\n"
+"Language: bg_BG\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: bakery\n"
+"X-Crowdin-Project-ID: 624294\n"
+"X-Crowdin-Language: bg\n"
+"X-Crowdin-File: /main/po/bakery.pot\n"
+"X-Crowdin-File-ID: 16\n"
 
 #: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
 msgid "BredOS Installer"
@@ -125,8 +125,7 @@ msgstr "Персонализирана инсталация"
 
 #. Do not translate literally, come up with a bread/baking related pun that works in the target language. Try to keep the idea that the installer will lead the way
 #: data/window.ui:92
-msgid ""
-"Let the Bakery installer whip up the perfect BredOS recipe for your machine!"
+msgid "Let the Bakery installer whip up the perfect BredOS recipe for your machine!"
 msgstr "Нека пекарната приготви идеалната рецепта на BredOS за вашия компютър!"
 
 #: data/window.ui:93
@@ -154,12 +153,8 @@ msgstr "За Bakery"
 
 #. Dont change the bakery_recipe.conf name
 #: data/window.ui:181
-msgid ""
-"You selected custom installation. Please provide a URL or PATH to the "
-"Bakery_recipe.conf"
-msgstr ""
-"Вие избрахте персонализирана инсталация. Моля, посочете линк или път до "
-"Bakery_recipe.conf"
+msgid "You selected custom installation. Please provide a URL or PATH to the Bakery_recipe.conf"
+msgstr "Вие избрахте персонализирана инсталация. Моля, посочете линк или път до Bakery_recipe.conf"
 
 #: data/window.ui:262
 msgid "Install online"
@@ -187,12 +182,8 @@ msgstr "Тествайте клавиатурата си тук!"
 
 #. If the target language doesnt use the latin please kindly tell the user to use english US
 #: data/kb_screen.ui:62
-msgid ""
-"If your language uses a different script than latin please use English US, "
-"you can always add your keyboard layout after install"
-msgstr ""
-"Моля използвайте Английски за сега. Можете да добавите своя език след "
-"инсталацията"
+msgid "If your language uses a different script than latin please use English US, you can always add your keyboard layout after install"
+msgstr "Моля използвайте Английски за сега. Можете да добавите своя език след инсталацията"
 
 #: data/kb_screen.ui:63
 msgid "Select your keyboard layout"
@@ -272,10 +263,9 @@ msgid "Use sudo and polkit without password."
 msgstr "Искате ли да използвате sudo и polkit без парола?"
 
 #: data/user_screen.ui:94
-#, fuzzy
 msgctxt "Login into the system literally, Translate as a question"
 msgid "Log in automatically without asking for password."
-msgstr "Искате ли да влизате в системата автоматично без да ви пита за парола."
+msgstr ""
 
 #: data/user_screen.ui:108
 msgid "Create your user account"
@@ -303,12 +293,8 @@ msgid "Log in automatically without asking for password. "
 msgstr "Влизане автоматично в компютъра без да пита за парола."
 
 #: data/summary_screen.ui:145
-msgid ""
-"Your selections have been listed below, please confirm and continue with "
-"instillation"
-msgstr ""
-"Вашите избори са показани по-долу, моля потвърдете и продължете с "
-"инсталацията"
+msgid "Your selections have been listed below, please confirm and continue with instillation"
+msgstr "Вашите избори са показани по-долу, моля потвърдете и продължете с инсталацията"
 
 #: data/summary_screen.ui:146
 msgid "Please confirm your choices"
@@ -325,3 +311,4 @@ msgstr "Инсталиране на BredOS"
 #: data/finish_screen.ui:9
 msgid "Installation Complete!"
 msgstr "Инсталацията е завършена!"
+
