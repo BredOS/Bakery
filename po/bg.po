@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: bakery\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-30 17:47\n"
+"PO-Revision-Date: 2023-10-30 18:10\n"
 "Last-Translator: \n"
 "Language-Team: Bulgarian\n"
 "Language: bg_BG\n"
@@ -12,10 +12,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Crowdin-Project: bakery\n"
-"X-Crowdin-Project-ID: 624282\n"
+"X-Crowdin-Project-ID: 624294\n"
 "X-Crowdin-Language: bg\n"
 "X-Crowdin-File: /main/po/bakery.pot\n"
-"X-Crowdin-File-ID: 10\n"
+"X-Crowdin-File-ID: 16\n"
 
 #: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
 msgid "BredOS Installer"
@@ -84,7 +84,7 @@ msgstr "Почистване на инсталацията"
 
 #: bakery-gui.py:106
 msgid "translator-credits"
-msgstr "translator-credits"
+msgstr ""
 
 #: bakery-gui.py:107
 msgid "Copyright The BredOS developers"
