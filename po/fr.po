@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: bakery\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-30 17:09\n"
+"PO-Revision-Date: 2023-10-30 17:37\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -40,7 +40,7 @@ msgstr "Fuseau horaire"
 
 #: config.py:13
 msgid "User"
-msgstr ""
+msgstr "Utilisateur"
 
 #: config.py:14
 msgid "Desktops"
@@ -84,11 +84,11 @@ msgstr "Nettoyage de l'installation"
 
 #: bakery-gui.py:106
 msgid "translator-credits"
-msgstr ""
+msgstr "translator-credits"
 
 #: bakery-gui.py:107
 msgid "Copyright The BredOS developers"
-msgstr ""
+msgstr "Tout droits réservés aux Développeurs de BredOS"
 
 #: bakery-gui.py:108
 msgid "Bakery is a simple installer for BredOS"
@@ -96,11 +96,11 @@ msgstr "Bakery est un simple installeur pour BredOS"
 
 #: bakery-gui.py:113
 msgid "Translated by"
-msgstr ""
+msgstr "Traduit par"
 
 #: bakery-gui.py:114
 msgid "Special thanks to"
-msgstr ""
+msgstr "Un grand merci à"
 
 #: bakery-gui.py:247 bakery-gui.py:261
 msgid "Next"
@@ -121,7 +121,7 @@ msgstr "Installation hors-ligne"
 
 #: data/window.ui:80
 msgid "Custom Installation"
-msgstr ""
+msgstr "Installation personnalisée."
 
 #. Do not translate literally, come up with a bread/baking related pun that works in the target language. Try to keep the idea that the installer will lead the way
 #: data/window.ui:92
@@ -135,7 +135,7 @@ msgstr "Bienvenue sur BredOS!"
 #: data/window.ui:129
 msgctxt "Button\n"
 msgid "Cancel"
-msgstr ""
+msgstr "Abandonner"
 
 #: data/window.ui:139
 msgctxt "Button"
@@ -174,7 +174,7 @@ msgstr "Abandonner"
 
 #: data/kb_screen.ui:39
 msgid "Pick your keyboard model"
-msgstr ""
+msgstr "Sélectionnez votre modèle de clavier"
 
 #: data/kb_screen.ui:52
 msgid "Test your layout here!"
@@ -223,15 +223,15 @@ msgstr "Veuillez sélectionner votre région"
 
 #: data/timezone_screen.ui:10
 msgid "Select your timezone"
-msgstr ""
+msgstr "Sélectionnez un fuseau horaire"
 
 #: data/timezone_screen.ui:23
 msgid "Regions"
-msgstr ""
+msgstr "Régions"
 
 #: data/timezone_screen.ui:35
 msgid "Zone"
-msgstr ""
+msgstr "Zone"
 
 #: data/timezone_screen.ui:52
 msgid "Current time:"
@@ -260,12 +260,12 @@ msgstr "Confirmez votre mot de passe"
 #: data/user_screen.ui:82
 msgctxt "Translate as question"
 msgid "Use sudo and polkit without password."
-msgstr ""
+msgstr "Utiliser sudo et polkit sans demander mot de passe."
 
 #: data/user_screen.ui:94
 msgctxt "Login into the system literally, Translate as a question"
 msgid "Log in automatically without asking for password."
-msgstr ""
+msgstr "Se connecter automatiquement sans demander le mot de passe."
 
 #: data/user_screen.ui:108
 msgid "Create your user account"
@@ -290,7 +290,7 @@ msgstr "Utiliser sudo et polkit sans demander le mot de passe."
 
 #: data/summary_screen.ui:115
 msgid "Log in automatically without asking for password. "
-msgstr ""
+msgstr "Connexion automatique. "
 
 #: data/summary_screen.ui:145
 msgid "Your selections have been listed below, please confirm and continue with instillation"
@@ -302,7 +302,7 @@ msgstr "Veuillez confirmer vos choix"
 
 #: data/install_screen.ui:9
 msgid "Please standby while installation is in progress"
-msgstr ""
+msgstr "Installation en cours, veuillez patienter."
 
 #: data/install_screen.ui:10
 msgid "Installing BredOS"
