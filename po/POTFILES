@@ -2,11 +2,11 @@ data/org.bredos.bakery.desktop.in
 data/org.bredos.bakery.appdata.xml.in
 data/org.bredos.bakery.gschema.xml
 bakery-cli.py
+config.py
 bakery.py
 bakery-gui.py
 data/window.ui
 data/kb_screen.ui
-data/kb_dialog.ui
 data/locale_screen.ui
 data/timezone_screen.ui
 data/user_screen.ui

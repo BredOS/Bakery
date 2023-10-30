@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Created with Cambalache 0.17.0 -->
-<interface>
+<interface domain="bakery">
   <!-- interface-name window.ui -->
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.2"/>
@@ -8,7 +8,7 @@
   <template class="BakeryWindow" parent="AdwApplicationWindow">
     <property name="default-height">800</property>
     <property name="default-width">800</property>
-    <property name="title">BredOS Installer</property>
+    <property name="title" translatable="yes">BredOS Installer</property>
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
@@ -77,11 +77,12 @@
                                     </child>
                                     <child>
                                       <object class="GtkLabel">
-                                        <property name="label">Custom Installation</property>
+                                        <property name="label" translatable="yes">Custom Installation</property>
                                       </object>
                                     </child>
                                   </object>
                                 </property>
+                                <property name="visible">False</property>
                               </object>
                             </child>
                           </object>
@@ -125,7 +126,7 @@
                             <child>
                               <object class="GtkButton" id="cancel_btn">
                                 <property name="halign">end</property>
-                                <property name="label" translatable="yes" context="Button">Cancel</property>
+                                <property name="label" translatable="yes" context="Button&#10;">Cancel</property>
                                 <property name="valign">end</property>
                                 <property name="vexpand">True</property>
                                 <style>
@@ -166,7 +167,7 @@
   <menu id="pop_menu">
     <item>
       <attribute name="action">app.about</attribute>
-      <attribute name="label">About Bakery</attribute>
+      <attribute name="label" translatable="yes">About Bakery</attribute>
       <attribute name="about_menu_item">name</attribute>
     </item>
   </menu>

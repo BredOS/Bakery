@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Created with Cambalache 0.17.0 -->
-<interface>
+<interface domain="bakery">
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.2"/>
   <template class="locale_screen" parent="AdwBin">
@@ -67,7 +67,7 @@
     <property name="default-height">470</property>
     <property name="default-width">400</property>
     <property name="hide-on-close">true</property>
-    <property name="title" translatable="yes">Select keyboard variant</property>
+    <property name="title" translatable="yes">Select your language locale</property>
     <property name="use-header-bar">0</property>
     <child>
       <object class="GtkBox">

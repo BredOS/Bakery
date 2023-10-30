@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Created with Cambalache 0.17.0 -->
-<interface>
+<interface domain="bakery">
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.0"/>
   <template class="finish_screen" parent="AdwBin">

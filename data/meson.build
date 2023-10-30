@@ -39,9 +39,6 @@ endif
 install_data('window.ui',
   install_dir: join_paths(get_option('datadir'), 'bakery/data')
 )
-install_data('kb_dialog.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
 install_data('kb_screen.ui',
   install_dir: join_paths(get_option('datadir'), 'bakery/data')
 )

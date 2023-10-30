@@ -5,16 +5,19 @@ timezone = {"region": "Europe", "zone": "London"}
 installer_version = "0.1.0"
 api_version = 1
 
-pages = {
-    "Keyboard": "kb_screen",
-    "Locale": "locale_screen",
-    "Timezone": "timezone_screen",
-    "User": "user_screen",
-    "Desktops": "de_screen",
-    "Summary": "summary_screen",
-    "Install": "install_screen",
-    "Finish": "finish_screen",
-}
+
+def pages(_):
+    return {
+        "Keyboard": ["kb_screen", _("Keyboard")],
+        "Locale": ["locale_screen", _("Locale")],
+        "Timezone": ["timezone_screen", _("Timezone")],
+        "User": ["user_screen", _("User")],
+        "Desktops": ["de_screen", _("Desktops")],
+        "Summary": ["summary_screen", _("Summary")],
+        "Install": ["install_screen", _("Install")],
+        "Finish": ["finish_screen", _("Finish")],
+    }
+
 
 offline_pages = [
     "Locale",

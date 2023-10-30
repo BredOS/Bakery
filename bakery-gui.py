@@ -22,6 +22,8 @@ from sys import argv
 import gi
 from os import path
 import threading
+import locale
+import gettext
 import bakery
 from bakery import (
     dryrun,
@@ -56,8 +58,6 @@ from pyrunning import (
 )
 from pytz import timezone
 import config
-
-# from bakery import kb_langs
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
@@ -97,18 +97,22 @@ class BakeryApp(Adw.Application):
         """Callback for the app.about action."""
         about = Adw.AboutWindow(
             transient_for=self.props.active_window,
-            application_name="BredOS Installer",
+            application_name=_("BredOS Installer"),
             application_icon="org.bredos.bakery",
             developer_name="BredOS",
             debug_info=self.win.collect_data(),
             version="0.1.0",
             developers=["Panda", "bill88t"],
             designers=["Panda", "DustyDaimler"],
-            copyright="© 2023 BredOS",
+            translator_credits=_("translator-credits"),
+            copyright=_("Copyright The BredOS developers"),
             comments=_("Bakery is a simple installer for BredOS"),
             license_type=Gtk.License.GPL_3_0,
             website="https://BredOS.org",
         )
+        translators = ["Panda's best friend", "Panda"]
+        about.add_credit_section(_("Translated by"), translators)
+        about.add_acknowledgement_section(_("Special thanks to"), ["Shivanandvp"])
         about.present()
 
     def create_action(self, name, callback, shortcuts=None) -> None:
@@ -276,7 +280,7 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.cancel_dialog.hide()
 
     def get_page_id(self, page_name) -> str:
-        return config.pages[page_name]
+        return page_name
 
     def collect_data(self, *_) -> dict:
         data = {}
@@ -307,12 +311,13 @@ class BakeryWindow(Adw.ApplicationWindow):
             list.append(string)
 
     def add_pages(self, stack, pages) -> None:
-        global all_pages
+        global all_pages, pages_dict
         all_pages = {}
+        pages_dict = config.pages(_)
         for page in pages:
-            page_ = globals()[config.pages[page]](window=self)
+            page_ = globals()[pages_dict[page][0]](window=self)
             all_pages[page] = page_
-            stack.add_titled(page_, config.pages[page], page)
+            stack.add_titled(page_, page, pages_dict[page][1])
 
     def init_screens(self, install_type) -> None:
         if install_type == "online":
@@ -536,7 +541,25 @@ class locale_screen(Adw.Bin):
         self.date_preview.set_label(time + "  -  " + date)
         self.currency_preview.set_label(number_format + "  -  " + currency_format)
 
-    def hide_dialog(self, *_) -> None:
+    def hide_dialog(self, stuff) -> None:
+        try:
+            # change the locale and update translations
+            print(self.locale)
+            try:
+                the_locale, encoding = self.locale.split(" ")
+                if not encoding == "UTF-8":
+                    the_locale += "." + encoding
+            except ValueError:
+                the_locale = self.locale
+            global _
+            _ = setup_translations("bg")
+            print(_("Next"))
+            win.queue_draw()
+        except Exception as e:
+            import traceback
+
+            print(traceback.format_exc())
+
         self.locale_dialog.hide()
 
     def show_dialog(self, *_) -> None:
@@ -801,7 +824,7 @@ class timezone_screen(Adw.Bin):
         if tz is not None:
             time = datetime.now(tz)
             self.curr_time.set_label(time.strftime("%Y-%m-%d %H:%M:%S"))
-            self.preview_row.set_subtitle("Previewing time in " + str(tz))
+            self.preview_row.set_subtitle(_("Previewing time in ") + str(tz))
 
 
 @Gtk.Template.from_file(script_dir + "/data/de_screen.ui")

@@ -29,13 +29,14 @@ package_bakery() {
         DESTDIR="$pkgdir" meson install
         rm -rf "$pkgdir/usr/share/bakery/data/"*.ui
         rm -rf "$pkgdir/usr/share/bakery/bakery-gui.py"
-        rm -rf "$pkgdir/usr/share/"{icons/,appdata/,applications/,glib-2.0}
+        rm -rf "$pkgdir/usr/share/"{icons/,appdata/,applications/,glib-2.0/}
 }
 
 package_bakery-gui() {
         cd "$srcdir/$pkgbase/build"
         depends=('bakery' 'python-babel' 'python-pyrunning')
         DESTDIR="$pkgdir" meson install
+        rm -rf "$pkgdir/usr/share/locale"
         rm -rf "$pkgdir/usr/share/bakery/"{bakery-cli.py,bakery.py,config.py}
         rm -rf "$pkgdir/usr/share/licenses/"
         rm -rf "$pkgdir/usr/bin"

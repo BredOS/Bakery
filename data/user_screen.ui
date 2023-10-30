@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Created with Cambalache 0.17.0 -->
-<interface>
+<interface domain="bakery">
   <!-- interface-name user_screen.ui -->
   <requires lib="gtk" version="4.12"/>
   <requires lib="libadwaita" version="1.4"/>
@@ -79,7 +79,7 @@
                       <object class="AdwActionRow">
                         <property name="activatable">False</property>
                         <property name="selectable">False</property>
-                        <property name="title" translatable="yes">Use sudo and polkit without password.</property>
+                        <property name="title" translatable="yes" context="Translate as question">Use sudo and polkit without password.</property>
                         <child>
                           <object class="GtkSwitch" id="nopasswd">
                             <property name="valign">center</property>
@@ -91,7 +91,7 @@
                       <object class="AdwActionRow">
                         <property name="activatable">False</property>
                         <property name="selectable">False</property>
-                        <property name="title" translatable="yes" context="Login into the system literally">Log in automatically without asking for password. </property>
+                        <property name="title" translatable="yes" context="Login into the system literally, Translate as a question">Log in automatically without asking for password.</property>
                         <child>
                           <object class="GtkSwitch" id="autologin">
                             <property name="valign">center</property>
