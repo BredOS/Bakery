@@ -14,8 +14,8 @@ msgstr ""
 "X-Crowdin-Project: bakery\n"
 "X-Crowdin-Project-ID: 624282\n"
 "X-Crowdin-Language: no\n"
-"X-Crowdin-File: /main/po/bg.po\n"
-"X-Crowdin-File-ID: 6\n"
+"X-Crowdin-File: /main/po/fr.po\n"
+"X-Crowdin-File-ID: 8\n"
 
 #: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
 msgid "BredOS Installer"
@@ -311,4 +311,8 @@ msgstr ""
 #: data/finish_screen.ui:9
 msgid "Installation Complete!"
 msgstr ""
+
+#~ msgctxt "Login into the system literally"
+#~ msgid "Log in automatically without asking for password. "
+#~ msgstr "Connexion automatique"
 
