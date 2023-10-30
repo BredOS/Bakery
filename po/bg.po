@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: bakery\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-30 17:09\n"
+"PO-Revision-Date: 2023-10-30 17:37\n"
 "Last-Translator: \n"
 "Language-Team: Bulgarian\n"
 "Language: bg_BG\n"
@@ -84,7 +84,7 @@ msgstr "Почистване на инсталацията"
 
 #: bakery-gui.py:106
 msgid "translator-credits"
-msgstr ""
+msgstr "translator-credits"
 
 #: bakery-gui.py:107
 msgid "Copyright The BredOS developers"
@@ -265,7 +265,7 @@ msgstr "Искате ли да използвате sudo и polkit без пар
 #: data/user_screen.ui:94
 msgctxt "Login into the system literally, Translate as a question"
 msgid "Log in automatically without asking for password."
-msgstr ""
+msgstr "Искате ли да влизате автоматично в компютъра без да пита за парола."
 
 #: data/user_screen.ui:108
 msgid "Create your user account"
