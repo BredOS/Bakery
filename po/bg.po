@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: bakery\n"
+"Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-30 18:10\n"
+"PO-Revision-Date: 2023-10-31 13:28\n"
 "Last-Translator: \n"
 "Language-Team: Bulgarian\n"
 "Language: bg_BG\n"
@@ -11,11 +11,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Crowdin-Project: bakery\n"
-"X-Crowdin-Project-ID: 624294\n"
+"X-Crowdin-Project: 584b35aa9096f3c7f606f346bb0bfffc\n"
+"X-Crowdin-Project-ID: 2\n"
 "X-Crowdin-Language: bg\n"
 "X-Crowdin-File: /main/po/bakery.pot\n"
-"X-Crowdin-File-ID: 16\n"
+"X-Crowdin-File-ID: 6\n"
 
 #: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
 msgid "BredOS Installer"
@@ -84,7 +84,7 @@ msgstr "Почистване на инсталацията"
 
 #: bakery-gui.py:106
 msgid "translator-credits"
-msgstr ""
+msgstr "translator-credits"
 
 #: bakery-gui.py:107
 msgid "Copyright The BredOS developers"
@@ -113,11 +113,11 @@ msgstr "Готово"
 
 #: bakery-gui.py:815
 msgid "Previewing time in "
-msgstr "Показано време в "
+msgstr "Показване на времето в "
 
 #: data/window.ui:60
 msgid "Install offline"
-msgstr "Онлайн инсталация"
+msgstr "Офлайн инсталация"
 
 #: data/window.ui:80
 msgid "Custom Installation"
@@ -265,7 +265,7 @@ msgstr "Искате ли да използвате sudo и polkit без пар
 #: data/user_screen.ui:94
 msgctxt "Login into the system literally, Translate as a question"
 msgid "Log in automatically without asking for password."
-msgstr "Искате ли да влизате автоматично в компютъра без да пита за парола."
+msgstr "Искате ли да влизате автоматично в компютъра без да пита за парола?"
 
 #: data/user_screen.ui:108
 msgid "Create your user account"

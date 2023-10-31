@@ -3,312 +3,312 @@ msgstr ""
 "Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-31 14:33\n"
+"PO-Revision-Date: 2023-10-31 12:29\n"
 "Last-Translator: \n"
-"Language-Team: French\n"
-"Language: fr_FR\n"
+"Language-Team: Dutch\n"
+"Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Crowdin-Project: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "X-Crowdin-Project-ID: 2\n"
-"X-Crowdin-Language: fr\n"
+"X-Crowdin-Language: nl\n"
 "X-Crowdin-File: /main/po/bakery.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
 #: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
 msgid "BredOS Installer"
-msgstr "Installeur BredOS."
+msgstr "BredOS Installer"
 
 #: data/org.bredos.bakery.appdata.xml.in:7
 msgid "No description"
-msgstr "Description manquante."
+msgstr "Geen beschrijving"
 
 #: config.py:10
 msgid "Keyboard"
-msgstr "Clavier"
+msgstr "Keyboard"
 
 #. Translate locale as language and region?
 #: config.py:11 data/summary_screen.ui:20
 msgid "Locale"
-msgstr "Langue et location"
+msgstr "Lokalisatie"
 
 #: config.py:12 data/summary_screen.ui:63
 msgid "Timezone"
-msgstr "Fuseau horaire"
+msgstr "Timezone"
 
 #: config.py:13
 msgid "User"
-msgstr "Utilisateur"
+msgstr "Gebruiker"
 
 #: config.py:14
 msgid "Desktops"
-msgstr "Bureaux"
+msgstr "Bureaublad"
 
 #: config.py:15
 msgid "Summary"
-msgstr "Sommaire"
+msgstr "Summary"
 
 #: config.py:16 bakery-gui.py:253
 msgid "Install"
-msgstr "Installer"
+msgstr "Installeren"
 
 #: config.py:17
 msgid "Finish"
-msgstr "Terminer"
+msgstr "Beëindigen"
 
 #: bakery.py:137
 msgid "Preparing for installation"
-msgstr "Préparation pour l'installation."
+msgstr "Installatie voorbereiden"
 
 #: bakery.py:138
 msgid "Applying Locale Settings"
-msgstr "Application des paramètres de langue et de location."
+msgstr "Locale instellingen toepassen"
 
 #: bakery.py:139
 msgid "Applying Keyboard Settings"
-msgstr "Application des paramètres du clavier."
+msgstr "Toetsenbordinstellingen toepassen"
 
 #: bakery.py:140
 msgid "Applying Timezone Settings"
-msgstr "Application des paramètres du fuseau horaire"
+msgstr "Instellingen voor tijdzone toepassen"
 
 #: bakery.py:141
 msgid "Creating User account"
-msgstr "Creation du compte utilisateur"
+msgstr "Gebruikersaccount aanmaken"
 
 #: bakery.py:142
 msgid "Cleaning up installation"
-msgstr "Nettoyage de l'installation"
+msgstr "Installatie opschonen"
 
 #: bakery-gui.py:106
 msgid "translator-credits"
-msgstr "crédits traducteur-interprète"
+msgstr "vertalers-credits"
 
 #: bakery-gui.py:107
 msgid "Copyright The BredOS developers"
-msgstr "Tout droits réservés aux Développeurs de BredOS"
+msgstr "Copyright de BredOS ontwikkelaars"
 
 #: bakery-gui.py:108
 msgid "Bakery is a simple installer for BredOS"
-msgstr "Bakery est un simple installeur pour BredOS"
+msgstr "Bakery is een eenvoudige installatie voor BredOS"
 
 #: bakery-gui.py:113
 msgid "Translated by"
-msgstr "Traduit par"
+msgstr "Vertaald door"
 
 #: bakery-gui.py:114
 msgid "Special thanks to"
-msgstr "Un grand merci à"
+msgstr "Speciale dank aan"
 
 #: bakery-gui.py:247 bakery-gui.py:261
 msgid "Next"
-msgstr "Suivant"
+msgstr "Volgende"
 
 #. done button
 #: bakery-gui.py:601 data/window.ui:235
 msgid "Done"
-msgstr "Terminer"
+msgstr "Voltooid"
 
 #: bakery-gui.py:815
 msgid "Previewing time in "
-msgstr "Fuseau Horaire: "
+msgstr "Voorbeeld tijd in "
 
 #: data/window.ui:60
 msgid "Install offline"
-msgstr "Installation hors-ligne"
+msgstr "Offline installeren"
 
 #: data/window.ui:80
 msgid "Custom Installation"
-msgstr "Installation personnalisée."
+msgstr "Aangepaste installatie"
 
 #. Do not translate literally, come up with a bread/baking related pun that works in the target language. Try to keep the idea that the installer will lead the way
 #: data/window.ui:92
 msgid "Let the Bakery installer whip up the perfect BredOS recipe for your machine!"
-msgstr "Laissez l'installeur concocter la recette parfaite pour votre machine!"
+msgstr "Laat het Bakery installatieprogramma het perfecte BredOS recept voor je machine omhoog draaien!"
 
 #: data/window.ui:93
 msgid "Welcome to BredOS!"
-msgstr "Bienvenue sur BredOS!"
+msgstr "Welkom bij BredOS!"
 
 #: data/window.ui:129
 msgctxt "Button\n"
 msgid "Cancel"
-msgstr "Abandonner"
+msgstr "annuleren"
 
 #: data/window.ui:139
 msgctxt "Button"
 msgid "Back"
-msgstr "Précédent"
+msgstr "Achterzijde"
 
 #: data/window.ui:145
 msgctxt "Button"
 msgid "Next"
-msgstr "Suivant"
+msgstr "Volgende"
 
 #: data/window.ui:170
 msgid "About Bakery"
-msgstr "À propos de Bakery"
+msgstr "Over Bakkerij"
 
 #. Dont change the bakery_recipe.conf name
 #: data/window.ui:181
 msgid "You selected custom installation. Please provide a URL or PATH to the Bakery_recipe.conf"
-msgstr "Vous avez choisi l'installation personnalisée, veuillez fournir une URL ou un chemin d'accès vers Bakery_recipe.conf"
+msgstr "U heeft een aangepaste installatie geselecteerd. Geef een URL of PATH aan de Bakery_recipe.conf"
 
 #: data/window.ui:262
 msgid "Install online"
-msgstr "Installation en ligne"
+msgstr "Online installeren"
 
 #: data/window.ui:275
 msgid "_No"
-msgstr "Non"
+msgstr "_Nee"
 
 #: data/window.ui:276 data/window.ui:287
 msgid "Yes"
-msgstr "Oui"
+msgstr "ja"
 
 #: data/window.ui:286
 msgid "_Cancel"
-msgstr "Abandonner"
+msgstr "_Annuleer"
 
 #: data/kb_screen.ui:39
 msgid "Pick your keyboard model"
-msgstr "Sélectionnez votre modèle de clavier"
+msgstr "Kies uw toetsenbord model"
 
 #: data/kb_screen.ui:52
 msgid "Test your layout here!"
-msgstr "Essayez votre disposition clavier ici!"
+msgstr "Test je lay-out hier!"
 
 #. If the target language doesnt use the latin please kindly tell the user to use english US
 #: data/kb_screen.ui:62
 msgid "If your language uses a different script than latin please use English US, you can always add your keyboard layout after install"
-msgstr "Si votre langue utilise un différent script que le Latin, veuillez utiliser Anglais US. Vous aurez toujours la possibilité de changer la disposition de votre clavier après l'installation."
+msgstr "Als uw taal een ander script gebruikt dan latin, gebruik dan Engels VS, dan kunt u altijd uw toetsenbordindeling toevoegen na installatie"
 
 #: data/kb_screen.ui:63
 msgid "Select your keyboard layout"
-msgstr "Veuillez sélectionner la disposition des touches de votre clavier"
+msgstr "Selecteer uw toetsenbordindeling"
 
 #: data/kb_screen.ui:73
 msgid "Select keyboard variant"
-msgstr "Sélectionnez une variante de votre clavier"
+msgstr "Selecteer toetsenbordvariant"
 
 #: data/kb_screen.ui:89
 msgid "Please select a variant for your keyboard layout."
-msgstr "Veuillez sélectionner une variante pour la disposition des touches de votre clavier."
+msgstr "Selecteer een variant voor de toetsenbordindeling."
 
 #: data/kb_screen.ui:94 data/locale_screen.ui:91
 msgid "Select"
-msgstr "Sélectionner"
+msgstr "Selecteren"
 
 #: data/locale_screen.ui:38
 msgid "Date and time"
-msgstr "Heure et date"
+msgstr "Datum en tijd"
 
 #: data/locale_screen.ui:46
 msgid "Numbers and currency"
-msgstr "Nombres et monnaie"
+msgstr "Nummers en valuta"
 
 #: data/locale_screen.ui:62
 msgid "Please select your language"
-msgstr "Veuillez sélectionner une langue"
+msgstr "Selecteer uw taal"
 
 #: data/locale_screen.ui:70
 msgid "Select your language locale"
-msgstr "Sélectionnez votre langue locale"
+msgstr "Selecteer uw taallokalisatie"
 
 #: data/locale_screen.ui:86
 msgid "Please select locale"
-msgstr "Veuillez sélectionner votre région"
+msgstr "Selecteer landinstelling"
 
 #: data/timezone_screen.ui:10
 msgid "Select your timezone"
-msgstr "Sélectionnez un fuseau horaire"
+msgstr "Selecteer uw tijdzone"
 
 #: data/timezone_screen.ui:23
 msgid "Regions"
-msgstr "Régions"
+msgstr "Regio's"
 
 #: data/timezone_screen.ui:35
 msgid "Zone"
-msgstr "Zone"
+msgstr "Zone:"
 
 #: data/timezone_screen.ui:52
 msgid "Current time:"
-msgstr "Heure locale:"
+msgstr "Huidige tijd:"
 
 #: data/user_screen.ui:31 data/summary_screen.ui:76
 msgid "Full name"
-msgstr "Nom complet"
+msgstr "Volledige naam"
 
 #: data/user_screen.ui:36 data/summary_screen.ui:84
 msgid "Username"
-msgstr "Nom d'utilisateur"
+msgstr "Gebruikersnaam"
 
 #: data/user_screen.ui:41 data/summary_screen.ui:92
 msgid "Hostname"
-msgstr "Nom de l'hôte"
+msgstr "Hostname"
 
 #: data/user_screen.ui:46
 msgid "Password"
-msgstr "Mot de passe"
+msgstr "Wachtwoord"
 
 #: data/user_screen.ui:51
 msgid "Confirm password"
-msgstr "Confirmez votre mot de passe"
+msgstr "Bevestig wachtwoord"
 
 #: data/user_screen.ui:82
 msgctxt "Translate as question"
 msgid "Use sudo and polkit without password."
-msgstr "Utiliser sudo et polkit sans demander mot de passe."
+msgstr "Gebruik sudo en polkit zonder wachtwoord."
 
 #: data/user_screen.ui:94
 msgctxt "Login into the system literally, Translate as a question"
 msgid "Log in automatically without asking for password."
-msgstr "Se connecter automatiquement sans demander le mot de passe."
+msgstr "Log automatisch in zonder om wachtwoord te vragen."
 
 #: data/user_screen.ui:108
 msgid "Create your user account"
-msgstr "Créez votre compte utilisateur"
+msgstr "Maak uw gebruikersaccount aan"
 
 #: data/summary_screen.ui:34
 msgid "Language"
-msgstr "Langue"
+msgstr "Taal"
 
 #: data/summary_screen.ui:42
 msgid "Layout"
-msgstr "Disposition clavier"
+msgstr "Indeling"
 
 #: data/summary_screen.ui:50
 msgctxt "keyboard model"
 msgid "Model"
-msgstr "Modèle"
+msgstr "Model"
 
 #: data/summary_screen.ui:102
 msgid "Use sudo and polkit without password."
-msgstr "Utiliser sudo et polkit sans demander le mot de passe."
+msgstr "Gebruik sudo en polkit zonder wachtwoord."
 
 #: data/summary_screen.ui:115
 msgid "Log in automatically without asking for password. "
-msgstr "Connexion automatique. "
+msgstr "Log automatisch in zonder om wachtwoord te vragen. "
 
 #: data/summary_screen.ui:145
 msgid "Your selections have been listed below, please confirm and continue with instillation"
-msgstr "Récapitulatif des paramètres sélectionné, veuillez confirmer et continuer avec l'installation"
+msgstr "Uw selecties zijn hieronder opgesomd, bevestig en ga door met de aanmaak"
 
 #: data/summary_screen.ui:146
 msgid "Please confirm your choices"
-msgstr "Veuillez confirmer vos choix"
+msgstr "Bevestig uw keuzes"
 
 #: data/install_screen.ui:9
 msgid "Please standby while installation is in progress"
-msgstr "Installation en cours, veuillez patienter."
+msgstr "Even geduld, de installatie wordt uitgevoerd"
 
 #: data/install_screen.ui:10
 msgid "Installing BredOS"
-msgstr "Installation de BredOS"
+msgstr "BredOS installeren"
 
 #: data/finish_screen.ui:9
 msgid "Installation Complete!"
-msgstr "Installation terminée!"
+msgstr "Installatie voltooid!"
 

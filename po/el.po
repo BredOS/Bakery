@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: bakery\n"
+"Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-30 18:05\n"
+"PO-Revision-Date: 2023-10-31 16:02\n"
 "Last-Translator: \n"
 "Language-Team: Greek\n"
 "Language: el_GR\n"
@@ -11,304 +11,304 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Crowdin-Project: bakery\n"
-"X-Crowdin-Project-ID: 624294\n"
+"X-Crowdin-Project: 584b35aa9096f3c7f606f346bb0bfffc\n"
+"X-Crowdin-Project-ID: 2\n"
 "X-Crowdin-Language: el\n"
 "X-Crowdin-File: /main/po/bakery.pot\n"
-"X-Crowdin-File-ID: 16\n"
+"X-Crowdin-File-ID: 6\n"
 
 #: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
 msgid "BredOS Installer"
-msgstr ""
+msgstr "Πρόγραμμα Εγκατάστασης BredOS"
 
 #: data/org.bredos.bakery.appdata.xml.in:7
 msgid "No description"
-msgstr ""
+msgstr "Χωρίς περιγραφή"
 
 #: config.py:10
 msgid "Keyboard"
-msgstr ""
+msgstr "Keyboard"
 
 #. Translate locale as language and region?
 #: config.py:11 data/summary_screen.ui:20
 msgid "Locale"
-msgstr ""
+msgstr "Τοπική"
 
 #: config.py:12 data/summary_screen.ui:63
 msgid "Timezone"
-msgstr ""
+msgstr "Timezone"
 
 #: config.py:13
 msgid "User"
-msgstr ""
+msgstr "Χρήστης"
 
 #: config.py:14
 msgid "Desktops"
-msgstr ""
+msgstr "Επιφάνειες Εργασίας"
 
 #: config.py:15
 msgid "Summary"
-msgstr ""
+msgstr "Summary"
 
 #: config.py:16 bakery-gui.py:253
 msgid "Install"
-msgstr ""
+msgstr "Εγκατάσταση"
 
 #: config.py:17
 msgid "Finish"
-msgstr ""
+msgstr "Ολοκλήρωση"
 
 #: bakery.py:137
 msgid "Preparing for installation"
-msgstr ""
+msgstr "Προετοιμασία για εγκατάσταση"
 
 #: bakery.py:138
 msgid "Applying Locale Settings"
-msgstr ""
+msgstr "Εφαρμογή Τοπικών Ρυθμίσεων"
 
 #: bakery.py:139
 msgid "Applying Keyboard Settings"
-msgstr ""
+msgstr "Εφαρμογή Ρυθμίσεων Πληκτρολογίου"
 
 #: bakery.py:140
 msgid "Applying Timezone Settings"
-msgstr ""
+msgstr "Εφαρμογή Ρυθμίσεων Ζώνης Ώρας"
 
 #: bakery.py:141
 msgid "Creating User account"
-msgstr ""
+msgstr "Δημιουργία λογαριασμού χρήστη"
 
 #: bakery.py:142
 msgid "Cleaning up installation"
-msgstr ""
+msgstr "Καθαρισμός εγκατάστασης"
 
 #: bakery-gui.py:106
 msgid "translator-credits"
-msgstr ""
+msgstr "transator-credits"
 
 #: bakery-gui.py:107
 msgid "Copyright The BredOS developers"
-msgstr ""
+msgstr "Πνευματικά δικαιώματα, Οι προγραμματιστές του BredOS"
 
 #: bakery-gui.py:108
 msgid "Bakery is a simple installer for BredOS"
-msgstr ""
+msgstr "Το Bakery είναι το πρόγραμμα εγκατάστασης για το BredOS"
 
 #: bakery-gui.py:113
 msgid "Translated by"
-msgstr ""
+msgstr "Μεταφράστηκε από"
 
 #: bakery-gui.py:114
 msgid "Special thanks to"
-msgstr ""
+msgstr "Ιδιαίτερες ευχαριστίες σε"
 
 #: bakery-gui.py:247 bakery-gui.py:261
 msgid "Next"
-msgstr ""
+msgstr "Επόμενο"
 
 #. done button
 #: bakery-gui.py:601 data/window.ui:235
 msgid "Done"
-msgstr ""
+msgstr "Ολοκληρώθηκε"
 
 #: bakery-gui.py:815
 msgid "Previewing time in "
-msgstr ""
+msgstr "Χρόνος προεπισκόπησης σε "
 
 #: data/window.ui:60
 msgid "Install offline"
-msgstr ""
+msgstr "Εγκατάσταση εκτός σύνδεσης"
 
 #: data/window.ui:80
 msgid "Custom Installation"
-msgstr ""
+msgstr "Προσαρμοσμένη Εγκατάσταση"
 
 #. Do not translate literally, come up with a bread/baking related pun that works in the target language. Try to keep the idea that the installer will lead the way
 #: data/window.ui:92
 msgid "Let the Bakery installer whip up the perfect BredOS recipe for your machine!"
-msgstr ""
+msgstr "Αφήστε τον εγκαταστάτη του Αρτοποιείου να σηκώσει την τέλεια συνταγή BredOS για το μηχάνημά σας!"
 
 #: data/window.ui:93
 msgid "Welcome to BredOS!"
-msgstr ""
+msgstr "Καλώς ήλθατε στο BredOS!"
 
 #: data/window.ui:129
 msgctxt "Button\n"
 msgid "Cancel"
-msgstr ""
+msgstr "Ακύρωση"
 
 #: data/window.ui:139
 msgctxt "Button"
 msgid "Back"
-msgstr ""
+msgstr "Πίσω"
 
 #: data/window.ui:145
 msgctxt "Button"
 msgid "Next"
-msgstr ""
+msgstr "Επόμενο"
 
 #: data/window.ui:170
 msgid "About Bakery"
-msgstr ""
+msgstr "Σχετικά Με Bakery"
 
 #. Dont change the bakery_recipe.conf name
 #: data/window.ui:181
 msgid "You selected custom installation. Please provide a URL or PATH to the Bakery_recipe.conf"
-msgstr ""
+msgstr "Επιλέξατε προσαρμοσμένη εγκατάσταση. Παρακαλώ δώστε μια διεύθυνση URL ή PATH στο Bakery_recipe.conf"
 
 #: data/window.ui:262
 msgid "Install online"
-msgstr ""
+msgstr "Εγκατάσταση online"
 
 #: data/window.ui:275
 msgid "_No"
-msgstr ""
+msgstr "_Όχι"
 
 #: data/window.ui:276 data/window.ui:287
 msgid "Yes"
-msgstr ""
+msgstr "Ναι"
 
 #: data/window.ui:286
 msgid "_Cancel"
-msgstr ""
+msgstr "_Ακύρωση"
 
 #: data/kb_screen.ui:39
 msgid "Pick your keyboard model"
-msgstr ""
+msgstr "Επιλέξτε το μοντέλο πληκτρολογίου σας"
 
 #: data/kb_screen.ui:52
 msgid "Test your layout here!"
-msgstr ""
+msgstr "Δοκίμασε τη διάταξη σας εδώ!"
 
 #. If the target language doesnt use the latin please kindly tell the user to use english US
 #: data/kb_screen.ui:62
 msgid "If your language uses a different script than latin please use English US, you can always add your keyboard layout after install"
-msgstr ""
+msgstr "Εάν η γλώσσα σας χρησιμοποιεί ένα διαφορετικό σενάριο από το λατινικό παρακαλώ χρησιμοποιήστε Αγγλικά ΗΠΑ, μπορείτε πάντα να προσθέσετε τη διάταξη πληκτρολογίου σας μετά την εγκατάσταση"
 
 #: data/kb_screen.ui:63
 msgid "Select your keyboard layout"
-msgstr ""
+msgstr "Επιλέξτε τη διάταξη πληκτρολογίου"
 
 #: data/kb_screen.ui:73
 msgid "Select keyboard variant"
-msgstr ""
+msgstr "Επιλέξτε την παραλλαγή του πληκτρολογίου"
 
 #: data/kb_screen.ui:89
 msgid "Please select a variant for your keyboard layout."
-msgstr ""
+msgstr "Παρακαλώ επιλέξτε μια παραλλαγή για τη διάταξη πληκτρολογίου σας."
 
 #: data/kb_screen.ui:94 data/locale_screen.ui:91
 msgid "Select"
-msgstr ""
+msgstr "Επιλογή"
 
 #: data/locale_screen.ui:38
 msgid "Date and time"
-msgstr ""
+msgstr "Ημερομηνία και ώρα"
 
 #: data/locale_screen.ui:46
 msgid "Numbers and currency"
-msgstr ""
+msgstr "Αριθμοί και νόμισμα"
 
 #: data/locale_screen.ui:62
 msgid "Please select your language"
-msgstr ""
+msgstr "Παρακαλώ επιλέξτε τη γλώσσα σας"
 
 #: data/locale_screen.ui:70
 msgid "Select your language locale"
-msgstr ""
+msgstr "Επιλέξτε τη γλώσσα σας"
 
 #: data/locale_screen.ui:86
 msgid "Please select locale"
-msgstr ""
+msgstr "Παρακαλώ επιλέξτε τοπική ρύθμιση"
 
 #: data/timezone_screen.ui:10
 msgid "Select your timezone"
-msgstr ""
+msgstr "Επιλέξτε τη ζώνη ώρας σας"
 
 #: data/timezone_screen.ui:23
 msgid "Regions"
-msgstr ""
+msgstr "Περιφέρειες"
 
 #: data/timezone_screen.ui:35
 msgid "Zone"
-msgstr ""
+msgstr "Ζώνη"
 
 #: data/timezone_screen.ui:52
 msgid "Current time:"
-msgstr ""
+msgstr "Τρέχουσα ώρα:"
 
 #: data/user_screen.ui:31 data/summary_screen.ui:76
 msgid "Full name"
-msgstr ""
+msgstr "Πλήρες όνομα"
 
 #: data/user_screen.ui:36 data/summary_screen.ui:84
 msgid "Username"
-msgstr ""
+msgstr "Όνομα Χρήστη"
 
 #: data/user_screen.ui:41 data/summary_screen.ui:92
 msgid "Hostname"
-msgstr ""
+msgstr "Hostname"
 
 #: data/user_screen.ui:46
 msgid "Password"
-msgstr ""
+msgstr "Κωδικός"
 
 #: data/user_screen.ui:51
 msgid "Confirm password"
-msgstr ""
+msgstr "Επιβεβαίωση κωδικού πρόσβασης"
 
 #: data/user_screen.ui:82
 msgctxt "Translate as question"
 msgid "Use sudo and polkit without password."
-msgstr ""
+msgstr "Χρησιμοποιήστε sudo και polkit χωρίς κωδικό πρόσβασης."
 
 #: data/user_screen.ui:94
 msgctxt "Login into the system literally, Translate as a question"
 msgid "Log in automatically without asking for password."
-msgstr ""
+msgstr "Συνδεθείτε αυτόματα χωρίς να ζητήσετε κωδικό πρόσβασης."
 
 #: data/user_screen.ui:108
 msgid "Create your user account"
-msgstr ""
+msgstr "Δημιουργήστε το λογαριασμό χρήστη σας"
 
 #: data/summary_screen.ui:34
 msgid "Language"
-msgstr ""
+msgstr "Γλώσσα"
 
 #: data/summary_screen.ui:42
 msgid "Layout"
-msgstr ""
+msgstr "Διάταξη"
 
 #: data/summary_screen.ui:50
 msgctxt "keyboard model"
 msgid "Model"
-msgstr ""
+msgstr "Μοντέλο"
 
 #: data/summary_screen.ui:102
 msgid "Use sudo and polkit without password."
-msgstr ""
+msgstr "Χρησιμοποιήστε sudo και polkit χωρίς κωδικό πρόσβασης."
 
 #: data/summary_screen.ui:115
 msgid "Log in automatically without asking for password. "
-msgstr ""
+msgstr "Συνδεθείτε αυτόματα χωρίς να ζητήσετε κωδικό πρόσβασης. "
 
 #: data/summary_screen.ui:145
 msgid "Your selections have been listed below, please confirm and continue with instillation"
-msgstr ""
+msgstr "Οι επιλογές σας έχουν καταγραφεί παρακάτω, παρακαλώ επιβεβαιώστε και συνεχίστε με ενστάλαξη"
 
 #: data/summary_screen.ui:146
 msgid "Please confirm your choices"
-msgstr ""
+msgstr "Παρακαλώ επιβεβαιώστε τις επιλογές σας"
 
 #: data/install_screen.ui:9
 msgid "Please standby while installation is in progress"
-msgstr ""
+msgstr "Παρακαλώ περιμένετε όσο η εγκατάσταση βρίσκεται σε εξέλιξη"
 
 #: data/install_screen.ui:10
 msgid "Installing BredOS"
-msgstr ""
+msgstr "Εγκατάσταση BredOS"
 
 #: data/finish_screen.ui:9
 msgid "Installation Complete!"
-msgstr ""
+msgstr "Η Εγκατάσταση Ολοκληρώθηκε!"
 
