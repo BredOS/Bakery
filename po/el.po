@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-31 12:29\n"
+"PO-Revision-Date: 2023-10-31 14:33\n"
 "Last-Translator: \n"
 "Language-Team: Greek\n"
 "Language: el_GR\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
 msgid "BredOS Installer"
-msgstr "Εγκαταστάτης BredOS"
+msgstr "Πρόγραμμα Εγκατάστασης BredOS"
 
 #: data/org.bredos.bakery.appdata.xml.in:7
 msgid "No description"
@@ -191,7 +191,7 @@ msgstr "Επιλέξτε τη διάταξη πληκτρολογίου"
 
 #: data/kb_screen.ui:73
 msgid "Select keyboard variant"
-msgstr "Επιλογή παραλλαγής πληκτρολογίου"
+msgstr "Επιλέξτε την παραλλαγή του πληκτρολογίου"
 
 #: data/kb_screen.ui:89
 msgid "Please select a variant for your keyboard layout."
