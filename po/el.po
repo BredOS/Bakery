@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-31 14:33\n"
+"PO-Revision-Date: 2023-10-31 16:02\n"
 "Last-Translator: \n"
 "Language-Team: Greek\n"
 "Language: el_GR\n"
@@ -88,11 +88,11 @@ msgstr "transator-credits"
 
 #: bakery-gui.py:107
 msgid "Copyright The BredOS developers"
-msgstr "Πνευματικά δικαιώματα Οι προγραμματιστές BredOS"
+msgstr "Πνευματικά δικαιώματα, Οι προγραμματιστές του BredOS"
 
 #: bakery-gui.py:108
 msgid "Bakery is a simple installer for BredOS"
-msgstr "Το αρτοποιείο είναι ένα απλό πρόγραμμα εγκατάστασης για το BredOS"
+msgstr "Το Bakery είναι το πρόγραμμα εγκατάστασης για το BredOS"
 
 #: bakery-gui.py:113
 msgid "Translated by"
