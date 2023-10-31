@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-31 10:33\n"
+"PO-Revision-Date: 2023-10-31 13:28\n"
 "Last-Translator: \n"
 "Language-Team: Hungarian\n"
 "Language: hu_HU\n"
@@ -19,28 +19,28 @@ msgstr ""
 
 #: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
 msgid "BredOS Installer"
-msgstr ""
+msgstr "BredOS Telepítő"
 
 #: data/org.bredos.bakery.appdata.xml.in:7
 msgid "No description"
-msgstr ""
+msgstr "Nincs leírás"
 
 #: config.py:10
 msgid "Keyboard"
-msgstr ""
+msgstr "Billentyűzet"
 
 #. Translate locale as language and region?
 #: config.py:11 data/summary_screen.ui:20
 msgid "Locale"
-msgstr ""
+msgstr "Nyelv és Régió"
 
 #: config.py:12 data/summary_screen.ui:63
 msgid "Timezone"
-msgstr ""
+msgstr "Időzóna"
 
 #: config.py:13
 msgid "User"
-msgstr ""
+msgstr "Felhasználó"
 
 #: config.py:14
 msgid "Desktops"
@@ -48,39 +48,39 @@ msgstr ""
 
 #: config.py:15
 msgid "Summary"
-msgstr ""
+msgstr "Összefoglaló"
 
 #: config.py:16 bakery-gui.py:253
 msgid "Install"
-msgstr ""
+msgstr "Telepítés"
 
 #: config.py:17
 msgid "Finish"
-msgstr ""
+msgstr "Befejezés"
 
 #: bakery.py:137
 msgid "Preparing for installation"
-msgstr ""
+msgstr "Felkészülés a telepítésre"
 
 #: bakery.py:138
 msgid "Applying Locale Settings"
-msgstr ""
+msgstr "Nyelv és régióbeállítások alkalmazása"
 
 #: bakery.py:139
 msgid "Applying Keyboard Settings"
-msgstr ""
+msgstr "Billentyűzetbeállítások alkalmazása"
 
 #: bakery.py:140
 msgid "Applying Timezone Settings"
-msgstr ""
+msgstr "Időzónabeállítások alkalmazása"
 
 #: bakery.py:141
 msgid "Creating User account"
-msgstr ""
+msgstr "Felhasználó létrehozása"
 
 #: bakery.py:142
 msgid "Cleaning up installation"
-msgstr ""
+msgstr "Feltakarítás a telepítő után"
 
 #: bakery-gui.py:106
 msgid "translator-credits"
@@ -88,7 +88,7 @@ msgstr ""
 
 #: bakery-gui.py:107
 msgid "Copyright The BredOS developers"
-msgstr ""
+msgstr "Copyright The BredOS developers"
 
 #: bakery-gui.py:108
 msgid "Bakery is a simple installer for BredOS"
