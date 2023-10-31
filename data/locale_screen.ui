@@ -67,7 +67,7 @@
     <property name="default-height">470</property>
     <property name="default-width">400</property>
     <property name="hide-on-close">true</property>
-    <property name="title" translatable="yes">Select your language locale</property>
+    <property name="title" translatable="yes">Select your language</property>
     <property name="use-header-bar">0</property>
     <child>
       <object class="GtkBox">

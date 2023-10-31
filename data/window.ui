@@ -211,7 +211,7 @@
                 <property name="child">
                   <object class="AdwButtonContent">
                     <property name="icon-name">document-open-symbolic</property>
-                    <property name="label">Open File</property>
+                    <property name="label" translatable="yes" context="button">Open File</property>
                   </object>
                 </property>
                 <property name="halign">end</property>
@@ -266,9 +266,9 @@
     </property>
   </object>
   <object class="AdwMessageDialog" id="install_cancel">
-    <property name="body">Are you sure you want to cancel your installation?</property>
+    <property name="body" translatable="yes">Are you sure you want to cancel your installation?</property>
     <property name="default-response">no</property>
-    <property name="heading">Warning</property>
+    <property name="heading" translatable="yes" context="dialog heading">Warning</property>
     <property name="transient-for">BakeryWindow</property>
     <!-- Custom fragments -->
     <responses>
@@ -277,9 +277,9 @@
     </responses>
   </object>
   <object class="AdwMessageDialog" id="install_confirm">
-    <property name="body">Are you sure you want to start the installation?</property>
+    <property name="body" translatable="yes">Are you sure you want to start the installation?</property>
     <property name="default-response">confirm</property>
-    <property name="heading">Start Installation</property>
+    <property name="heading" translatable="yes" context="Dialog heading">Start Installation</property>
     <property name="transient-for">BakeryWindow</property>
     <!-- Custom fragments -->
     <responses>
