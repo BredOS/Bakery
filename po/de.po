@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-31 14:33\n"
+"POT-Creation-Date: 2023-10-31 21:01+0200\n"
+"PO-Revision-Date: 2023-10-31 19:04\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "Language: de_DE\n"
@@ -17,44 +17,44 @@ msgstr ""
 "X-Crowdin-File: /main/po/bakery.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
+#: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:100 data/window.ui:11
 msgid "BredOS Installer"
 msgstr "BredOS-Installer"
 
-#: data/org.bredos.bakery.appdata.xml.in:7
-msgid "No description"
-msgstr "Keine Beschreibung"
+#: data/org.bredos.bakery.appdata.xml.in:7 bakery-gui.py:109
+msgid "Bakery is a simple installer for BredOS"
+msgstr "Bäckerei ist ein einfacher Installer für BredOS"
 
-#: config.py:10
+#: config.py:11
 msgid "Keyboard"
 msgstr "Keyboard"
 
 #. Translate locale as language and region?
-#: config.py:11 data/summary_screen.ui:20
+#: config.py:12 data/summary_screen.ui:20
 msgid "Locale"
 msgstr "Lokal"
 
-#: config.py:12 data/summary_screen.ui:63
+#: config.py:13 data/summary_screen.ui:63
 msgid "Timezone"
 msgstr "Timezone"
 
-#: config.py:13
+#: config.py:14
 msgid "User"
 msgstr "Benutzer"
 
-#: config.py:14
+#: config.py:15
 msgid "Desktops"
 msgstr "Desktops"
 
-#: config.py:15
+#: config.py:16
 msgid "Summary"
 msgstr "Summary"
 
-#: config.py:16 bakery-gui.py:253
+#: config.py:17 bakery-gui.py:254
 msgid "Install"
 msgstr "Installieren"
 
-#: config.py:17
+#: config.py:18
 msgid "Finish"
 msgstr "Beenden"
 
@@ -82,36 +82,32 @@ msgstr "Benutzerkonto erstellen"
 msgid "Cleaning up installation"
 msgstr "Installation wird bereinigt"
 
-#: bakery-gui.py:106
+#: bakery-gui.py:107
 msgid "translator-credits"
 msgstr "Übersetzer-Credits"
 
-#: bakery-gui.py:107
+#: bakery-gui.py:108
 msgid "Copyright The BredOS developers"
 msgstr "Copyright der BredOS-Entwickler"
 
-#: bakery-gui.py:108
-msgid "Bakery is a simple installer for BredOS"
-msgstr "Bäckerei ist ein einfacher Installer für BredOS"
-
-#: bakery-gui.py:113
+#: bakery-gui.py:114
 msgid "Translated by"
 msgstr "Übersetzt von"
 
-#: bakery-gui.py:114
+#: bakery-gui.py:115
 msgid "Special thanks to"
 msgstr "Besonderer Dank an"
 
-#: bakery-gui.py:247 bakery-gui.py:261
+#: bakery-gui.py:248 bakery-gui.py:262 bakery-gui.py:556
 msgid "Next"
 msgstr "Nächste"
 
 #. done button
-#: bakery-gui.py:601 data/window.ui:235
+#: bakery-gui.py:613 data/window.ui:235
 msgid "Done"
 msgstr "Fertig"
 
-#: bakery-gui.py:815
+#: bakery-gui.py:827
 msgid "Previewing time in "
 msgstr "Vorschauzeit in "
 
@@ -156,9 +152,23 @@ msgstr "Über Bakery"
 msgid "You selected custom installation. Please provide a URL or PATH to the Bakery_recipe.conf"
 msgstr "Sie haben eine benutzerdefinierte Installation ausgewählt. Bitte geben Sie der Bakery_recipe.conf eine URL oder PATH an"
 
+#: data/window.ui:214
+msgctxt "button"
+msgid "Open File"
+msgstr "Datei öffnen"
+
 #: data/window.ui:262
 msgid "Install online"
 msgstr "Online installieren"
+
+#: data/window.ui:269
+msgid "Are you sure you want to cancel your installation?"
+msgstr "Sind Sie sicher, dass Sie Ihre Installation abbrechen möchten?"
+
+#: data/window.ui:271
+msgctxt "dialog heading"
+msgid "Warning"
+msgstr "Warnung"
 
 #: data/window.ui:275
 msgid "_No"
@@ -167,6 +177,15 @@ msgstr "_Nein"
 #: data/window.ui:276 data/window.ui:287
 msgid "Yes"
 msgstr "Ja"
+
+#: data/window.ui:280
+msgid "Are you sure you want to start the installation?"
+msgstr "Sind Sie sicher, dass Sie die Installation starten möchten?"
+
+#: data/window.ui:282
+msgctxt "Dialog heading"
+msgid "Start Installation"
+msgstr ""
 
 #: data/window.ui:286
 msgid "_Cancel"
@@ -214,7 +233,7 @@ msgid "Please select your language"
 msgstr "Bitte wählen Sie Ihre Sprache"
 
 #: data/locale_screen.ui:70
-msgid "Select your language locale"
+msgid "Select your language"
 msgstr "Wählen Sie Ihre Sprache"
 
 #: data/locale_screen.ui:86
