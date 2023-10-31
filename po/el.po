@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-31 16:02\n"
+"POT-Creation-Date: 2023-10-31 21:01+0200\n"
+"PO-Revision-Date: 2023-10-31 19:39\n"
 "Last-Translator: \n"
 "Language-Team: Greek\n"
 "Language: el_GR\n"
@@ -17,44 +17,44 @@ msgstr ""
 "X-Crowdin-File: /main/po/bakery.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
+#: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:100 data/window.ui:11
 msgid "BredOS Installer"
 msgstr "Πρόγραμμα Εγκατάστασης BredOS"
 
-#: data/org.bredos.bakery.appdata.xml.in:7
-msgid "No description"
-msgstr "Χωρίς περιγραφή"
+#: data/org.bredos.bakery.appdata.xml.in:7 bakery-gui.py:109
+msgid "Bakery is a simple installer for BredOS"
+msgstr "Το Bakery είναι το πρόγραμμα εγκατάστασης για το BredOS"
 
-#: config.py:10
+#: config.py:11
 msgid "Keyboard"
 msgstr "Keyboard"
 
 #. Translate locale as language and region?
-#: config.py:11 data/summary_screen.ui:20
+#: config.py:12 data/summary_screen.ui:20
 msgid "Locale"
 msgstr "Τοπική"
 
-#: config.py:12 data/summary_screen.ui:63
+#: config.py:13 data/summary_screen.ui:63
 msgid "Timezone"
 msgstr "Timezone"
 
-#: config.py:13
+#: config.py:14
 msgid "User"
 msgstr "Χρήστης"
 
-#: config.py:14
+#: config.py:15
 msgid "Desktops"
 msgstr "Επιφάνειες Εργασίας"
 
-#: config.py:15
+#: config.py:16
 msgid "Summary"
 msgstr "Summary"
 
-#: config.py:16 bakery-gui.py:253
+#: config.py:17 bakery-gui.py:254
 msgid "Install"
 msgstr "Εγκατάσταση"
 
-#: config.py:17
+#: config.py:18
 msgid "Finish"
 msgstr "Ολοκλήρωση"
 
@@ -82,36 +82,32 @@ msgstr "Δημιουργία λογαριασμού χρήστη"
 msgid "Cleaning up installation"
 msgstr "Καθαρισμός εγκατάστασης"
 
-#: bakery-gui.py:106
+#: bakery-gui.py:107
 msgid "translator-credits"
 msgstr "transator-credits"
 
-#: bakery-gui.py:107
+#: bakery-gui.py:108
 msgid "Copyright The BredOS developers"
 msgstr "Πνευματικά δικαιώματα, Οι προγραμματιστές του BredOS"
 
-#: bakery-gui.py:108
-msgid "Bakery is a simple installer for BredOS"
-msgstr "Το Bakery είναι το πρόγραμμα εγκατάστασης για το BredOS"
-
-#: bakery-gui.py:113
+#: bakery-gui.py:114
 msgid "Translated by"
 msgstr "Μεταφράστηκε από"
 
-#: bakery-gui.py:114
+#: bakery-gui.py:115
 msgid "Special thanks to"
 msgstr "Ιδιαίτερες ευχαριστίες σε"
 
-#: bakery-gui.py:247 bakery-gui.py:261
+#: bakery-gui.py:248 bakery-gui.py:262 bakery-gui.py:556
 msgid "Next"
 msgstr "Επόμενο"
 
 #. done button
-#: bakery-gui.py:601 data/window.ui:235
+#: bakery-gui.py:613 data/window.ui:235
 msgid "Done"
 msgstr "Ολοκληρώθηκε"
 
-#: bakery-gui.py:815
+#: bakery-gui.py:827
 msgid "Previewing time in "
 msgstr "Χρόνος προεπισκόπησης σε "
 
@@ -156,9 +152,23 @@ msgstr "Σχετικά Με Bakery"
 msgid "You selected custom installation. Please provide a URL or PATH to the Bakery_recipe.conf"
 msgstr "Επιλέξατε προσαρμοσμένη εγκατάσταση. Παρακαλώ δώστε μια διεύθυνση URL ή PATH στο Bakery_recipe.conf"
 
+#: data/window.ui:214
+msgctxt "button"
+msgid "Open File"
+msgstr "Άνοιγμα Αρχείου"
+
 #: data/window.ui:262
 msgid "Install online"
 msgstr "Εγκατάσταση online"
+
+#: data/window.ui:269
+msgid "Are you sure you want to cancel your installation?"
+msgstr "Είστε βέβαιοι ότι θέλετε να ακυρώσετε την εγκατάστασή σας?"
+
+#: data/window.ui:271
+msgctxt "dialog heading"
+msgid "Warning"
+msgstr "Προειδοποίηση"
 
 #: data/window.ui:275
 msgid "_No"
@@ -167,6 +177,15 @@ msgstr "_Όχι"
 #: data/window.ui:276 data/window.ui:287
 msgid "Yes"
 msgstr "Ναι"
+
+#: data/window.ui:280
+msgid "Are you sure you want to start the installation?"
+msgstr "Είστε βέβαιοι ότι θέλετε να ξεκινήσετε την εγκατάσταση?"
+
+#: data/window.ui:282
+msgctxt "Dialog heading"
+msgid "Start Installation"
+msgstr "Έναρξη Εγκατάστασης"
 
 #: data/window.ui:286
 msgid "_Cancel"
@@ -214,7 +233,7 @@ msgid "Please select your language"
 msgstr "Παρακαλώ επιλέξτε τη γλώσσα σας"
 
 #: data/locale_screen.ui:70
-msgid "Select your language locale"
+msgid "Select your language"
 msgstr "Επιλέξτε τη γλώσσα σας"
 
 #: data/locale_screen.ui:86

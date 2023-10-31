@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-30 14:45+0000\n"
-"PO-Revision-Date: 2023-10-31 14:33\n"
+"POT-Creation-Date: 2023-10-31 21:01+0200\n"
+"PO-Revision-Date: 2023-10-31 19:39\n"
 "Last-Translator: \n"
 "Language-Team: Japanese\n"
 "Language: ja_JP\n"
@@ -17,44 +17,44 @@ msgstr ""
 "X-Crowdin-File: /main/po/bakery.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:99 data/window.ui:11
+#: data/org.bredos.bakery.desktop.in:3 bakery-gui.py:100 data/window.ui:11
 msgid "BredOS Installer"
 msgstr "BredOS インストーラー"
 
-#: data/org.bredos.bakery.appdata.xml.in:7
-msgid "No description"
-msgstr "説明がありません"
+#: data/org.bredos.bakery.appdata.xml.in:7 bakery-gui.py:109
+msgid "Bakery is a simple installer for BredOS"
+msgstr "BakeryはBredOS用のシンプルなインストーラです"
 
-#: config.py:10
+#: config.py:11
 msgid "Keyboard"
 msgstr "Keyboard"
 
 #. Translate locale as language and region?
-#: config.py:11 data/summary_screen.ui:20
+#: config.py:12 data/summary_screen.ui:20
 msgid "Locale"
 msgstr "ロケール"
 
-#: config.py:12 data/summary_screen.ui:63
+#: config.py:13 data/summary_screen.ui:63
 msgid "Timezone"
 msgstr "Timezone"
 
-#: config.py:13
+#: config.py:14
 msgid "User"
 msgstr "ユーザー"
 
-#: config.py:14
+#: config.py:15
 msgid "Desktops"
 msgstr "デスクトップ"
 
-#: config.py:15
+#: config.py:16
 msgid "Summary"
 msgstr "Summary"
 
-#: config.py:16 bakery-gui.py:253
+#: config.py:17 bakery-gui.py:254
 msgid "Install"
 msgstr "インストール"
 
-#: config.py:17
+#: config.py:18
 msgid "Finish"
 msgstr "完了"
 
@@ -82,36 +82,32 @@ msgstr "ユーザーアカウントの作成"
 msgid "Cleaning up installation"
 msgstr "インストールをクリーンアップ中"
 
-#: bakery-gui.py:106
+#: bakery-gui.py:107
 msgid "translator-credits"
 msgstr "翻訳者クレジット"
 
-#: bakery-gui.py:107
+#: bakery-gui.py:108
 msgid "Copyright The BredOS developers"
 msgstr "Copyright The BredOS developers"
 
-#: bakery-gui.py:108
-msgid "Bakery is a simple installer for BredOS"
-msgstr "BakeryはBredOS用のシンプルなインストーラです"
-
-#: bakery-gui.py:113
+#: bakery-gui.py:114
 msgid "Translated by"
 msgstr "翻訳者:"
 
-#: bakery-gui.py:114
+#: bakery-gui.py:115
 msgid "Special thanks to"
 msgstr "ありがとうございました"
 
-#: bakery-gui.py:247 bakery-gui.py:261
+#: bakery-gui.py:248 bakery-gui.py:262 bakery-gui.py:556
 msgid "Next"
 msgstr "次へ"
 
 #. done button
-#: bakery-gui.py:601 data/window.ui:235
+#: bakery-gui.py:613 data/window.ui:235
 msgid "Done"
 msgstr "完了"
 
-#: bakery-gui.py:815
+#: bakery-gui.py:827
 msgid "Previewing time in "
 msgstr "プレビュー時間 "
 
@@ -156,9 +152,23 @@ msgstr "ベーカリーについて"
 msgid "You selected custom installation. Please provide a URL or PATH to the Bakery_recipe.conf"
 msgstr "カスタムインストールを選択しました。URL または PATH を Bakery_recipe.conf に指定してください。"
 
+#: data/window.ui:214
+msgctxt "button"
+msgid "Open File"
+msgstr "ファイルを開く"
+
 #: data/window.ui:262
 msgid "Install online"
 msgstr "オンラインでインストール"
+
+#: data/window.ui:269
+msgid "Are you sure you want to cancel your installation?"
+msgstr "インストールをキャンセルしてもよろしいですか？"
+
+#: data/window.ui:271
+msgctxt "dialog heading"
+msgid "Warning"
+msgstr "警告"
 
 #: data/window.ui:275
 msgid "_No"
@@ -167,6 +177,15 @@ msgstr "いいえ(_N)"
 #: data/window.ui:276 data/window.ui:287
 msgid "Yes"
 msgstr "はい"
+
+#: data/window.ui:280
+msgid "Are you sure you want to start the installation?"
+msgstr "インストールを開始してもよろしいですか？"
+
+#: data/window.ui:282
+msgctxt "Dialog heading"
+msgid "Start Installation"
+msgstr "インストールを開始"
 
 #: data/window.ui:286
 msgid "_Cancel"
@@ -214,8 +233,8 @@ msgid "Please select your language"
 msgstr "言語を選択してください"
 
 #: data/locale_screen.ui:70
-msgid "Select your language locale"
-msgstr "言語のロケールを選択"
+msgid "Select your language"
+msgstr "言語を選択"
 
 #: data/locale_screen.ui:86
 msgid "Please select locale"
