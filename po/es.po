@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 584b35aa9096f3c7f606f346bb0bfffc\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-31 21:01+0200\n"
-"PO-Revision-Date: 2023-10-31 19:04\n"
+"PO-Revision-Date: 2023-10-31 19:39\n"
 "Last-Translator: \n"
 "Language-Team: Spanish\n"
 "Language: es_ES\n"
@@ -185,7 +185,7 @@ msgstr "¿Está seguro de que desea iniciar la instalación?"
 #: data/window.ui:282
 msgctxt "Dialog heading"
 msgid "Start Installation"
-msgstr ""
+msgstr "Iniciar instalación"
 
 #: data/window.ui:286
 msgid "_Cancel"
