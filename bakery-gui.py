@@ -43,6 +43,8 @@ from bakery import (
     uidc,
     gidc,
     lrun,
+    detect_install_device,
+    detect_install_source,
 )
 from time import sleep
 from datetime import date, datetime, time
@@ -285,7 +287,11 @@ class BakeryWindow(Adw.ApplicationWindow):
     def collect_data(self, *_) -> dict:
         data = {}
         if not self.install_type == None:
-            data["install_type"] = self.install_type
+            install_data = {}
+            install_data["type"] = self.install_type
+            install_data["source"] = detect_install_source()
+            install_data["device"] = detect_install_device()
+            data["install_type"] = install_data
             data["root_password"] = False
             data["layout"] = all_pages["Keyboard"].layout
             data["locale"] = all_pages["Locale"].locale

@@ -139,7 +139,9 @@ def populate_messages(lang=None) -> None:
         [_("Applying Keyboard Settings"), 20],  # 2
         [_("Applying Timezone Settings"), 30],  # 3
         [_("Creating User account"), 40],  # 4
-        [_("Cleaning up installation"), 100],  # 5
+        [_("Setting Hostname"), 50],  # 5
+        [_("Finalizing installation"), 90],  # 6
+        [_("Cleaning up installation"), 100],  # 7
     ]
 
 
@@ -934,7 +936,7 @@ def set_locale(locale: str) -> None:
             "sudo",
             "bash",
             "-c",
-            "echo LANG=" + locale.split(" ")[0] + "> /etc/locale.conf",
+            "echo LANG=" + locale.split(" ")[0] + " > /etc/locale.conf",
         ]
     )
 
@@ -1137,20 +1139,51 @@ def package_desc(packages: list) -> dict:
     return res
 
 
+# Device functions
+
+
+def detect_install_source() -> str:
+    with open("/proc/cmdline", "r") as cmdline_file:
+        cmdline = cmdline_file.read()
+        if "archisobasedir" in cmdline or "archisolabel" in cmdline:
+            return "from_iso"
+        else:
+            return "on_device"
+
+
+def detect_install_device() -> str:
+    try:
+        with open("/sys/firmware/devicetree/base/model", "r") as model_file:
+            return model_file.read().rstrip("\n")
+    except FileNotFoundError:
+        try:
+            with open("/sys/class/dmi/id/product_name", "r") as product_name_file:
+                return product_name_file.read().rstrip("\n")
+        except FileNotFoundError:
+            return "unknown"
+
+
 def enable_services(services: list) -> None:
     try:
-        lrun(["sudo", "systemctl", "enable", i])
+        for i in services:
+            lrun(["sudo", "systemctl", "enable", i])
     except:
         pass
 
 
-def setup_base() -> None:
+def final_setup() -> None:
     if dryrun:
         lp("Setup base skipped in dryrun")
         return
-    os.remove("/etc/sudoers.d/g_wheel")
-    os.remove("/etc/polkit-1/rules.d/49-nopasswd_global.rules")
-
+    lrun(
+        [
+            "sudo",
+            "rm",
+            "-f",
+            "/etc/sudoers.d/g_wheel",
+            "/etc/polkit-1/rules.d/49-nopasswd_global.rules",
+        ]
+    )
     lrun(["sudo", "systemctl", "disable", "resizefs.service"])
     enable_services(
         ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"]
@@ -1341,6 +1374,39 @@ def sudo_nopasswd(no_passwd: bool) -> None:
         )
 
 
+def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> None:
+    if dm == "lightdm":
+        lp("Enabling autologin for " + username + " in " + dm)
+        if (install_type["source"] == "on_device") or (
+            install_type["source"] == "from_iso" and install_type["type"] == "offline"
+        ):
+            lrun(
+                [
+                    "sudo",
+                    "cp",
+                    "/etc/lightdm/lightdm.conf.bak",
+                    "/etc/lightdm/lightdm.conf",
+                ]
+            )
+        cmd = f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\ngreeter-session=lightdm-slick-greeter' /etc/lightdm/lightdm.conf"
+        lrun(["sudo", "sh", "-c", cmd])
+
+
+def enable_autologin_tty(username: str) -> None:
+    # sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
+    lrun(["sudo", "mkdir", "-p", "/etc/systemd/system/getty@tty1.service.d/"])
+    overrideconf = f"""[Service]
+ExecStart=
+ExecStart=-/usr/bin/agetty --autologin {username} --noclear %I $TERM
+"""
+    cmd = f'echo "{overrideconf}" | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf'
+    lrun(["sudo", "sh", "-c", cmd])
+
+
+def set_hostname(hostname: str) -> None:
+    lrun(["sudo", "bash", "-c", "echo " + hostname + " > /etc/hostname"])
+
+
 # Gui support functions
 
 
@@ -1388,7 +1454,11 @@ def install(settings=None) -> int:
     if settings is None:
         if dryrun:
             settings = {
-                "install_type": "offline",
+                "install_type": {
+                    "type": "offline",
+                    "source": "on_device",
+                    "device": "rpi4",
+                },
                 "layout": {"model": "pc105", "layout": "us", "variant": "alt-intl"},
                 "locale": "en_US.UTF-8 UTF-8",
                 "timezone": {"region": "Europe", "zone": "Sofia", "ntp": True},
@@ -1416,10 +1486,10 @@ def install(settings=None) -> int:
         else:
             raise ValueError("No data passed with dryrun disabled.")
 
-    if settings["install_type"] == "online":
+    if settings["install_type"]["type"] == "online":
         lp("Online mode not yet implemented!", mode="error")
         return 3
-    elif settings["install_type"] == "offline":
+    elif settings["install_type"]["type"] == "offline":
         lp("%ST0%")  # Preparing
         sleep(0.15)
         # Parse settings
@@ -1455,12 +1525,10 @@ def install(settings=None) -> int:
             if i not in settings.keys():
                 lp("Invalid manifest, does not contain " + i, mode="error")
                 return 2
-        if settings["install_type"] not in ["online", "offline", "custom"]:
-            lp(
-                'Invalid install_type, use "online", "offline" or "custom".',
-                mode="error",
-            )
-            return 2
+        for i in ["type", "source", "device"]:
+            if i not in settings["install_type"].keys():
+                lp("Invalid install_type manifest, does not contain " + i, mode="error")
+                return 2
         for i in ["model", "layout", "variant"]:
             if i not in settings["layout"].keys():
                 lp("Invalid layout manifest, does not contain " + i, mode="error")
@@ -1546,22 +1614,43 @@ def install(settings=None) -> int:
             settings["user"]["groups"],
         )
         sudo_nopasswd(settings["user"]["sudo_nopasswd"])
-        # TODO: autologin for tty
+        # ideally, we should have a way to check which DM/DE is installed
+        if settings["user"]["autologin"]:
+            enable_autologin(
+                settings["user"]["username"],
+                "cinammon",
+                "lightdm",
+                settings["install_type"],
+            )
+
+            enable_autologin_tty(settings["user"]["username"])
 
         lp("Took {:.5f}".format(get_timer()))
-        st(5)  # Cleanup
+        st(5)  # Configure hostname
+        reset_timer()
+
+        set_hostname(settings["hostname"])
+
+        lp("Took {:.5f}".format(get_timer()))
+        st(6)  # finishing up
+        reset_timer()
+
+        final_setup()
+
+        lp("Took {:.5f}".format(get_timer()))
+        st(7)  # Cleanup
         reset_timer()
 
         # Done
         lp("Installation finished. Total time: {:.5f}".format(monotonic() - start_time))
         sleep(0.15)
         return 0
-    elif settings["install_type"] == "custom":
+    elif settings["install_type"]["type"] == "custom":
         lp("Custom mode not yet implemented!", mode="error")
         return 3
-    elif settings["install_type"] == "on_device":
+    elif settings["install_type"]["source"] == "on_device":
         lp("On device mode not yet implemented!", mode="error")
         return 3
-    elif settings["install_type"] == "from_iso":
+    elif settings["install_type"]["source"] == "from_iso":
         lp("From iso mode not yet implemented!", mode="error")
         return 3
