@@ -929,6 +929,14 @@ def set_locale(locale: str) -> None:
             raise OSError("Locale " + locale + " not enabled!")
     lp("Setting locale to: " + locale)
     lrun(["sudo", "localectl", "set-locale", "LANG=" + locale])
+    lrun(
+        [
+            "sudo",
+            "bash",
+            "-c",
+            "echo LANG=" + locale.split(" ")[0] + "> /etc/locale.conf",
+        ]
+    )
 
 
 def langs(only_enabled: bool = False) -> dict:
@@ -1291,7 +1299,7 @@ def adduser(username: str, password: str, uid, gid, shell: str, groups: list) ->
         raise OSError("Used GID")
     lp("Making group " + username + " on gid " + gid)
     lrun(["sudo", "groupadd", username, "-g", gid])  # May silently fail, which is fine.
-    lp("Adding user " + username + "on " + uid + ":" + gid + " with shell " + shell)
+    lp("Adding user " + username + " on " + uid + ":" + gid + " with shell " + shell)
     lrun(["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell])
     for i in groups:
         groupadd(username, i)
@@ -1300,7 +1308,7 @@ def adduser(username: str, password: str, uid, gid, shell: str, groups: list) ->
 
 def groupadd(username: str, group: str) -> None:
     lp("Adding " + username + " to group " + group)
-    lrun(["sudo", "usermod", "-aG", username, group])
+    lrun(["sudo", "usermod", "-aG", group, username])
 
 
 def passwd(username: str, password: str) -> None:
