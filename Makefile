@@ -4,7 +4,7 @@ all: help
 
 translations:
 	@meson setup build
-	@cd build && (ninja bakery-update-po || (ninja reconfigure && ninja bakery-update-po))
+	@cd build && (ninja bakery-pot || (ninja reconfigure && ninja bakery-pot))
 
 package: translations
 	echo "Package make not done"

@@ -1,7 +1,7 @@
 # Maintainer: Bill Sideris <bill88t@feline.gr>
 pkgname=('bakery' 'bakery-gui')
 pkgbase="bakery"
-pkgver=0.0.1
+pkgver=0.1.0
 pkgrel=1
 pkgdesc="BredOS Installer"
 arch=('any')
@@ -34,7 +34,7 @@ package_bakery() {
 
 package_bakery-gui() {
         cd "$srcdir/$pkgbase/build"
-        depends=('bakery' 'python-babel' 'python-pyrunning')
+        depends=('bakery' 'python-babel' 'python-pyrunning' 'libadwaita')
         DESTDIR="$pkgdir" meson install
         rm -rf "$pkgdir/usr/share/locale"
         rm -rf "$pkgdir/usr/share/bakery/"{bakery-cli.py,bakery.py,config.py}
