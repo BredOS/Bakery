@@ -1354,24 +1354,11 @@ def passwd(username: str, password: str) -> None:
 
 
 def sudo_nopasswd(no_passwd: bool) -> None:
+    cmd = ["sudo", "sh", "-c", "echo '%wheel ALL=(ALL) "]
     if no_passwd:
-        lrun(
-            [
-                "sudo",
-                "sh",
-                "-c",
-                "echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/10-installer",
-            ]
-        )
-    else:
-        lrun(
-            [
-                "sudo",
-                "sh",
-                "-c",
-                "echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/10-installer",
-            ]
-        )
+        cmd[-1] += "NOPASSWD: "
+    cmd[-1] += "ALL' > /etc/sudoers.d/10-installer"
+    lrun(cmd)
 
 
 def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> None:
