@@ -512,7 +512,9 @@ class locale_screen(Adw.Bin):
             else:
                 # clear the listbox
                 self.locales_list.remove_all()
-                for locale in langs()[lang]:
+                sr = langs()[lang]
+                sr.sort()
+                for locale in sr:
                     newrow = Gtk.ListBoxRow()
                     # Language - Layout
                     locale_label = Gtk.Label(label=locale)
@@ -550,16 +552,12 @@ class locale_screen(Adw.Bin):
     def hide_dialog(self, stuff) -> None:
         try:
             # change the locale and update translations
-            print(self.locale)
             try:
                 the_locale, encoding = self.locale.split(" ")
                 if not encoding == "UTF-8":
                     the_locale += "." + encoding
             except ValueError:
                 the_locale = self.locale
-            global _
-            _ = setup_translations("bg")
-            print(_("Next"))
             win.queue_draw()
         except Exception as e:
             import traceback
