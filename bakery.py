@@ -293,11 +293,21 @@ logging_handler = LoggingHandler(
 )
 
 
-def lrun(cmd: list, force: bool = False) -> None:
+def lrun(cmd, force: bool = False, shell=False) -> None:
     if dryrun and not force:
-        lp("Would have run: " + str(cmd))
+        lp(
+            "Would have run in "
+            + ("shell" if shell else "system")
+            + " mode: "
+            + " ".join(cmd)
+        )
     else:
-        Command(cmd).run_log_and_wait(logging_handler=logging_handler)
+        if shell:
+            Command(cmd).run_log_and_wait(logging_handler=logging_handler)
+        else:
+            Command(shell=True, shell_command_string=cmd).run_log_and_wait(
+                logging_handler=logging_handler
+            )
 
 
 lp("Logger initialized.")
