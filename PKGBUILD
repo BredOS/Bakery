@@ -21,7 +21,7 @@ prepare() {
 
 build() {
         cd "$srcdir/$pkgbase"
-        meson build --prefix=/usr
+        meson setup build --prefix=/usr
 }
 
 package_bakery() {
