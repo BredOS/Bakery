@@ -193,6 +193,9 @@ def console_logging(
         lp("PROGRESS: " + str(stm[1]) + "%")
 
 
+log_path = None
+
+
 def setup_logging() -> logging.Logger:
     """
     Setup logging
@@ -227,6 +230,8 @@ def setup_logging() -> logging.Logger:
         exit(1)
 
     print("Logging to:", log_file)
+    global log_path
+    log_path = log_file
     rm_old_logs(log_dir, keep=5)
 
     log_file_handler = logging.FileHandler(log_file)
@@ -249,6 +254,17 @@ def rm_old_logs(log_dir_path: str, keep: int) -> None:
     for i in os.listdir(log_dir_path):
         if i.startswith("BAKERY" if not dryrun else "DRYRUN"):
             os.remove(f"{log_dir_path}/{i}")
+
+
+def copy_logs(new_usern: str) -> None:
+    subprocess.run(
+        [
+            "cp",
+            "-v",
+            "/home/bred/.bredos",
+            "/home/" + new_usern + "/.bredos",
+        ]
+    )
 
 
 # Logger config
@@ -1630,6 +1646,8 @@ def install(settings=None) -> int:
 
         # Done
         lp("Installation finished. Total time: {:.5f}".format(monotonic() - start_time))
+        lp("Copying logs to new user..")
+        copy_logs(settings["user"]["username"])
         sleep(0.15)
         return 0
     elif settings["install_type"]["type"] == "custom":
