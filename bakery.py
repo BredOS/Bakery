@@ -258,6 +258,9 @@ def rm_old_logs(log_dir_path: str, keep: int) -> None:
 
 
 def copy_logs(new_usern: str) -> None:
+    if dryrun:
+        lp("Would have synced and copied logs.")
+        return
     subprocess.run("sync")
     subprocess.run(
         [
