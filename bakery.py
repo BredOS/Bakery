@@ -85,6 +85,7 @@ _stimer = monotonic()
 
 
 def reset_timer() -> None:
+    global _stimer
     _stimer = monotonic()
 
 
@@ -261,7 +262,7 @@ def copy_logs(new_usern: str) -> None:
     subprocess.run(
         [
             "cp",
-            "-v",
+            "-vr",
             "/home/bred/.bredos",
             "/home/" + new_usern + "/.bredos",
         ]
