@@ -10,6 +10,7 @@ license=('GPL3')
 options=('!strip')
 # branch=gui
 source=()
+makedepends=('meson')
 md5sums=()
 
 prepare() {
