@@ -922,6 +922,7 @@ def locales(only_enabled: bool = False) -> list:
                 or (data[i][2] != "_" and data[i][3] != "_")
                 or (only_enabled and data[i][0] == "#")
                 or "@" in data[i]
+                or "UTF-8" not in data[i]
             ):
                 data.pop(i)  # remove non-locale / disabled locale on only_enabled
         for i in range(len(data)):
@@ -957,14 +958,15 @@ def set_locale(locale: str) -> None:
             lp("The locale " + locale + " is not enabled, but this is a dryrun.")
         else:
             raise OSError("Locale " + locale + " not enabled!")
-    lp("Setting locale to: " + locale)
-    lrun(["sudo", "localectl", "set-locale", "LANG=" + locale])
+    lc = locale.split(" ")[0]
+    lp("Setting locale to: " + lc)
+    lrun(["sudo", "localectl", "set-locale", "LANG=" + lc])
     lrun(
         [
             "sudo",
             "bash",
             "-c",
-            "echo LANG=" + locale.split(" ")[0] + " > /etc/locale.conf",
+            "echo LANG=" + lc + " > /etc/locale.conf",
         ]
     )
 
@@ -1658,9 +1660,8 @@ def install(settings=None) -> int:
 
         # Done
         lp("Installation finished. Total time: {:.5f}".format(monotonic() - start_time))
-        lp("Copying logs to new user..")
-        copy_logs(settings["user"]["username"])
         sleep(0.15)
+        copy_logs(settings["user"]["username"])
         return 0
     elif settings["install_type"]["type"] == "custom":
         lp("Custom mode not yet implemented!", mode="error")
