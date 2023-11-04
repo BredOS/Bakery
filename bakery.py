@@ -261,9 +261,19 @@ def copy_logs(new_usern: str) -> None:
     subprocess.run("sync")
     subprocess.run(
         [
+            "sudo",
             "cp",
             "-vr",
             "/home/bred/.bredos",
+            "/home/" + new_usern + "/.bredos",
+        ]
+    )
+    subprocess.run(
+        [
+            "sudo",
+            "chown",
+            "-R",
+            new_usern + ":" + new_usern,
             "/home/" + new_usern + "/.bredos",
         ]
     )
