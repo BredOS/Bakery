@@ -257,6 +257,7 @@ def rm_old_logs(log_dir_path: str, keep: int) -> None:
 
 
 def copy_logs(new_usern: str) -> None:
+    subprocess.run("sync")
     subprocess.run(
         [
             "cp",
