@@ -6,7 +6,7 @@ project('bakery',
 
 i18n = import('i18n')
 
-install_data('bakery-cli.py', install_dir: join_paths(get_option('datadir'), 'bakery'))
+install_data('bakery-tui.py', install_dir: join_paths(get_option('datadir'), 'bakery'))
 install_data('bakery-gui.py', install_dir: join_paths(get_option('datadir'), 'bakery'))
 install_data('bakery.py', install_dir: join_paths(get_option('datadir'), 'bakery'))
 install_data('config.py', install_dir: join_paths(get_option('datadir'), 'bakery'))
