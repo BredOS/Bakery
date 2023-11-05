@@ -8,6 +8,5 @@ if __name__ == "__main__":
     if not bakery.dryrun:
         raise OSError("Protection against dum!")
     # res = bakery.install()
-    bakery.lrun("ls && pwd", force=True, shell=True)
-    sleep(0.5)
+    bakery.lrun(["ls", "-l"], force=True, silent=True)
     # print("Exited with exit code:", res)

@@ -293,21 +293,14 @@ logging_handler = LoggingHandler(
 )
 
 
-def lrun(cmd, force: bool = False, shell=False) -> None:
+def lrun(cmd: list, force: bool = False, silent: bool = False) -> None:
     if dryrun and not force:
-        lp(
-            "Would have run in "
-            + ("shell" if shell else "system")
-            + " mode: "
-            + " ".join(cmd)
-        )
+        lp("Would have run " + " ".join(cmd))
     else:
-        if shell:
+        if not silent:
             Command(cmd).run_log_and_wait(logging_handler=logging_handler)
         else:
-            Command(shell=True, shell_command_string=cmd).run_log_and_wait(
-                logging_handler=logging_handler
-            )
+            Command(cmd).run_and_wait()
 
 
 lp("Logger initialized.")
@@ -1209,7 +1202,7 @@ def detect_install_device() -> str:
 def enable_services(services: list) -> None:
     try:
         for i in services:
-            lrun(["sudo", "systemctl", "enable", i])
+            lrun(["sudo", "systemctl", "enable", i], silent=True)
     except:
         pass
 
@@ -1227,9 +1220,10 @@ def final_setup() -> None:
             "/etc/polkit-1/rules.d/49-nopasswd_global.rules",
         ]
     )
-    lrun(["sudo", "systemctl", "disable", "resizefs.service"])
+    lrun(["sudo", "systemctl", "disable", "resizefs.service"], silent=True)
     enable_services(
-        ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"]
+        ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"],
+        silent=True,
     )
 
 
