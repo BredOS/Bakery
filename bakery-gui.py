@@ -45,6 +45,7 @@ from bakery import (
     lrun,
     detect_install_device,
     detect_install_source,
+    reboot,
 )
 from time import sleep
 from datetime import date, datetime, time
@@ -206,6 +207,7 @@ class BakeryWindow(Adw.ApplicationWindow):
     def on_done_clicked(self, button) -> None:
         # quit the app
         self.close()
+        reboot(0)
 
     @debounce(0.3)
     def on_next_clicked(self, button) -> None:
@@ -612,7 +614,9 @@ class InstallThread(threading.Thread):
             self.window.back_btn.set_visible(False)
             self.window.next_btn.disconnect_by_func(self.window.on_install_btn_clicked)
             self.window.next_btn.connect("clicked", self.window.on_done_clicked)
-            self.window.next_btn.set_label(_("Done"))
+            self.window.next_btn.set_label(_("Reboot"))
+        else:
+            raise NotImplementedError("Failure is not a choice!")
 
 
 @Gtk.Template.from_file(script_dir + "/data/user_screen.ui")

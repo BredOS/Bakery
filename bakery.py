@@ -1437,7 +1437,7 @@ def set_hostname(hostname: str) -> None:
     lrun(["sudo", "bash", "-c", "echo " + hostname + " > /etc/hostname"])
 
 
-# Gui support functions
+# Support functions
 
 
 def debounce(wait):
@@ -1466,6 +1466,19 @@ def debounce(wait):
         return debounced
 
     return decorator
+
+
+def reboot(time: int = 10) -> None:
+    if time < 0:
+        raise ValueError("Time cannot be lower than 0")
+    if not dryrun:
+        while time:
+            print("Shutting down in " + str(time - 1) + "..")
+            sleep(1)
+            time -= 1
+        subprocess.run(["sudo", "shutdown", "-r", "now"])
+    else:
+        print("Skipping reboot during dryrun.")
 
 
 # Main functions
