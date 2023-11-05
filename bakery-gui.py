@@ -462,7 +462,10 @@ class kb_screen(Adw.Bin):
     def change_kb_layout(self, lang, model, layout) -> None:
         if layout == "normal":
             layout = ""
-        lrun(["setxkbmap", lang, model, layout])
+        lrun(["setxkbmap", "-model", model])
+        lrun(["setxkbmap", "-layout", lang])
+        # WARNING: Variant not set.
+        # lrun(["setxkbmap", "-variant", layout])
 
 
 @Gtk.Template.from_file(script_dir + "/data/locale_screen.ui")
