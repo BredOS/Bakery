@@ -417,7 +417,6 @@ class kb_screen(Adw.Bin):
             layouts = kb_variants(self.kb_prettylayouts[lang])
             self.layout["layout"] = self.kb_prettylayouts[lang]
             if not len(layouts):
-                print("no layouts")
                 self.layout["variant"] = "normal"
                 self.change_kb_layout(
                     self.layout["layout"], self.layout["model"], self.layout["variant"]
@@ -506,7 +505,6 @@ class locale_screen(Adw.Bin):
         if row != self.last_selected_row:
             self.last_selected_row = row
             lang = row.get_child().get_label()
-            print(lang)
             if len(self.lang_data[lang]) == 1:
                 self.update_previews(self.lang_data[lang][0])
             else:
@@ -860,7 +858,6 @@ class summary_screen(Adw.Bin):
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
-        # print(type(self.locale_preview))
 
     def page_shown(self) -> None:
         self.data = self.window.collect_data()
