@@ -1223,7 +1223,6 @@ def final_setup() -> None:
     lrun(["sudo", "systemctl", "disable", "resizefs.service"], silent=True)
     enable_services(
         ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"],
-        silent=True,
     )
 
 
