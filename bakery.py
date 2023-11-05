@@ -808,7 +808,10 @@ _kbmodelmap = {
     "creativedw7000": "Creative Desktop Wireless 7000",
     "htcdream": "Htc Dream phone",
     "teck227": "Truly Ergonomic Computer Keyboard Model 227 (Wide Alt keys)",
-    "teck229": "Truly Ergonomic Computer Keyboard Model 229 (Standard sized Alt keys, additional Super and Menu key)",
+    "teck229": (
+        "Truly Ergonomic Computer Keyboard Model 229 (Standard sized Alt keys, additional "
+        + "Super and Menu key)"
+    ),
 }
 
 _kblangmap = {
@@ -1411,8 +1414,15 @@ def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> Non
                     "/etc/lightdm/lightdm.conf",
                 ]
             )
-        cmd = f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\ngreeter-session=lightdm-slick-greeter' /etc/lightdm/lightdm.conf"
-        lrun(["sudo", "sh", "-c", cmd])
+        lrun(
+            [
+                "sudo",
+                "sh",
+                "-c",
+                f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\n"
+                + "greeter-session=lightdm-slick-greeter' /etc/lightdm/lightdm.conf",
+            ]
+        )
 
 
 def enable_autologin_tty(username: str) -> None:
