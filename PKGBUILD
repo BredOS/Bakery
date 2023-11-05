@@ -38,7 +38,7 @@ package_bakery-gui() {
         depends=('bakery' 'python-babel' 'python-pyrunning' 'libadwaita')
         DESTDIR="$pkgdir" meson install
         rm -rf "$pkgdir/usr/share/locale"
-        rm -rf "$pkgdir/usr/share/bakery/"{bakery-cli.py,bakery.py,config.py}
+        rm -rf "$pkgdir/usr/share/bakery/"{bakery-tui.py,bakery.py,config.py}
         rm -rf "$pkgdir/usr/share/licenses/"
         rm -rf "$pkgdir/usr/bin"
 }
