@@ -1,14 +1,13 @@
 # Maintainer: Bill Sideris <bill88t@feline.gr>
 pkgname=('bakery' 'bakery-gui')
 pkgbase="bakery"
-pkgver=0.1.0
-pkgrel=2
+pkgver=1.0.0
+pkgrel=1
 pkgdesc="BredOS Installer"
 arch=('any')
 url="https://github.com/BredOS/Bakery"
 license=('GPL3')
 options=('!strip')
-# branch=gui
 source=()
 makedepends=('meson')
 md5sums=()

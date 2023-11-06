@@ -2,7 +2,7 @@
 
 supported_languages = {"English": "en_US.UTF-8"}
 timezone = {"region": "Europe", "zone": "London"}
-installer_version = "0.1.0"
+installer_version = "1.0.0"
 api_version = 1
 
 

@@ -104,7 +104,7 @@ class BakeryApp(Adw.Application):
             application_icon="org.bredos.bakery",
             developer_name="BredOS",
             debug_info=self.win.collect_data(),
-            version="0.1.0",
+            version=config.installer_version,
             developers=["Panda", "bill88t"],
             designers=["Panda", "DustyDaimler"],
             translator_credits=_("translator-credits"),
