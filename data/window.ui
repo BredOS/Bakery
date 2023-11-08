@@ -161,7 +161,7 @@
       </object>
     </child>
     <style>
-      <class name="devel"/>
+      <class name="a"/>
     </style>
   </template>
   <menu id="pop_menu">

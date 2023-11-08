@@ -491,11 +491,11 @@
 	(5,29,"GtkWidget",2,2,"name","rounded"),
 	(5,30,"GtkWidget",2,2,"name","suggested-action"),
 	(2,84,"GtkWidget",2,2,"name","destructive-action"),
-	(2,43,"GtkWidget",2,2,"name","devel"),
 	(2,90,"(item)",1,2,"name","about_menu_item"),
 	(2,94,"GtkWidget",2,2,"name","linked"),
 	(2,98,"GtkWidget",2,2,"name","suggested-action"),
 	(4,17,"GtkWidget",2,2,"name","rounded"),
-	(4,18,"GtkWidget",2,2,"name","suggested-action")
+	(4,18,"GtkWidget",2,2,"name","suggested-action"),
+	(2,43,"GtkWidget",2,2,"name","a")
   </object_data_arg>
 </cambalache-project>
