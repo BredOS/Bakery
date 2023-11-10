@@ -295,7 +295,7 @@ logging_handler = LoggingHandler(
 
 def lrun(cmd: list, force: bool = False, silent: bool = False) -> None:
     if dryrun and not force:
-        lp("Would have run " + " ".join(cmd))
+        lp("Would have run: " + " ".join(cmd))
     else:
         if not silent:
             Command(cmd).run_log_and_wait(logging_handler=logging_handler)
@@ -1211,10 +1211,12 @@ def enable_services(services: list) -> None:
 
 
 def final_setup() -> None:
-    if dryrun:
-        lp("Setup base skipped in dryrun")
-        return
-    lrun(
+    lrun(["sudo", "systemctl", "disable", "resizefs.service"], silent=True)
+    enable_services(
+        ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"],
+    )
+    global defer
+    defer.append(
         [
             "sudo",
             "rm",
@@ -1222,10 +1224,6 @@ def final_setup() -> None:
             "/etc/sudoers.d/g_wheel",
             "/etc/polkit-1/rules.d/49-nopasswd_global.rules",
         ]
-    )
-    lrun(["sudo", "systemctl", "disable", "resizefs.service"], silent=True)
-    enable_services(
-        ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"],
     )
 
 
