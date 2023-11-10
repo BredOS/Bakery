@@ -1665,7 +1665,7 @@ def install(settings=None) -> int:
         if settings["user"]["autologin"]:
             enable_autologin(
                 settings["user"]["username"],
-                "cinammon",
+                "cinnamon",
                 "lightdm",
                 settings["install_type"],
             )
