@@ -1702,6 +1702,11 @@ def install(settings=None) -> int:
 
         # Done
         lp("Installation finished. Total time: {:.5f}".format(monotonic() - start_time))
+        if len(defer):
+            lp("There are still deferred commands:")
+            for i in defer:
+                lp(str(i))
+            lp("These commands will NOT be logged.")
         sleep(0.15)
         copy_logs(settings["user"]["username"])
         sleep(0.15)
