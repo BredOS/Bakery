@@ -1397,7 +1397,7 @@ def sudo_nopasswd(no_passwd: bool) -> None:
     cmd[-1] += "ALL' > /etc/sudoers.d/10-installer"
     if not no_passwd:
         global defer
-        lp("Sudo reconfiguration defered to the end of the installation!")
+        lp("Sudo reconfiguration deferred to the end of the installation!")
         defer.append(cmd)
     else:
         lrun(cmd)
@@ -1488,17 +1488,20 @@ def reboot(time: int = 10) -> None:
         print("Skipping reboot during dryrun.")
 
 
-def run_defered():
+def run_deferred():
+    global defer
     if len(defer):
-        lp("Running defered commands..")
+        lp("Running deferred commands..")
+        sleep(0.15)
         for i in defer:
             lrun(i)
+        defer.clear()
 
 
 # Main functions
 
 
-def install(settings=None) -> int:
+def install(settings=None, do_deferred: bool = True) -> int:
     """
     The main install function.
 
@@ -1708,8 +1711,9 @@ def install(settings=None) -> int:
         sleep(0.15)
         copy_logs(settings["user"]["username"])
         sleep(0.15)
-        run_defered()
-        sleep(0.15)
+        if do_deferred:
+            run_deferred()
+            sleep(0.15)
         return 0
     elif settings["install_type"]["type"] == "custom":
         lp("Custom mode not yet implemented!", mode="error")

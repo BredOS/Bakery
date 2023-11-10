@@ -45,6 +45,7 @@ from bakery import (
     lrun,
     detect_install_device,
     detect_install_source,
+    run_deferred,
     reboot,
 )
 from time import sleep
@@ -207,7 +208,8 @@ class BakeryWindow(Adw.ApplicationWindow):
     def on_done_clicked(self, button) -> None:
         # quit the app
         self.close()
-        reboot(0)
+        run_deferred()
+        reboot(0)  # This will work cause of terminal sudo reauth timer.
 
     @debounce(0.3)
     def on_next_clicked(self, button) -> None:
@@ -605,7 +607,7 @@ class InstallThread(threading.Thread):
     def run(self):
         install_data = self.window.collect_data()
         lp("Starting install with data: " + str(install_data))
-        res = bakery.install(install_data)
+        res = bakery.install(install_data, do_deferred=False)
         if res == 0:
             # Change to finish page
             self.window.current_page = self.window.pages.index("Finish")
