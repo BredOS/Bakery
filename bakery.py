@@ -78,6 +78,8 @@ import config
 
 dryrun = False if "DO_DRYRUN" not in os.listdir() else True
 
+defer = []
+
 
 # Timer functions
 
@@ -149,10 +151,8 @@ def populate_messages(lang=None) -> None:
 populate_messages()
 
 
-def lp(message, write_to_f=True, mode="info") -> None:
-    if not write_to_f:
-        LogMessage.Info(message)
-    elif mode == "info":
+def lp(message, mode="info") -> None:
+    if mode == "info":
         LogMessage.Info(message).write(logging_handler=logging_handler)
     elif mode == "debug":
         LogMessage.Debug(message).write(logging_handler=logging_handler)
@@ -1397,7 +1397,12 @@ def sudo_nopasswd(no_passwd: bool) -> None:
     if no_passwd:
         cmd[-1] += "NOPASSWD: "
     cmd[-1] += "ALL' > /etc/sudoers.d/10-installer"
-    lrun(cmd)
+    if not no_passwd:
+        global defer
+        lp("Sudo reconfiguration defered to the end of the installation!")
+        defer.append(cmd)
+    else:
+        lrun(cmd)
 
 
 def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> None:
@@ -1485,6 +1490,13 @@ def reboot(time: int = 10) -> None:
         print("Skipping reboot during dryrun.")
 
 
+def run_defered():
+    if len(defer):
+        lp("Running defered commands..")
+        for i in defer:
+            lrun(i)
+
+
 # Main functions
 
 
@@ -1518,7 +1530,7 @@ def install(settings=None) -> int:
                     "gid": False,
                     "shell": "/bin/bash",
                     "groups": ["wheel", "network", "video", "audio", "storage", "uucp"],
-                    "sudo_nopasswd": True,
+                    "sudo_nopasswd": False,
                     "autologin": True,
                 },
                 "root_password": False,
@@ -1692,6 +1704,9 @@ def install(settings=None) -> int:
         lp("Installation finished. Total time: {:.5f}".format(monotonic() - start_time))
         sleep(0.15)
         copy_logs(settings["user"]["username"])
+        sleep(0.15)
+        run_defered()
+        sleep(0.15)
         return 0
     elif settings["install_type"]["type"] == "custom":
         lp("Custom mode not yet implemented!", mode="error")
