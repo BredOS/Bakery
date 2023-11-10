@@ -1420,7 +1420,8 @@ def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> Non
                 "sh",
                 "-c",
                 f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\n"
-                + "greeter-session=lightdm-slick-greeter' /etc/lightdm/lightdm.conf",
+                + "greeter-session=lightdm-slick-greeter\\nautologin-user-timeout=0\\nautologin-guest=false'"
+                + " /etc/lightdm/lightdm.conf",
             ]
         )
 
