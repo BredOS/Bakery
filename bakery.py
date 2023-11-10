@@ -1474,7 +1474,7 @@ def reboot(time: int = 5) -> None:
     if time < 0:
         raise ValueError("Time cannot be lower than 0")
     if not dryrun:
-        subprocess.run(["sudo", "sh", "-c", f"sleep {time} && shutdown -r now"])
+        subprocess.run(["sudo", "sh", "-c", f"sleep {time} && shutdown -r now &"])
     else:
         print("Skipping reboot during dryrun.")
 
