@@ -208,8 +208,8 @@ class BakeryWindow(Adw.ApplicationWindow):
     def on_done_clicked(self, button) -> None:
         # quit the app
         self.close()
+        reboot()  # We are on a hurry passed here!
         run_deferred()
-        reboot(0)  # This will work cause of terminal sudo reauth timer.
 
     @debounce(0.3)
     def on_next_clicked(self, button) -> None:

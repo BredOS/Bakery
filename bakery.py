@@ -1395,12 +1395,7 @@ def sudo_nopasswd(no_passwd: bool) -> None:
     if no_passwd:
         cmd[-1] += "NOPASSWD: "
     cmd[-1] += "ALL' > /etc/sudoers.d/10-installer"
-    if not no_passwd:
-        global defer
-        lp("Sudo reconfiguration deferred to the end of the installation!")
-        defer.append(cmd)
-    else:
-        lrun(cmd)
+    lrun(cmd)
 
 
 def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> None:
@@ -1475,15 +1470,11 @@ def debounce(wait):
     return decorator
 
 
-def reboot(time: int = 10) -> None:
+def reboot(time: int = 5) -> None:
     if time < 0:
         raise ValueError("Time cannot be lower than 0")
     if not dryrun:
-        while time:
-            print("Shutting down in " + str(time - 1) + "..")
-            sleep(1)
-            time -= 1
-        subprocess.run(["sudo", "shutdown", "-r", "now"])
+        subprocess.run(["sudo", "sh", "-c", f"sleep {time} && shutdown -r now"])
     else:
         print("Skipping reboot during dryrun.")
 
