@@ -78,6 +78,8 @@ import config
 
 dryrun = False if "DO_DRYRUN" not in os.listdir() else True
 
+defer = []
+
 
 # Timer functions
 
@@ -149,10 +151,8 @@ def populate_messages(lang=None) -> None:
 populate_messages()
 
 
-def lp(message, write_to_f=True, mode="info") -> None:
-    if not write_to_f:
-        LogMessage.Info(message)
-    elif mode == "info":
+def lp(message, mode="info") -> None:
+    if mode == "info":
         LogMessage.Info(message).write(logging_handler=logging_handler)
     elif mode == "debug":
         LogMessage.Debug(message).write(logging_handler=logging_handler)
@@ -295,7 +295,7 @@ logging_handler = LoggingHandler(
 
 def lrun(cmd: list, force: bool = False, silent: bool = False) -> None:
     if dryrun and not force:
-        lp("Would have run " + " ".join(cmd))
+        lp("Would have run: " + " ".join(cmd))
     else:
         if not silent:
             Command(cmd).run_log_and_wait(logging_handler=logging_handler)
@@ -1211,10 +1211,12 @@ def enable_services(services: list) -> None:
 
 
 def final_setup() -> None:
-    if dryrun:
-        lp("Setup base skipped in dryrun")
-        return
-    lrun(
+    lrun(["sudo", "systemctl", "disable", "resizefs.service"], silent=True)
+    enable_services(
+        ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"],
+    )
+    global defer
+    defer.append(
         [
             "sudo",
             "rm",
@@ -1222,10 +1224,6 @@ def final_setup() -> None:
             "/etc/sudoers.d/g_wheel",
             "/etc/polkit-1/rules.d/49-nopasswd_global.rules",
         ]
-    )
-    lrun(["sudo", "systemctl", "disable", "resizefs.service"], silent=True)
-    enable_services(
-        ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"],
     )
 
 
@@ -1420,7 +1418,8 @@ def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> Non
                 "sh",
                 "-c",
                 f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\n"
-                + "greeter-session=lightdm-slick-greeter' /etc/lightdm/lightdm.conf",
+                + "greeter-session=lightdm-slick-greeter\\nautologin-user-timeout=0\\nautologin-guest=false'"
+                + " /etc/lightdm/lightdm.conf",
             ]
         )
 
@@ -1471,23 +1470,29 @@ def debounce(wait):
     return decorator
 
 
-def reboot(time: int = 10) -> None:
+def reboot(time: int = 5) -> None:
     if time < 0:
         raise ValueError("Time cannot be lower than 0")
     if not dryrun:
-        while time:
-            print("Shutting down in " + str(time - 1) + "..")
-            sleep(1)
-            time -= 1
-        subprocess.run(["sudo", "shutdown", "-r", "now"])
+        subprocess.run(["sudo", "sh", "-c", f"sleep {time} && shutdown -r now &"])
     else:
         print("Skipping reboot during dryrun.")
+
+
+def run_deferred():
+    global defer
+    if len(defer):
+        lp("Running deferred commands..")
+        sleep(0.15)
+        for i in defer:
+            lrun(i)
+        defer.clear()
 
 
 # Main functions
 
 
-def install(settings=None) -> int:
+def install(settings=None, do_deferred: bool = True) -> int:
     """
     The main install function.
 
@@ -1517,7 +1522,7 @@ def install(settings=None) -> int:
                     "gid": False,
                     "shell": "/bin/bash",
                     "groups": ["wheel", "network", "video", "audio", "storage", "uucp"],
-                    "sudo_nopasswd": True,
+                    "sudo_nopasswd": False,
                     "autologin": True,
                 },
                 "root_password": False,
@@ -1664,7 +1669,7 @@ def install(settings=None) -> int:
         if settings["user"]["autologin"]:
             enable_autologin(
                 settings["user"]["username"],
-                "cinammon",
+                "cinnamon",
                 "lightdm",
                 settings["install_type"],
             )
@@ -1689,8 +1694,17 @@ def install(settings=None) -> int:
 
         # Done
         lp("Installation finished. Total time: {:.5f}".format(monotonic() - start_time))
+        if len(defer):
+            lp("There are still deferred commands:")
+            for i in defer:
+                lp(str(i))
+            lp("These commands will NOT be logged.")
         sleep(0.15)
         copy_logs(settings["user"]["username"])
+        sleep(0.15)
+        if do_deferred:
+            run_deferred()
+            sleep(0.15)
         return 0
     elif settings["install_type"]["type"] == "custom":
         lp("Custom mode not yet implemented!", mode="error")
