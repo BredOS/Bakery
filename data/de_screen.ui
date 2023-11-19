@@ -2,4 +2,6 @@
 <!-- Created with Cambalache 0.17.0 -->
 <interface>
   <!-- interface-name de_screen.ui -->
+  <requires lib="libadwaita" version="1.0"/>
+  <object class="AdwBin" id="de_screen"/>
 </interface>

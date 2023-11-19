@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.17.0 -->
+<interface>
+  <!-- interface-name kb_dialog.ui -->
+  <requires lib="gtk" version="4.12"/>
+  <requires lib="libadwaita" version="1.0"/>
+  <template class="partitioning_screen" parent="AdwBin">
+    <property name="child">
+      <object class="AdwStatusPage">
+        <property name="title">Select where you want to install BredOS</property>
+      </object>
+    </property>
+  </template>
+</interface>

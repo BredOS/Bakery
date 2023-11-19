@@ -160,6 +160,8 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.cancel_dialog = self.install_cancel
         self.cancel_dialog.set_property("hide-on-close", True)
         self.install_type = None
+        self.install_source = detect_install_source()
+        self.install_device = detect_install_device()
         # self.online_install.connect("clicked", self.main_button_clicked)
         self.offline_install.connect("clicked", self.main_button_clicked)
         self.custom_install.connect("clicked", self.main_button_clicked)
@@ -172,13 +174,10 @@ class BakeryWindow(Adw.ApplicationWindow):
     @debounce(2)
     def main_button_clicked(self, button) -> None:
         if button == self.offline_install:
-            lp("offline install")
             self.init_screens("offline")
         # elif button == self.online_install:
-        #     lp("online install")
         #     self.init_screens("online")
         elif button == self.custom_install:
-            lp("custom install")
             self.init_screens("custom")
 
     def on_install_btn_clicked(self, button) -> None:
@@ -291,8 +290,8 @@ class BakeryWindow(Adw.ApplicationWindow):
         if not self.install_type == None:
             install_data = {}
             install_data["type"] = self.install_type
-            install_data["source"] = detect_install_source()
-            install_data["device"] = detect_install_device()
+            install_data["source"] = self.install_source
+            install_data["device"] = self.install_device
             data["install_type"] = install_data
             data["root_password"] = False
             data["layout"] = all_pages["Keyboard"].layout
@@ -329,20 +328,28 @@ class BakeryWindow(Adw.ApplicationWindow):
 
     def init_screens(self, install_type) -> None:
         if install_type == "online":
-            self.pages = config.online_pages
+            if self.install_source == "from_iso":
+                self.pages = config.online_pages_from_iso
+            else:
+                self.pages = config.online_pages_on_dev
             self.add_pages(self.stack1, self.pages)
         elif install_type == "offline":
-            self.pages = config.offline_pages
+            if self.install_source == "from_iso":
+                self.pages = config.offline_pages_from_iso
+            else:
+                self.pages = config.offline_pages_on_dev
             self.add_pages(self.stack1, self.pages)
 
         bakery.logging_handler = LoggingHandler(
             logger=bakery.logger,
             logging_functions=[all_pages["Install"].console_logging],
         )
-
+        self.install_type = install_type
+        lp("Install type: " + self.install_type)
+        lp("Installing on: " + self.install_device)
+        lp("Installation source: " + self.install_source)
         self.current_page = 0
         self.update_buttons()
-        self.install_type = install_type
         self.main_stk.set_visible_child(self.install_page.get_child())
 
 
