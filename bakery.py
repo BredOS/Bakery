@@ -1422,6 +1422,7 @@ def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> Non
                 + " /etc/lightdm/lightdm.conf",
             ]
         )
+        groupadd(username, "autologin")
 
 
 def enable_autologin_tty(username: str) -> None:
