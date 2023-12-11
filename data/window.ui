@@ -245,7 +245,6 @@
       </object>
     </property>
     <property name="message-type">question</property>
-    <property name="transient-for">BakeryWindow</property>
   </object>
   <object class="GtkButton">
     <property name="child">
@@ -287,17 +286,25 @@
       <response id="yes" translatable="yes" appearance="suggested">Yes</response>
     </responses>
   </object>
-  <object class="AdwMessageDialog" id="error_dialog">
+  <object class="AdwMessageDialog" id="log_dialog">
+    <property name="body-use-markup">True</property>
+    <property name="close-response">ok</property>
+    <property name="default-response">ok</property>
+    <property name="hide-on-close">True</property>
+    <property name="modal">True</property>
+    <property name="transient-for">BakeryWindow</property>
+    <!-- Custom fragments -->
+    <responses>
+      <response id="ok" translatable="yes" appearance="suggested">Okay</response>
+    </responses>
+  </object>
+  <object class="AdwMessageDialog" id="err_dialog">
+    <property name="body" translatable="yes" context="Do not translate &lt;a href=&quot;https://discord.gg/jwhxuyKXaa&quot;&gt;https://discord.gg/jwhxuyKXaa&lt;/a&gt;">An error occurred during installation. Do you want to upload the log file, so you can easily report the issue in our discord? &lt;a href="https://discord.gg/jwhxuyKXaa"&gt;https://discord.gg/jwhxuyKXaa&lt;/a&gt;</property>
+    <property name="body-use-markup">True</property>
+    <property name="close-response">no</property>
     <property name="default-response">no</property>
-    <property name="extra-child">
-      <object class="GtkLabel">
-        <property name="label">Do you want to upload the log to the internet?</property>
-        <style>
-          <class name="title-4"/>
-        </style>
-      </object>
-    </property>
-    <property name="heading" translatable="yes">An error occurred</property>
+    <property name="heading">Upload log?</property>
+    <property name="hide-on-close">True</property>
     <property name="modal">True</property>
     <property name="transient-for">BakeryWindow</property>
     <!-- Custom fragments -->

@@ -47,6 +47,8 @@ from bakery import (
     detect_install_source,
     run_deferred,
     reboot,
+    upload_log,
+    log_path,
 )
 from time import sleep
 from datetime import date, datetime, time
@@ -114,7 +116,7 @@ class BakeryApp(Adw.Application):
             license_type=Gtk.License.GPL_3_0,
             website="https://BredOS.org",
         )
-        translators = ["Panda's best friend", "Panda"]
+        translators = ["Bill88t", "Panda"]
         about.add_credit_section(_("Translated by"), translators)
         about.add_acknowledgement_section(_("Special thanks to"), ["Shivanandvp"])
         about.present()
@@ -153,6 +155,8 @@ class BakeryWindow(Adw.ApplicationWindow):
     custom_install = Gtk.Template.Child()
     install_cancel = Gtk.Template.Child()
     install_confirm = Gtk.Template.Child()
+    err_dialog = Gtk.Template.Child()
+    log_dialog = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -171,6 +175,47 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.next_btn.connect("clicked", self.on_next_clicked)
         self.back_btn.connect("clicked", self.on_back_clicked)
         self.cancel_btn.connect("clicked", self.on_cancel_clicked)
+        self.err_dialog.connect("response", self.on_err_dialog_response)
+        self.log_dialog.connect("response", self.on_log_dialog_response)
+
+    def on_err_dialog_response(self, dialog, resp) -> None:
+        if resp == "yes":
+            self.err_dialog.hide()
+            logurl = upload_log()
+            if logurl == "error":
+                self.log_dialog.set_heading(_("Log upload failed"))
+                self.log_dialog.set_body(
+                    _("The log file could not be uploaded it can still be found at")
+                    + '<br><a href="file://'
+                    + log_path
+                    + '">'
+                    + log_path
+                    + "</a>"
+                )
+            else:
+                self.log_dialog.set_heading(_("Log uploaded"))
+                self.log_dialog.set_body(
+                    _("The log file has been uploaded, you can find it at")
+                    + '\n<a href="'
+                    + logurl
+                    + '">'
+                    + logurl
+                    + "</a>"
+                    + '\n<a href="file://'
+                    + log_path
+                    + '">'
+                    + log_path
+                    + "</a>"
+                )
+            self.log_dialog.present()
+        if resp == "no":
+            self.err_dialog.hide()
+            exit(1)
+
+    def on_log_dialog_response(self, dialog, resp) -> None:
+        if resp == "ok":
+            self.log_dialog.hide()
+            exit(1)
 
     @debounce(2)
     def main_button_clicked(self, button) -> None:
@@ -628,7 +673,7 @@ class InstallThread(threading.Thread):
             self.window.next_btn.connect("clicked", self.window.on_done_clicked)
             self.window.next_btn.set_label(_("Reboot"))
         else:
-            raise NotImplementedError("Failure is not a choice!")
+            GLib.timeout_add(500, self.window.err_dialog.present)
 
 
 @Gtk.Template.from_file(script_dir + "/data/user_screen.ui")

@@ -210,8 +210,8 @@ def setup_logging() -> logging.Logger:
     logger = logging.getLogger("bredos-bakery")
     logger.setLevel(logging.DEBUG)
     if dryrun:
-        log_dir = os.path.join(".")
-        log_file = os.path.join(log_dir, "DRYRUN.log")
+        log_dir = os.path.abspath(os.path.join("."))
+        log_file = os.path.abspath(os.path.join(log_dir, "DRYRUN.log"))
     else:
         log_dir = os.path.join(os.path.expanduser("~"), ".bredos", "bakery", "logs")
         log_file = os.path.join(
@@ -1440,6 +1440,20 @@ def set_hostname(hostname: str) -> None:
 
 
 # Support functions
+
+
+def upload_log() -> str:
+    command = f"cat {log_path} | nc termbin.com 9999"
+    lp("Uploading log to termbin.com")
+    try:
+        result = subprocess.run(
+            command, shell=True, check=True, text=True, capture_output=True
+        )
+        lp("Log uploaded to " + result.stdout.strip().split("\n")[0])
+        return result.stdout.strip().split("\n")[0]
+    except subprocess.CalledProcessError:
+        lp("Error uploading log to termbin.com", mode="error")
+        return "error"
 
 
 def debounce(wait):
