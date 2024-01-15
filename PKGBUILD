@@ -2,7 +2,7 @@
 pkgname=('bakery' 'bakery-gui')
 pkgbase="bakery"
 pkgver=1.0.0
-pkgrel=2
+pkgrel=3
 pkgdesc="BredOS Installer"
 arch=('any')
 url="https://github.com/BredOS/Bakery"

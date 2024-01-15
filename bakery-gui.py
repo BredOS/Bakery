@@ -45,6 +45,7 @@ from bakery import (
     lrun,
     detect_install_device,
     detect_install_source,
+    detect_session_configuration,
     run_deferred,
     reboot,
     upload_log,
@@ -167,6 +168,7 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.install_type = None
         self.install_source = detect_install_source()
         self.install_device = detect_install_device()
+        self.session_configuration = detect_session_configuration()
         # self.online_install.connect("clicked", self.main_button_clicked)
         self.offline_install.connect("clicked", self.main_button_clicked)
         self.custom_install.connect("clicked", self.main_button_clicked)
@@ -340,6 +342,7 @@ class BakeryWindow(Adw.ApplicationWindow):
             install_data["source"] = self.install_source
             install_data["device"] = self.install_device
             data["install_type"] = install_data
+            data["session_configuration"] = self.session_configuration
             data["root_password"] = False
             data["layout"] = all_pages["Keyboard"].layout
             data["locale"] = all_pages["Locale"].locale

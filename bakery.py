@@ -1180,6 +1180,27 @@ def package_desc(packages: list) -> dict:
 
 # Device functions
 
+def detect_session_configuration() -> dict:
+    # Check for the XDG_SESSION_TYPE environment variable
+    try:
+        xdg_session_type = os.environ.get('XDG_SESSION_TYPE')
+    except:
+        xdg_session_type = None
+    # Check for the XDG_CURRENT_DESKTOP environment variable and lowercase it
+    try:
+        xdg_current_desktop = os.environ.get('XDG_CURRENT_DESKTOP').lower()
+    except:
+        xdg_current_desktop = None
+    # look at where display-manager.service is symlinked to 
+    try:
+        display_manager = os.path.basename(os.path.realpath('/etc/systemd/system/display-manager.service')).replace('.service', '')
+    except:
+        display_manager = None
+
+    if xdg_session_type == 'wayland':
+        return {"dm": display_manager, "de": xdg_current_desktop, "is_wayland": True}
+    else:
+        return {"dm": display_manager, "de": xdg_current_desktop, "is_wayland": False}
 
 def detect_install_source() -> str:
     with open("/proc/cmdline", "r") as cmdline_file:
@@ -1193,7 +1214,7 @@ def detect_install_source() -> str:
 def detect_install_device() -> str:
     try:
         with open("/sys/firmware/devicetree/base/model", "r") as model_file:
-            return model_file.read().rstrip("\n")
+            return model_file.read().rstrip("\n").rstrip('\x00')
     except FileNotFoundError:
         try:
             with open("/sys/class/dmi/id/product_name", "r") as product_name_file:
@@ -1210,11 +1231,14 @@ def enable_services(services: list) -> None:
         pass
 
 
-def final_setup() -> None:
+def final_setup(settings) -> None:
     lrun(["sudo", "systemctl", "disable", "resizefs.service"], silent=True)
     enable_services(
         ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"],
     )
+    if settings["session_configuration"]["dm"] == "gdm" and settings["user"]["autologin"] == True:
+        # rm /etc/gdm/custom.conf
+        lrun(["sudo", "rm", "/etc/gdm/custom.conf"], silent=True)
     global defer
     defer.append(
         [
@@ -1398,7 +1422,10 @@ def sudo_nopasswd(no_passwd: bool) -> None:
     lrun(cmd)
 
 
-def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> None:
+def enable_autologin(username: str, session_configuration: dict, install_type: dict) -> None:
+    dm = session_configuration["dm"]
+    de = session_configuration["de"]
+    is_wayland = session_configuration["is_wayland"]
     if dm == "lightdm":
         lp("Enabling autologin for " + username + " in " + dm)
         if (install_type["source"] == "on_device") or (
@@ -1422,7 +1449,34 @@ def enable_autologin(username: str, de: str, dm: str, install_type: dict) -> Non
                 + " /etc/lightdm/lightdm.conf",
             ]
         )
-        groupadd(username, "autologin")
+    elif dm == "gdm":
+        lp("Enabling autologin for " + username + " in " + dm)
+
+        config = f"""# GDM configuration storage
+
+[daemon]
+# Uncomment the line below to force the login screen to use Xorg
+#WaylandEnable=false
+AutomaticLogin={username}
+AutomaticLoginEnable=True
+# TimedLoginEnable=true
+# TimedLogin={username}
+# TimedLoginDelay=1
+XSession={de}
+
+[security]
+
+[xdmcp]
+
+[chooser]
+
+[debug]
+# Uncomment the line below to turn on debugging
+#Enable=true
+"""
+        cmd = f'echo "{config}" > /etc/gdm/custom.conf'
+        lrun(["sudo", "sh", "-c", cmd])
+    groupadd(username, "autologin")
 
 
 def enable_autologin_tty(username: str) -> None:
@@ -1525,6 +1579,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
                     "source": "on_device",
                     "device": "rpi4",
                 },
+                "session_configuration": {'dm': 'lightdm', 'de': 'XFCE', 'is_wayland': False},
                 "layout": {"model": "pc105", "layout": "us", "variant": "alt-intl"},
                 "locale": "en_US.UTF-8 UTF-8",
                 "timezone": {"region": "Europe", "zone": "Sofia", "ntp": True},
@@ -1579,6 +1634,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
             return 2
         for i in [
             "install_type",
+            "session_configuration",
             "layout",
             "locale",
             "timezone",
@@ -1594,6 +1650,13 @@ def install(settings=None, do_deferred: bool = True) -> int:
         for i in ["type", "source", "device"]:
             if i not in settings["install_type"].keys():
                 lp("Invalid install_type manifest, does not contain " + i, mode="error")
+                return 2
+        for i in ["dm", "de", "is_wayland"]:
+            if i not in settings["session_configuration"].keys():
+                lp(
+                    "Invalid session_configuration manifest, does not contain " + i,
+                    mode="error",
+                )
                 return 2
         for i in ["model", "layout", "variant"]:
             if i not in settings["layout"].keys():
@@ -1684,8 +1747,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
         if settings["user"]["autologin"]:
             enable_autologin(
                 settings["user"]["username"],
-                "cinnamon",
-                "lightdm",
+                settings["session_configuration"],
                 settings["install_type"],
             )
 
@@ -1701,7 +1763,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
         st(6)  # finishing up
         reset_timer()
 
-        final_setup()
+        final_setup(settings)
 
         lp("Took {:.5f}".format(get_timer()))
         st(7)  # Cleanup
