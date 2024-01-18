@@ -1180,27 +1180,31 @@ def package_desc(packages: list) -> dict:
 
 # Device functions
 
+
 def detect_session_configuration() -> dict:
     # Check for the XDG_SESSION_TYPE environment variable
     try:
-        xdg_session_type = os.environ.get('XDG_SESSION_TYPE')
+        xdg_session_type = os.environ.get("XDG_SESSION_TYPE")
     except:
         xdg_session_type = None
     # Check for the XDG_CURRENT_DESKTOP environment variable and lowercase it
     try:
-        xdg_current_desktop = os.environ.get('XDG_CURRENT_DESKTOP').lower()
+        xdg_current_desktop = os.environ.get("XDG_CURRENT_DESKTOP").lower()
     except:
         xdg_current_desktop = None
-    # look at where display-manager.service is symlinked to 
+    # look at where display-manager.service is symlinked to
     try:
-        display_manager = os.path.basename(os.path.realpath('/etc/systemd/system/display-manager.service')).replace('.service', '')
+        display_manager = os.path.basename(
+            os.path.realpath("/etc/systemd/system/display-manager.service")
+        ).replace(".service", "")
     except:
         display_manager = None
 
-    if xdg_session_type == 'wayland':
+    if xdg_session_type == "wayland":
         return {"dm": display_manager, "de": xdg_current_desktop, "is_wayland": True}
     else:
         return {"dm": display_manager, "de": xdg_current_desktop, "is_wayland": False}
+
 
 def detect_install_source() -> str:
     with open("/proc/cmdline", "r") as cmdline_file:
@@ -1214,7 +1218,7 @@ def detect_install_source() -> str:
 def detect_install_device() -> str:
     try:
         with open("/sys/firmware/devicetree/base/model", "r") as model_file:
-            return model_file.read().rstrip("\n").rstrip('\x00')
+            return model_file.read().rstrip("\n").rstrip("\x00")
     except FileNotFoundError:
         try:
             with open("/sys/class/dmi/id/product_name", "r") as product_name_file:
@@ -1236,7 +1240,10 @@ def final_setup(settings) -> None:
     enable_services(
         ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"],
     )
-    if settings["session_configuration"]["dm"] == "gdm" and settings["user"]["autologin"] == True:
+    if (
+        settings["session_configuration"]["dm"] == "gdm"
+        and settings["user"]["autologin"] == True
+    ):
         # rm /etc/gdm/custom.conf
         lrun(["sudo", "rm", "/etc/gdm/custom.conf"], silent=True)
     global defer
@@ -1422,7 +1429,9 @@ def sudo_nopasswd(no_passwd: bool) -> None:
     lrun(cmd)
 
 
-def enable_autologin(username: str, session_configuration: dict, install_type: dict) -> None:
+def enable_autologin(
+    username: str, session_configuration: dict, install_type: dict
+) -> None:
     dm = session_configuration["dm"]
     de = session_configuration["de"]
     is_wayland = session_configuration["is_wayland"]
@@ -1461,8 +1470,8 @@ AutomaticLogin={username}
 AutomaticLoginEnable=True
 # TimedLoginEnable=true
 # TimedLogin={username}
-# TimedLoginDelay=1
-XSession={de}
+# TimedLoginDelay=5
+DefaultSession={de}
 
 [security]
 
@@ -1579,7 +1588,11 @@ def install(settings=None, do_deferred: bool = True) -> int:
                     "source": "on_device",
                     "device": "rpi4",
                 },
-                "session_configuration": {'dm': 'lightdm', 'de': 'XFCE', 'is_wayland': False},
+                "session_configuration": {
+                    "dm": "lightdm",
+                    "de": "XFCE",
+                    "is_wayland": False,
+                },
                 "layout": {"model": "pc105", "layout": "us", "variant": "alt-intl"},
                 "locale": "en_US.UTF-8 UTF-8",
                 "timezone": {"region": "Europe", "zone": "Sofia", "ntp": True},
