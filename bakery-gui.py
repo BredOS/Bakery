@@ -107,7 +107,7 @@ class BakeryApp(Adw.Application):
             application_name=_("BredOS Installer"),
             application_icon="org.bredos.bakery",
             developer_name="BredOS",
-            debug_info=self.win.collect_data(),
+            debug_info=self.win.collect_data(show_pass=False),
             version=config.installer_version,
             developers=["Panda", "bill88t"],
             designers=["Panda", "DustyDaimler"],
@@ -161,6 +161,7 @@ class BakeryWindow(Adw.ApplicationWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.set_deletable(False)
         # go to the first page of main stack
         self.main_stk.set_visible_child(self.main_page.get_child())
         self.cancel_dialog = self.install_cancel
@@ -172,14 +173,14 @@ class BakeryWindow(Adw.ApplicationWindow):
         # self.online_install.connect("clicked", self.main_button_clicked)
         self.offline_install.connect("clicked", self.main_button_clicked)
         self.custom_install.connect("clicked", self.main_button_clicked)
-        self.cancel_dialog.connect("response", self.delete_pages)
+        self.cancel_dialog.connect("response", self.on_cancel_dialog_response)
 
         self.next_btn.connect("clicked", self.on_next_clicked)
         self.back_btn.connect("clicked", self.on_back_clicked)
         self.cancel_btn.connect("clicked", self.on_cancel_clicked)
         self.err_dialog.connect("response", self.on_err_dialog_response)
         self.log_dialog.connect("response", self.on_log_dialog_response)
-
+        
     def on_err_dialog_response(self, dialog, resp) -> None:
         if resp == "yes":
             self.err_dialog.hide()
@@ -320,6 +321,17 @@ class BakeryWindow(Adw.ApplicationWindow):
         # connect the yes button to the delete_pages function
         self.cancel_dialog.present()
 
+    def on_close_clicked(self, button) -> None:
+        # connect the yes button to the delete_pages function
+        self.cancel_dialog.present()
+
+    def on_cancel_dialog_response(self, dialog, resp) -> None:
+        if resp == "yes":
+            self.cancel_dialog.hide()
+            self.close()
+        else:
+            self.cancel_dialog.hide()
+
     def delete_pages(self, dialog, resp) -> None:
         if resp == "yes":
             self.main_stk.set_visible_child(self.main_page.get_child())
@@ -334,7 +346,7 @@ class BakeryWindow(Adw.ApplicationWindow):
     def get_page_id(self, page_name) -> str:
         return page_name
 
-    def collect_data(self, *_) -> dict:
+    def collect_data(self, show_pass=False , *_) -> dict:
         data = {}
         if not self.install_type == None:
             install_data = {}
@@ -349,6 +361,8 @@ class BakeryWindow(Adw.ApplicationWindow):
             data["timezone"] = all_pages["Timezone"].timezone
             data["hostname"] = all_pages["User"].get_hostname()
             data["user"] = all_pages["User"].collect_data()
+            if not show_pass:
+                data["user"]["password"] = "REDACTED"
             installer = {}
             installer["installer_version"] = config.installer_version
             installer["ui"] = "gui"
@@ -660,8 +674,8 @@ class InstallThread(threading.Thread):
         self.install_window = install_window
 
     def run(self):
-        install_data = self.window.collect_data()
-        lp("Starting install with data: " + str(install_data))
+        install_data = self.window.collect_data(show_pass=True)
+        lp("Starting install with data: " + str(self.window.collect_data(show_pass=False)))
         res = bakery.install(install_data, do_deferred=False)
         if res == 0:
             # Change to finish page
