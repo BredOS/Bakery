@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.17.0 -->
+<!-- Created with Cambalache 0.92.0 -->
 <interface domain="bakery">
   <!-- interface-name kb_screen.ui -->
   <requires lib="gtk" version="4.12"/>
@@ -39,8 +39,10 @@
                             <property name="title" translatable="yes">Pick your keyboard model</property>
                             <child>
                               <object class="GtkDropDown" id="models_list">
+                                <property name="enable-search">True</property>
                                 <property name="margin-bottom">5</property>
                                 <property name="margin-top">5</property>
+                                <property name="search-match-mode">substring</property>
                               </object>
                             </child>
                           </object>

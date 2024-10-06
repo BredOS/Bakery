@@ -13,12 +13,14 @@ def pages(_):
         "Timezone": ["timezone_screen", _("Timezone")],
         "User": ["user_screen", _("User")],
         "Desktops": ["de_screen", _("Desktops")],
-        "Partitioning": ["partitioning_screen", _("Partitioning")],
+        "Partitioning": ["partitioning_screen", _("Partitions")],
         "Summary": ["summary_screen", _("Summary")],
         "Install": ["install_screen", _("Install")],
         "Finish": ["finish_screen", _("Finish")],
     }
 
+
+#    "Partitioning",
 
 offline_pages_on_dev = [
     "Locale",
@@ -44,7 +46,8 @@ online_pages_from_iso = [
     "Keyboard",
     "Timezone",
     "User",
-    "Desktop" "Partitioning",
+    "Desktop",
+    "Partitioning",
     "Summary",
     "Install",
     "Finish",
@@ -58,4 +61,22 @@ offline_pages_from_iso = [
     "Summary",
     "Install",
     "Finish",
+]
+
+colors = [
+    "color1",
+    "color2",
+    "color3",
+    "color4",
+    "color5",
+    "color6",
+    "color7",
+    "color8",
+    "color9",
+    "color10",
+    "color11",
+    "color12",
+    "color13",
+    "color14",
+    "color15",
 ]

@@ -1,0 +1,81 @@
+.rm-border {
+    border-right: none;
+}
+
+.color1 {
+    background-color: #f2dede; 
+}
+
+.color2 {
+    background-color: #d9ead3;
+}
+
+.color3 {
+    background-color: #d9f0ff;
+}
+
+.color4 {
+    background-color: #fff2cc;
+}
+
+.color5 {
+    background-color: #e5e0ec;
+}
+
+.color6 {
+    background-color: #fce5cd;
+}
+
+.color7 {
+    background-color: #eaf1dd; 
+}
+
+.color8 {
+    background-color: #f3e5f5;
+}
+
+.color9 {
+    background-color: #ffd9eb; 
+}
+
+.color10 {
+    background-color: #d9d2e9;
+}
+
+.color11 {
+    background-color: #fff7e6;
+}
+
+.color12 {
+    background-color: #e2f0cb;
+}
+
+.color13 {
+    background-color: #c9f0c8;
+}
+
+.color14 {
+    background-color: #f5e6e8;
+}
+
+.color15 {
+    background-color: #e8ecef;
+}
+
+.partition-box {
+    padding: 10px;
+}  
+
+.first-partition {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.last-partition {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.partition-box.selected {
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5);
+}

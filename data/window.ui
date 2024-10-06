@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.17.0 -->
+<!-- Created with Cambalache 0.92.0 -->
 <interface domain="bakery">
   <!-- interface-name window.ui -->
-  <requires lib="gtk" version="4.0"/>
+  <requires lib="gio" version="2.44"/>
+  <requires lib="gtk" version="4.10"/>
   <requires lib="libadwaita" version="1.2"/>
-  <requires lib="gio" version="2.0"/>
   <template class="BakeryWindow" parent="AdwApplicationWindow">
-    <property name="default-height">800</property>
-    <property name="default-width">800</property>
+    <property name="default-height">775</property>
+    <property name="default-width">885</property>
     <property name="title" translatable="yes">BredOS Installer</property>
     <child>
       <object class="GtkBox">
@@ -25,6 +25,7 @@
         </child>
         <child>
           <object class="GtkStack" id="main_stk">
+            <property name="transition-duration">100</property>
             <property name="transition-type">slide-left-right</property>
             <child>
               <object class="GtkStackPage" id="main_page">
@@ -34,12 +35,6 @@
                       <object class="GtkBox">
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
-                        <child>
-                          <object class="GtkImage">
-                            <property name="icon-name">org.bredos.bakery</property>
-                            <property name="pixel-size">256</property>
-                          </object>
-                        </child>
                         <child>
                           <object class="GtkBox">
                             <property name="halign">center</property>
@@ -90,6 +85,7 @@
                       </object>
                     </property>
                     <property name="description" translatable="yes" comments="Do not translate literally, come up with a bread/baking related pun that works in the target language. Try to keep the idea that the installer will lead the way&#10;">Let the Bakery installer whip up the perfect BredOS recipe for your machine!</property>
+                    <property name="icon-name">org.bredos.bakery-big</property>
                     <property name="title" translatable="yes">Welcome to BredOS!</property>
                   </object>
                 </property>
@@ -100,11 +96,41 @@
                 <property name="child">
                   <object class="GtkBox">
                     <child>
-                      <object class="GtkStackSidebar" id="stack1_sidebar">
-                        <property name="can-focus">False</property>
-                        <property name="can-target">False</property>
-                        <property name="focus-on-click">False</property>
-                        <property name="stack">stack1</property>
+                      <object class="AdwStatusPage">
+                        <property name="child">
+                          <object class="GtkBox">
+                            <property name="height-request">0</property>
+                            <property name="orientation">vertical</property>
+                            <property name="vexpand">True</property>
+                            <child>
+                              <object class="GtkStackSidebar" id="stack1_sidebar">
+                                <property name="can-focus">False</property>
+                                <property name="can-target">False</property>
+                                <property name="focus-on-click">False</property>
+                                <property name="height-request">440</property>
+                                <property name="stack">stack1</property>
+                                <property name="valign">start</property>
+                                <property name="vexpand">True</property>
+                                <property name="width-request">40</property>
+                                <style>
+                                  <class name="rm-border"/>
+                                </style>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="icon-name">org.bredos.bakery-big</property>
+                        <style>
+                          <class name="compact"/>
+                          <class name="add-border"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparator">
+                        <style>
+                          <class name=".vertical"/>
+                        </style>
                       </object>
                     </child>
                     <child>
@@ -161,7 +187,7 @@
       </object>
     </child>
     <style>
-      <class name="a"/>
+      <class name="asdf"/>
     </style>
   </template>
   <menu id="pop_menu">
@@ -269,7 +295,7 @@
     <property name="default-response">no</property>
     <property name="heading" translatable="yes" context="dialog heading">Warning</property>
     <property name="transient-for">BakeryWindow</property>
-    <!-- Custom fragments -->
+    <!-- Custom object fragments -->
     <responses>
       <response id="cancel" translatable="yes">_No</response>
       <response id="yes" translatable="yes" appearance="destructive">Yes</response>
@@ -280,7 +306,7 @@
     <property name="default-response">confirm</property>
     <property name="heading" translatable="yes" context="Dialog heading">Start Installation</property>
     <property name="transient-for">BakeryWindow</property>
-    <!-- Custom fragments -->
+    <!-- Custom object fragments -->
     <responses>
       <response id="cancel" translatable="yes">_Cancel</response>
       <response id="yes" translatable="yes" appearance="suggested">Yes</response>
@@ -293,7 +319,7 @@
     <property name="hide-on-close">True</property>
     <property name="modal">True</property>
     <property name="transient-for">BakeryWindow</property>
-    <!-- Custom fragments -->
+    <!-- Custom object fragments -->
     <responses>
       <response id="ok" translatable="yes" appearance="suggested">Okay</response>
     </responses>
@@ -307,7 +333,7 @@
     <property name="hide-on-close">True</property>
     <property name="modal">True</property>
     <property name="transient-for">BakeryWindow</property>
-    <!-- Custom fragments -->
+    <!-- Custom object fragments -->
     <responses>
       <response id="cancel" translatable="yes">_No</response>
       <response id="yes" translatable="yes" appearance="suggested">Yes</response>

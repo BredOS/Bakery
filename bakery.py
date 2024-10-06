@@ -15,10 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+import parted
 import toml
 import subprocess
 import os
 import gettext
+import io
+import sys
 from time import sleep, monotonic
 from pathlib import Path
 import socket
@@ -28,6 +31,7 @@ import json
 from traceback import print_exception
 from threading import Lock
 from functools import wraps
+import time
 
 from pyrunning import logging, LogMessage, LoggingHandler, Command, LoggingLevel
 import gi
@@ -284,6 +288,12 @@ def copy_logs(new_usern: str) -> None:
 
 # Logger config
 
+# class StdErrRedirector(io.TextIOBase):
+#     def write(self, message):
+#         if message.strip():
+#                 lp(message, mode="info")
+
+# sys.stderr = StdErrRedirector()
 
 print("Starting logger..")
 logger = setup_logging()
@@ -307,9 +317,25 @@ lp("Logger initialized.")
 lp("Dry run = " + str(dryrun))
 
 
+# Exception handling
+
+
+def catch_exceptions(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            lp(f"Exception in {func.__name__}: {e}", mode="error")
+            lp(print_exception(), mode="error")
+
+    return wrapper
+
+
 # TOML
 
 
+@catch_exceptions
 def check_override_config() -> bool:
     # check if a /boot/override.toml exists.
     try:
@@ -320,12 +346,14 @@ def check_override_config() -> bool:
         return False
 
 
+@catch_exceptions
 def load_config(file_path: str = "/bakery/config.toml") -> dict:
     # Load a config file as a dict.
     lp("Loaded config: " + file_path)
     return toml.load(file_path)
 
 
+@catch_exceptions
 def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
     # Export a config file from a stored config dict.
     try:
@@ -340,6 +368,7 @@ def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
 # Networking functions
 
 
+@catch_exceptions
 def test_up(hostport: tuple) -> bool:
     if not networking_up():
         return False
@@ -351,6 +380,7 @@ def test_up(hostport: tuple) -> bool:
         return False
 
 
+@catch_exceptions
 def networking_up() -> bool:
     # Tests if an interface is connected.
     client = NM.Client.new(None)
@@ -364,6 +394,7 @@ def networking_up() -> bool:
     return False
 
 
+@catch_exceptions
 def internet_up() -> bool:
     res = False
     for i in [
@@ -379,6 +410,7 @@ def internet_up() -> bool:
     return res
 
 
+@catch_exceptions
 def geoip() -> dict:
     try:
         if not internet_up():
@@ -390,6 +422,7 @@ def geoip() -> dict:
         return config.timezone
 
 
+@catch_exceptions
 def ethernet_available() -> bool:
     client = NM.Client.new(None)
     devices = client.get_devices()
@@ -399,6 +432,7 @@ def ethernet_available() -> bool:
     return False
 
 
+@catch_exceptions
 def ethernet_connected() -> bool:
     client = NM.Client.new(None)
     devices = client.get_devices()
@@ -411,6 +445,7 @@ def ethernet_connected() -> bool:
     return False
 
 
+@catch_exceptions
 def wifi_available() -> bool:
     client = NM.Client.new(None)
     devices = client.get_devices()
@@ -420,6 +455,7 @@ def wifi_available() -> bool:
     return False
 
 
+@catch_exceptions
 def wifi_connected() -> bool:
     client = NM.Client.new(None)
     devices = client.get_devices()
@@ -432,16 +468,19 @@ def wifi_connected() -> bool:
     return False
 
 
+@catch_exceptions
 def open_nm_settings() -> None:
     # Opens whichever gui for network settings is found.
     pass
 
 
+@catch_exceptions
 def check_updated() -> bool:
     # Check if bakery version has chanced in pacman.
     return False
 
 
+@catch_exceptions
 def nmtui() -> None:
     # Opens nmtui for network settings configurations.
     st = True
@@ -532,6 +571,7 @@ _langmap = {
     "ks": "Kashmiri",
     "ku": "Kurdish",
     "kw": "Cornish",
+    "kv": "Komi",
     "ky": "Kyrgyz",
     "lb": "Luxembourgish",
     "ln": "Lingala",
@@ -582,6 +622,7 @@ _langmap = {
     "sq": "Albanian",
     "sr": "Serbian",
     "ss": "Swati",
+    "su": "Basa Sunda",
     "st": "Southern Sotho",
     "sv": "Swedish",
     "sw": "Swahili",
@@ -917,6 +958,7 @@ _kblangmap = {
 }
 
 
+@catch_exceptions
 def locales(only_enabled: bool = False) -> list:
     """
     Returns all possible locales.
@@ -939,6 +981,7 @@ def locales(only_enabled: bool = False) -> list:
         return set(data)
 
 
+@catch_exceptions
 def enable_locales(to_en: list) -> None:
     to_add = set()
     enabled = locales(True)
@@ -961,6 +1004,7 @@ def enable_locales(to_en: list) -> None:
         lp("No locales were enabled, not regenerating locale database.")
 
 
+@catch_exceptions
 def set_locale(locale: str) -> None:
     if locale not in locales(True):
         if dryrun:
@@ -980,6 +1024,7 @@ def set_locale(locale: str) -> None:
     )
 
 
+@catch_exceptions
 def langs(only_enabled: bool = False) -> dict:
     """
     A formatted dict of languages and locales
@@ -997,6 +1042,7 @@ def langs(only_enabled: bool = False) -> dict:
     return res
 
 
+@catch_exceptions
 def kb_variants(lang: str) -> list:
     try:
         variants = (
@@ -1016,6 +1062,7 @@ _kb_modcf = None
 _kb_modct = None
 
 
+@catch_exceptions
 def kb_models(flip: bool = False) -> dict:
     res = {}
     global _kb_modcf, _kb_modct
@@ -1048,6 +1095,7 @@ _kb_laycf = None
 _kb_layct = None
 
 
+@catch_exceptions
 def kb_layouts(flip: bool = False) -> dict:
     res = {}
     global _kb_laycf, _kb_layct
@@ -1079,6 +1127,7 @@ def kb_layouts(flip: bool = False) -> dict:
     return res
 
 
+@catch_exceptions
 def kb_set(model: str, layout: str, variant) -> None:
     lp("Setting keyboard layout to: " + model + " - " + layout + " - " + variant)
     if model not in kb_models().keys():
@@ -1096,6 +1145,7 @@ def kb_set(model: str, layout: str, variant) -> None:
     lrun(cmd)
 
 
+@catch_exceptions
 def tz_list() -> dict:
     res = {}
     data = (
@@ -1112,6 +1162,7 @@ def tz_list() -> dict:
     return res
 
 
+@catch_exceptions
 def tz_set(region: str, zone: str) -> None:
     tzs = tz_list()
     if region in tzs.keys() and zone in tzs[region]:
@@ -1121,6 +1172,7 @@ def tz_set(region: str, zone: str) -> None:
         raise TypeError("Timezone " + region + "/" + zone + " not a valid timezone!")
 
 
+@catch_exceptions
 def tz_ntp(ntp: bool) -> None:
     lp("Setting ntp to " + str(ntp))
     lrun(["sudo", "timedatectl", "set-ntp", str(int(ntp))])
@@ -1129,6 +1181,7 @@ def tz_ntp(ntp: bool) -> None:
 # Package functions
 
 
+@catch_exceptions
 def ensure_localdb(retries: int = 3) -> None:
     if not internet_up():
         raise OSError("Internet Unavailable.")
@@ -1142,6 +1195,7 @@ def ensure_localdb(retries: int = 3) -> None:
         raise OSError("Could not update databases.")
 
 
+@catch_exceptions
 def package_desc(packages: list) -> dict:
     ensure_localdb()
     res = {}
@@ -1200,30 +1254,42 @@ def detect_session_configuration() -> dict:
     except:
         display_manager = None
 
+    lp("Detected Display Manager: " + display_manager, mode="debug")
+    lp("Detected Desktop Environment: " + xdg_current_desktop, mode="debug")
     if xdg_session_type == "wayland":
+        lp("Detected Wayland session", mode="debug")
         return {"dm": display_manager, "de": xdg_current_desktop, "is_wayland": True}
     else:
+        lp("Detected X11 session", mode="debug")
         return {"dm": display_manager, "de": xdg_current_desktop, "is_wayland": False}
 
 
+@catch_exceptions
 def detect_install_source() -> str:
     with open("/proc/cmdline", "r") as cmdline_file:
         cmdline = cmdline_file.read()
         if "archisobasedir" in cmdline or "archisolabel" in cmdline:
+            lp("Installation source: from_iso", mode="debug")
             return "from_iso"
         else:
+            lp("Installation source: on_device", mode="debug")
             return "on_device"
 
 
 def detect_install_device() -> str:
     try:
         with open("/sys/firmware/devicetree/base/model", "r") as model_file:
-            return model_file.read().rstrip("\n").rstrip("\x00")
+            device = model_file.read().rstrip("\n").rstrip("\x00")
+            lp("Detected device: " + device, mode="debug")
+            return device
     except FileNotFoundError:
         try:
             with open("/sys/class/dmi/id/product_name", "r") as product_name_file:
-                return product_name_file.read().rstrip("\n")
+                device = product_name_file.read().rstrip("\n")
+                lp("Detected device: " + device, mode="debug")
+                return device
         except FileNotFoundError:
+            lp("Device detection failed", mode="error")
             return "unknown"
 
 
@@ -1233,6 +1299,209 @@ def enable_services(services: list) -> None:
             lrun(["sudo", "systemctl", "enable", i], silent=True)
     except:
         pass
+
+
+# Partitioning functions
+
+
+def check_efi() -> bool:
+    try:
+        with open("/proc/mounts", "r") as mounts_file:
+            mounts = mounts_file.read().split("\n")
+            for mount in mounts:
+                if "efivarfs" in mount:
+                    lp("System is EFI", mode="debug")
+                    return True
+    except FileNotFoundError:
+        lp("System is MBR/BIOS", mode="debug")
+    return False
+
+
+def check_partition_table(disk: str) -> str:
+    try:
+        device = parted.getDevice(disk)
+        disk_instance = parted.newDisk(device)
+        lp(f"Found a {disk_instance.type} partition table on {disk}", mode="debug")
+        return disk_instance.type
+    except Exception as e:
+        lp(f"Error while processing disk {disk}: {str(e)}", mode="error")
+        return None
+
+
+@catch_exceptions
+def get_block_devices():
+    disks = subprocess.check_output(["lsblk", "-d", "-o", "NAME"]).decode("UTF-8")
+    disk_list = disks.strip().split("\n")[1:]  # Skip header line
+    disk_list = [
+        disk
+        for disk in disk_list
+        if not disk.startswith("loop") and not disk.startswith("zram")
+    ]
+    disk_list = ["/dev/" + disk for disk in disk_list]
+    lp("Found block devices: " + str(disk_list), mode="debug")
+    return disk_list
+
+
+def list_drives() -> dict:
+    device_names = get_block_devices()
+    pretty_names = {}
+
+    for device_name in device_names:
+        try:
+            device = parted.getDevice(device_name)
+            model = device.model.strip() if device.model else "Unknown"
+            if len(model) > 20:
+                model = model[:17] + "..."
+            pretty_names[device_name] = model
+        except Exception as e:
+            lp(f"Error retrieving device info for {device_name}: {e}", mode="error")
+
+    return pretty_names
+
+
+def get_partitions() -> list:
+    # Get the partitions from get_block_devices
+    disk_list = get_block_devices()
+    partitions_dict = {}
+    for disk in disk_list:
+        try:
+            device = parted.getDevice(disk)
+            disk_instance = parted.newDisk(device)
+
+            partitions_info = []
+            for partition in disk_instance.partitions:
+                # if partition is extended, skip it
+                if partition.type == 2:
+                    continue
+                partition_info = {
+                    partition.path: [
+                        int(partition.getSize()),  # Size in MB
+                        partition.geometry.start,  # Start sector
+                        partition.geometry.end,  # End sector
+                        partition.fileSystem.type
+                        if partition.fileSystem
+                        else None,  # Filesystem type
+                    ]
+                }
+                partitions_info.append(partition_info)
+
+            # Get the free space regions and add them to the partitions_info
+            free_space_regions = disk_instance.getFreeSpaceRegions()
+            for free_space_region in free_space_regions:
+                if free_space_region.getSize() < 4:
+                    continue
+                free_space_info = {
+                    "Free space": [
+                        free_space_region.getSize(),  # Size in MB
+                        free_space_region.start,  # Start sector
+                        free_space_region.end,  # End sector
+                        None,  # Filesystem type
+                    ]
+                }
+
+                partitions_info.append(free_space_info)
+
+            # Sort the partitions_info list by the start sector
+            partitions_info.sort(key=lambda x: list(x.values())[0][1])
+            partitions_dict[disk] = partitions_info
+
+        except Exception as e:
+            lp(f"Error while processing disk {disk}: {str(e)}", mode="error")
+
+    return partitions_dict  # {disk: [{part1: [size, start, end, fs]}, {part2: [size, start, end, fs]}, {"free_space": [size, start, end, None]}]}
+
+
+@catch_exceptions
+def gen_new_partitions(old_partitions: dict, action: str, part_to_replace=None) -> dict:
+    # get the drives physical sector size, sector size, length
+    disk = list(old_partitions.keys())[0]
+    device = parted.getDevice(disk)
+    sector_size = device.sectorSize
+    physical_sector_size = device.physicalSectorSize
+    length = device.length
+    drive_size = length * sector_size / 1024 / 1024  # in MB
+    if action == "erase_all":
+        # efi 256M, swap 2G, root rest
+        new_partitions = {}
+        for disk, partitions in old_partitions.items():
+            new_partitions[disk] = [
+                {"EFI": [float(256), 2048, 256 * 1024 * 1024 // sector_size, "fat32"]},
+                {
+                    "swap": [
+                        float(2048),
+                        257 * 1024 * 1024 // sector_size,
+                        2049 * 1024 * 1024 // sector_size,
+                        "swap",
+                    ]
+                },
+                {
+                    "BredOS": [
+                        int(drive_size) - 257 - 2050,
+                        2050 * 1024 * 1024 // sector_size,
+                        length - sector_size,
+                        "btrfs",
+                    ]
+                },
+            ]
+        return new_partitions
+    elif action == "replace":
+        # check there is a fat32 that can be used for efi if not create one before the partition to be replaced
+        # check for fat32 partition
+        for disk, partitions in old_partitions.items():
+            for partition in partitions:
+                if partition[list(partition.keys())[0]][3] == "fat32":
+                    fat32 = partition
+                    break
+                else:
+                    fat32 = None
+        new_partitions = {}
+        for disk, partitions in old_partitions.items():
+            # Get the partition to be replaced using the  number
+            part = partitions[part_to_replace]
+
+            # Initialize the new partitions list for the disk
+            new_partitions[disk] = []
+
+            # Add all the partitions except the one to be replaced
+            for partition in partitions:
+                if partition != part:
+                    new_partitions[disk].append(partition)
+
+            # Get the start and end of the partition to be replaced
+            start = part[list(part.keys())[0]][1]
+            end = part[list(part.keys())[0]][2]
+            size = part[list(part.keys())[0]][0]
+            sector_size = 512  # Assume a default sector size
+
+            if fat32:
+                new_partitions[disk].append(
+                    {
+                        "fat32": [
+                            256,
+                            start,
+                            start + (256 * 1024 * 1024 // sector_size),
+                            "fat32",
+                        ]
+                    }
+                )
+
+                # Add the root partition
+                new_partitions[disk].append(
+                    {
+                        "BredOS": [
+                            size - 257,
+                            start + (257 * 1024 * 1024 // sector_size),
+                            end,
+                            "btrfs",
+                        ]
+                    }
+                )
+            else:
+                new_partitions[disk].append({"BredOS": [size, start, end, "btrfs"]})
+        # sort the partitions by the start sector
+        for disk, partitions in new_partitions.items():
+            partitions.sort(key=lambda x: list(x.values())[0][1])
+        return new_partitions
 
 
 def final_setup(settings) -> None:
@@ -1546,6 +1815,18 @@ def debounce(wait):
         return debounced
 
     return decorator
+
+
+def time_fn(func):
+    def wrapped(*args, **kwargs):
+        start_time = time.time()  # Record the start time
+        result = func(*args, **kwargs)  # Call the original function
+        end_time = time.time()  # Record the end time
+        duration = end_time - start_time  # Calculate the duration
+        print(f"Function '{func.__name__}' took {duration:.4f} seconds to execute.")
+        return result  # Return the result of the original function
+
+    return wrapped
 
 
 def reboot(time: int = 5) -> None:

@@ -1,13 +1,386 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.17.0 -->
+<!-- Created with Cambalache 0.92.0 -->
 <interface>
   <!-- interface-name kb_dialog.ui -->
   <requires lib="gtk" version="4.12"/>
-  <requires lib="libadwaita" version="1.0"/>
+  <requires lib="libadwaita" version="1.5"/>
   <template class="partitioning_screen" parent="AdwBin">
     <property name="child">
-      <object class="AdwStatusPage">
-        <property name="title">Select where you want to install BredOS</property>
+      <object class="GtkBox">
+        <property name="hexpand">True</property>
+        <property name="margin-bottom">5</property>
+        <property name="margin-start">-1</property>
+        <property name="margin-top">5</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">5</property>
+        <property name="vexpand">True</property>
+        <child>
+          <object class="GtkBox">
+            <property name="hexpand">True</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel" id="sys_type">
+                <property name="hexpand">True</property>
+                <property name="justify">center</property>
+                <property name="label">System type:</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">center</property>
+                <property name="hexpand">True</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Select storage device:</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkDropDown" id="disk_list">
+                    <style>
+                      <class name="pill"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="part_table">
+                <property name="hexpand">True</property>
+                <property name="justify">center</property>
+                <property name="label">Partition table:</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">center</property>
+            <property name="margin-bottom">5</property>
+            <property name="margin-end">5</property>
+            <property name="margin-start">5</property>
+            <property name="margin-top">5</property>
+            <child>
+              <object class="GtkButton" id="guided_partitioning">
+                <property name="label">Switch to guided partitioning</property>
+                <property name="visible">False</property>
+                <style/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="manual_partitioning">
+                <property name="label">Switch to manual partitioning</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="gparted_button">
+                <property name="child">
+                  <object class="AdwButtonContent">
+                    <property name="icon-name">gparted</property>
+                    <property name="label">Open GParted</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="term_button">
+                <property name="child">
+                  <object class="AdwButtonContent">
+                    <property name="icon-name">utilities-terminal</property>
+                    <property name="label">Open terminal</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <style>
+              <class name="linked"/>
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkStack" id="stack">
+            <property name="transition-type">crossfade</property>
+            <child>
+              <object class="GtkStackPage">
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="margin-bottom">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-start">15</property>
+                        <property name="margin-top">5</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">5</property>
+                        <property name="valign">center</property>
+                        <property name="vexpand">True</property>
+                        <child>
+                          <object class="GtkCheckButton" id="install_alongside">
+                            <property name="child">
+                              <object class="GtkBox">
+                                <property name="spacing">5</property>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-name">disk-quota-critical-symbolic</property>
+                                    <property name="icon-size">large</property>
+                                    <property name="pixel-size">64</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="halign">center</property>
+                                    <property name="orientation">vertical</property>
+                                    <property name="valign">baseline-center</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="halign">start</property>
+                                        <property name="justify">fill</property>
+                                        <property name="label">Install alongside</property>
+                                        <style>
+                                          <class name=".title-1"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="halign">start</property>
+                                        <property name="label">Bakery will shrink a partition to make space for BredOS.</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                            <property name="group">
+                              <object class="GtkCheckButton" id="group1"/>
+                            </property>
+                            <property name="visible">False</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="replace_part">
+                            <property name="group">group1</property>
+                            <property name="visible">False</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">5</property>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-name">disk-quota-critical-symbolic</property>
+                                    <property name="icon-size">large</property>
+                                    <property name="pixel-size">64</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="halign">center</property>
+                                    <property name="orientation">vertical</property>
+                                    <property name="valign">baseline-center</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="halign">start</property>
+                                        <property name="justify">fill</property>
+                                        <property name="label">Replace a partition</property>
+                                        <style>
+                                          <class name=".title-1"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="halign">start</property>
+                                        <property name="label">Bakery will replace a partition you select with BredOS.</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="erase_all">
+                            <property name="group">group1</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">5</property>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-name">disk-quota-critical-symbolic</property>
+                                    <property name="icon-size">large</property>
+                                    <property name="pixel-size">64</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="halign">center</property>
+                                    <property name="orientation">vertical</property>
+                                    <property name="valign">baseline-center</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="halign">start</property>
+                                        <property name="justify">fill</property>
+                                        <property name="label">Erase disk</property>
+                                        <style>
+                                          <class name=".title-1"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="halign">start</property>
+                                        <property name="label">This will &lt;span weight="bold" foreground='red'&gt;DELETE&lt;/span&gt; any data present on the disk.</property>
+                                        <property name="lines">0</property>
+                                        <property name="use-markup">True</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="manual_part">
+                            <property name="group">group1</property>
+                            <property name="visible">False</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">5</property>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-name">disk-quota-critical-symbolic</property>
+                                    <property name="icon-size">large</property>
+                                    <property name="pixel-size">64</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="halign">center</property>
+                                    <property name="orientation">vertical</property>
+                                    <property name="valign">baseline-center</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="halign">start</property>
+                                        <property name="justify">fill</property>
+                                        <property name="label">Manual partitioning</property>
+                                        <style>
+                                          <class name=".title-1"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="halign">start</property>
+                                        <property name="label">You can create or resize partitions yourself.</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparator"/>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="hexpand">True</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-start">5</property>
+                        <property name="visible">False</property>
+                        <child>
+                          <object class="GtkLabel" id="info_label">
+                            <property name="halign">start</property>
+                            <property name="hexpand">True</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="encrypt">
+                            <property name="halign">end</property>
+                            <property name="label">Encrypt system</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkGrid" id="big_grid">
+                        <property name="column-spacing">5</property>
+                        <property name="margin-bottom">10</property>
+                        <property name="margin-end">10</property>
+                        <property name="margin-start">10</property>
+                        <property name="margin-top">5</property>
+                        <property name="row-spacing">5</property>
+                        <child>
+                          <object class="GtkLabel" id="curr_label">
+                            <property name="label">Current:</property>
+                            <property name="valign">center</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="after_label">
+                            <property name="label">After:</property>
+                            <property name="margin-top">5</property>
+                            <property name="valign">center</property>
+                            <property name="visible">False</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">2</property>
+                            </layout>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="name">guided</property>
+                <property name="title">guided</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="child">
+                  <object class="AdwStatusPage">
+                    <property name="description">i can add text here btwwww</property>
+                    <property name="title">Manual partitioning</property>
+                    <child>
+                      <object class="AdwPreferencesPage">
+                        <child>
+                          <object class="AdwPreferencesGroup" id="parts_group">
+                            <property name="header-suffix">
+                              <object class="GtkButton" id="refresh_parts">
+                                <property name="halign">center</property>
+                                <property name="icon-name">view-refresh-symbolic</property>
+                                <property name="valign">center</property>
+                                <style>
+                                  <class name="flat"/>
+                                </style>
+                              </object>
+                            </property>
+                            <property name="title">Available partitions</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <style>
+                      <class name="compact"/>
+                    </style>
+                  </object>
+                </property>
+                <property name="name">manual</property>
+                <property name="title">manual</property>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </property>
   </template>
