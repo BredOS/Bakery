@@ -328,13 +328,22 @@ class BakeryWindow(Adw.ApplicationWindow):
         num_pages = len(self.pages)
         # if page is user page make it so user cant go forward
         global user_event
+        global part_event
         user_event = threading.Event()
+        part_event = threading.Event()
         self.check_thread = CheckThread(all_pages["User"])
+        self.check_part_thread = CheckPartitioningThread(all_pages["Partitioning"])
+
         if self.current_page == self.pages.index("User"):
             self.next_btn.set_sensitive(False)
             # start the thread to check when all fields are filled
             self.next_btn.set_label(_("Next"))
             self.check_thread.start()
+        elif self.current_page == self.pages.index("Partitioning"):
+            self.next_btn.set_sensitive(False)
+            # start the thread to check when all fields are filled
+            self.next_btn.set_label(_("Next"))
+            self.check_part_thread.start()
         elif self.current_page == self.pages.index("Summary"):
             user_event.set()
             all_pages["Summary"].page_shown()
@@ -349,6 +358,7 @@ class BakeryWindow(Adw.ApplicationWindow):
         else:
             self.next_btn.set_label(_("Next"))
             user_event.set()
+            part_event.set()
             self.next_btn.set_sensitive(self.current_page < num_pages - 1)
             self.back_btn.set_sensitive(self.current_page > 0)
 
@@ -405,6 +415,10 @@ class BakeryWindow(Adw.ApplicationWindow):
             data["installer"] = installer
             data["packages"] = []
             data["de_packages"] = []
+            try:
+                data["partitions"] = all_pages["Partitioning"].collect_data()
+            except:
+                data["partitions"] = []
             return data
         else:
             return {"install_type": "None"}
@@ -1155,7 +1169,9 @@ class partitioning_screen(Adw.Bin):
         # Else need atleast 1 /boot that is either fat32E
         root_found = False
         boot_found = False
-        if self.selected_mode_view == "guided":
+        print(self.selection)
+        print(self.selected_mode_view)
+        if self.selected_mode_view == "manual":
             for part, details in self.selection.items():
                 fs = details["fs"]
                 mp = details["mp"]
@@ -1168,7 +1184,7 @@ class partitioning_screen(Adw.Bin):
 
             if root_found and boot_found:
                 return True
-        elif self.selected_mode_view == "manual":
+        elif self.selected_mode_view == "guided":
             if self.selected_mode == "erase_all":
                 return True
         return False
@@ -1464,6 +1480,38 @@ class partitioning_screen(Adw.Bin):
             )
             print(self.new_partitions)
             self.populate_disk_preview(self.new_partitions, new=True)
+
+    def collect_data(self) -> dict:
+        data = {}
+        data["type"] = self.selected_mode_view
+        if self.selected_mode_view == "manual":
+            data["disk"] = self.disk
+            data["partitions"] = self.selection
+        else:
+            data["disk"] = self.disk
+            data["mode"] = self.selected_mode
+            try:
+                data["partitions"] = self.new_partitions
+            except AttributeError:
+                data["partitions"] = None
+        return data
+
+
+class CheckPartitioningThread(threading.Thread):
+    def __init__(self, window):
+        threading.Thread.__init__(self)
+        self.window = window
+
+    def run(self):
+        while True:
+            if part_event.is_set():
+                break
+            print(self.window.collect_data())
+            if self.window.validate_selection():
+                win.next_btn.set_sensitive(True)
+            else:
+                win.next_btn.set_sensitive(False)
+            sleep(0.5)
 
 
 @Gtk.Template.from_file(script_dir + "/data/install_screen.ui")

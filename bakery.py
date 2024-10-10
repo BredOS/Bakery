@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+import tempfile
 import parted
 import toml
 import subprocess
@@ -982,7 +983,7 @@ def locales(only_enabled: bool = False) -> list:
 
 
 @catch_exceptions
-def enable_locales(to_en: list) -> None:
+def enable_locales(to_en: list, chroot: bool = False, mnt_dir: str = None) -> None:
     to_add = set()
     enabled = locales(True)
     all_loc = locales()
@@ -997,15 +998,23 @@ def enable_locales(to_en: list) -> None:
     if len(to_add):
         for i in to_add:  # Why fumble with stacked \\n? Just spam a bit.
             lp("Enabling locale: " + i)
-            lrun(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
+            if chroot:
+                run_chroot_cmd(
+                    mnt_dir, ["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"]
+                )
+            else:
+                lrun(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
         lp("Generating locales")
-        lrun(["sudo", "locale-gen"])
+        if chroot:
+            run_chroot_cmd(mnt_dir, ["sudo", "locale-gen"])
+        else:
+            lrun(["sudo", "locale-gen"])
     else:
         lp("No locales were enabled, not regenerating locale database.")
 
 
 @catch_exceptions
-def set_locale(locale: str) -> None:
+def set_locale(locale: str, chroot: bool = False, mnt_dir: str = None) -> None:
     if locale not in locales(True):
         if dryrun:
             lp("The locale " + locale + " is not enabled, but this is a dryrun.")
@@ -1013,15 +1022,27 @@ def set_locale(locale: str) -> None:
             raise OSError("Locale " + locale + " not enabled!")
     lc = locale.split(" ")[0]
     lp("Setting locale to: " + lc)
-    lrun(["sudo", "localectl", "set-locale", "LANG=" + lc])
-    lrun(
-        [
-            "sudo",
-            "bash",
-            "-c",
-            "echo LANG=" + lc + " > /etc/locale.conf",
-        ]
-    )
+    if chroot:
+        run_chroot_cmd(mnt_dir, ["sudo", "localectl", "set-locale", "LANG=" + lc])
+        run_chroot_cmd(
+            mnt_dir,
+            [
+                "sudo",
+                "bash",
+                "-c",
+                "echo LANG=" + lc + " > /etc/locale.conf",
+            ],
+        )
+    else:
+        lrun(["sudo", "localectl", "set-locale", "LANG=" + lc])
+        lrun(
+            [
+                "sudo",
+                "bash",
+                "-c",
+                "echo LANG=" + lc + " > /etc/locale.conf",
+            ]
+        )
 
 
 @catch_exceptions
@@ -1128,7 +1149,9 @@ def kb_layouts(flip: bool = False) -> dict:
 
 
 @catch_exceptions
-def kb_set(model: str, layout: str, variant) -> None:
+def kb_set(
+    model: str, layout: str, variant, chroot: bool = False, mnt_dir: str = None
+) -> None:
     lp("Setting keyboard layout to: " + model + " - " + layout + " - " + variant)
     if model not in kb_models().keys():
         lp("Keyboard model " + model + " not found!")
@@ -1142,7 +1165,10 @@ def kb_set(model: str, layout: str, variant) -> None:
     cmd = ["sudo", "localectl", "set-x11-keymap", layout, model]
     if variant not in [None, "normal"]:
         cmd.append(variant)
-    lrun(cmd)
+    if chroot:
+        run_chroot_cmd(mnt_dir, cmd)
+    else:
+        lrun(cmd)
 
 
 @catch_exceptions
@@ -1163,19 +1189,27 @@ def tz_list() -> dict:
 
 
 @catch_exceptions
-def tz_set(region: str, zone: str) -> None:
+def tz_set(region: str, zone: str, chroot: bool = False, mnt_dir: str = None) -> None:
     tzs = tz_list()
     if region in tzs.keys() and zone in tzs[region]:
-        lrun(["sudo", "timedatectl", "set-timezone", region + "/" + zone])
+        cmd = ["sudo", "timedatectl", "set-timezone", region + "/" + zone]
+        if chroot:
+            run_chroot_cmd(mnt_dir, cmd)
+        else:
+            lrun(cmd)
     else:
         lp("Timezone " + region + "/" + zone + " not a valid timezone!")
         raise TypeError("Timezone " + region + "/" + zone + " not a valid timezone!")
 
 
 @catch_exceptions
-def tz_ntp(ntp: bool) -> None:
+def tz_ntp(ntp: bool, chroot: bool = False, mnt_dir: str = None) -> None:
     lp("Setting ntp to " + str(ntp))
-    lrun(["sudo", "timedatectl", "set-ntp", str(int(ntp))])
+    cmd = ["sudo", "timedatectl", "set-ntp", str(int(ntp))]
+    if chroot:
+        run_chroot_cmd(mnt_dir, cmd)
+    else:
+        lrun(cmd)
 
 
 # Package functions
@@ -1293,10 +1327,14 @@ def detect_install_device() -> str:
             return "unknown"
 
 
-def enable_services(services: list) -> None:
+def enable_services(services: list, chroot: bool = False, mnt_dir: str = None) -> None:
     try:
         for i in services:
-            lrun(["sudo", "systemctl", "enable", i], silent=True)
+            cmd = ["sudo", "systemctl", "enable", i]
+            if chroot:
+                run_chroot_cmd(mnt_dir, cmd)
+            else:
+                lrun(cmd)
     except:
         pass
 
@@ -1421,23 +1459,15 @@ def gen_new_partitions(old_partitions: dict, action: str, part_to_replace=None) 
     length = device.length
     drive_size = length * sector_size / 1024 / 1024  # in MB
     if action == "erase_all":
-        # efi 256M, swap 2G, root rest
+        # efi 256M, root rest
         new_partitions = {}
         for disk, partitions in old_partitions.items():
             new_partitions[disk] = [
                 {"EFI": [float(256), 2048, 256 * 1024 * 1024 // sector_size, "fat32"]},
                 {
-                    "swap": [
-                        float(2048),
-                        257 * 1024 * 1024 // sector_size,
-                        2049 * 1024 * 1024 // sector_size,
-                        "swap",
-                    ]
-                },
-                {
                     "BredOS": [
-                        int(drive_size) - 257 - 2050,
-                        2050 * 1024 * 1024 // sector_size,
+                        int(drive_size) - 257,
+                        257 * 1024 * 1024 // sector_size,
                         length - sector_size,
                         "btrfs",
                     ]
@@ -1502,6 +1532,96 @@ def gen_new_partitions(old_partitions: dict, action: str, part_to_replace=None) 
         for disk, partitions in new_partitions.items():
             partitions.sort(key=lambda x: list(x.values())[0][1])
         return new_partitions
+
+
+def format_partition(partition: str, fs: str) -> None:
+    if fs == "fat32":
+        lrun(["sudo", "mkfs.fat", "-F32", partition])
+    elif fs == "ext4":
+        lrun(["sudo", "mkfs.ext4", partition])
+    elif fs == "btrfs":
+        lrun(["sudo", "mkfs.btrfs", "-f", partition])
+        temp_dir = tempfile.mkdtemp()
+        try:
+            lrun(["sudo", "mount", partition, temp_dir])
+            subvolumes = ["@", "@home", "@log", "@pkg", "@.snapshots"]
+            for subvol in subvolumes:
+                lrun(
+                    [
+                        "sudo",
+                        "btrfs",
+                        "subvolume",
+                        "create",
+                        os.path.join(temp_dir, subvol),
+                    ]
+                )
+        finally:
+            lrun(["sudo", "umount", temp_dir])
+            os.rmdir(temp_dir)
+
+
+def get_fs(partition: str) -> str:
+    cmd = ["lsblk", "-no", "FSTYPE", partition]
+    return subprocess.check_output(cmd).decode("utf-8").strip()
+
+
+def get_uuid(partition: str) -> str:
+    cmd = ["sudo", "blkid", "-s", "UUID", "-o", "value", partition]
+    return subprocess.check_output(cmd).decode("utf-8").strip()
+
+
+def mount_partition(partition: str, mount_point: str) -> None:
+    lrun(["sudo", "mount", partition, mount_point])
+
+
+def partition_disk(partitioning: dict) -> None:
+    # {'type': 'guided', 'disk': '/dev/nvme1n1', 'mode': 'erase_all', 'partitions': {'/dev/nvme1n1': [{'EFI': [256.0, 2048, 524288, 'fat32']}, {'swap': [2048.0, 526336, 4196352, 'swap']}, {'BredOS': [241891, 4198400, 500117680, 'btrfs']}]}}
+    # OR
+    # {'type': 'manual', 'disk': '/dev/nvme1n1', 'partitions': {'/dev/nvme1n1p1': {'fs': 'fat32', 'mp': 'Use as boot'}, '/dev/nvme1n1p2': {'fs': 'btrfs', 'mp': 'Use as root'}, '/dev/nvme1n1p3': {'fs': None, 'mp': 'Use as home'}}}
+    if partitioning["type"] == "guided":
+        if partitioning["mode"] == "erase_all":
+            disk = partitioning["disk"]
+
+
+# ISO functions
+
+
+def run_chroot_cmd(work_dir: str, cmd: list) -> None:
+    lrun(["arch-chroot", work_dir] + cmd)
+
+
+def grub_install(mnt_dir: str, arch: str = "arm64-efi") -> None:
+    run_chroot_cmd(
+        mnt_dir,
+        [
+            "grub-install",
+            f"--target={arch}",
+            "--efi-directory=/boot/efi",
+            "--removable",
+            "--bootloader-id=BredOS",
+        ],
+    )
+    run_chroot_cmd(mnt_dir, ["grub-mkconfig", "-o", "/boot/grub/grub.cfg"])
+
+
+def unpack_sqfs(sqfs_file: str, mnt_dir: str) -> None:
+    print("todo")
+
+
+def pacstrap(mnt_dir: str, packages: list) -> None:
+    lp("Pacstrapping packages: " + " ".join(packages))
+    run_chroot_cmd(mnt_dir, ["pacstrap", mnt_dir] + packages)
+    lp("Pacstrap complete")
+
+
+def install_packages(packages: list, chroot: bool = False, mnt_dir: str = None) -> None:
+    cmd = ["pacman", "-Sy", "--noconfirm"] + packages
+    lp("Installing packages: " + " ".join(packages))
+    if chroot and mnt_dir is not None:
+        run_chroot_cmd(mnt_dir, cmd)
+    else:
+        lrun(cmd)
+    lp("Package installation complete")
 
 
 def final_setup(settings) -> None:
@@ -1650,7 +1770,16 @@ def shells() -> set:
     return res
 
 
-def adduser(username: str, password: str, uid, gid, shell: str, groups: list) -> None:
+def adduser(
+    username: str,
+    password: str,
+    uid,
+    gid,
+    shell: str,
+    groups: list,
+    chroot: bool = False,
+    mnt_dir: str = None,
+) -> None:
     if isinstance(uid, int):
         uid = str(uid)
     elif not uid.isdigit():
@@ -1668,38 +1797,84 @@ def adduser(username: str, password: str, uid, gid, shell: str, groups: list) ->
     if gidc(gid):
         raise OSError("Used GID")
     lp("Making group " + username + " on gid " + gid)
-    lrun(["sudo", "groupadd", username, "-g", gid])  # May silently fail, which is fine.
+    if chroot:
+        run_chroot_cmd(mnt_dir, ["sudo", "groupadd", username, "-g", gid])
+    else:
+        lrun(
+            ["sudo", "groupadd", username, "-g", gid]
+        )  # May silently fail, which is fine.
     lp("Adding user " + username + " on " + uid + ":" + gid + " with shell " + shell)
-    lrun(["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell])
+    if chroot:
+        run_chroot_cmd(
+            mnt_dir,
+            [
+                "sudo",
+                "useradd",
+                "-N",
+                username,
+                "-u",
+                uid,
+                "-g",
+                gid,
+                "-m",
+                "-s",
+                shell,
+            ],
+        )
+    else:
+        lrun(
+            ["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell]
+        )
     for i in groups:
         groupadd(username, i)
     passwd(username, password)
 
 
-def groupadd(username: str, group: str) -> None:
+def groupadd(
+    username: str, group: str, chroot: bool = False, mnt_dir: str = None
+) -> None:
     lp("Adding " + username + " to group " + group)
-    lrun(["sudo", "usermod", "-aG", group, username])
+    cmd = ["sudo", "usermod", "-aG", group, username]
+    if chroot:
+        run_chroot_cmd(mnt_dir, cmd)
+    else:
+        lrun(cmd)
 
 
-def passwd(username: str, password: str) -> None:
+def passwd(
+    username: str, password: str, chroot: bool = False, mnt_dir: str = None
+) -> None:
     lp("Setting user " + username + " password")
     cmd = ["sudo", "passwd", username]
     if dryrun:
         lp("Would have run: " + str(cmd) + ", with the password via stdin.")
+    elif dryrun and chroot:
+        lp("Would have run: " + str(cmd) + ", with the password via stdin in chroot")
+    elif chroot:
+        subprocess.run(
+            ["arch-chroot", mnt_dir] + cmd, input=f"{password}\n{password}", text=True
+        )
     else:
         subprocess.run(cmd, input=f"{password}\n{password}", text=True)
 
 
-def sudo_nopasswd(no_passwd: bool) -> None:
+def sudo_nopasswd(no_passwd: bool, chroot: bool = False, mnt_dir: str = None) -> None:
     cmd = ["sudo", "sh", "-c", "echo '%wheel ALL=(ALL) "]
     if no_passwd:
         cmd[-1] += "NOPASSWD: "
     cmd[-1] += "ALL' > /etc/sudoers.d/10-installer"
-    lrun(cmd)
+    if chroot:
+        run_chroot_cmd(mnt_dir, cmd)
+    else:
+        lrun(cmd)
 
 
 def enable_autologin(
-    username: str, session_configuration: dict, install_type: dict
+    username: str,
+    session_configuration: dict,
+    install_type: dict,
+    chroot: bool = False,
+    mnt_dir: str = None,
 ) -> None:
     dm = session_configuration["dm"]
     de = session_configuration["de"]
@@ -1709,24 +1884,28 @@ def enable_autologin(
         if (install_type["source"] == "on_device") or (
             install_type["source"] == "from_iso" and install_type["type"] == "offline"
         ):
-            lrun(
-                [
-                    "sudo",
-                    "cp",
-                    "/etc/lightdm/lightdm.conf.bak",
-                    "/etc/lightdm/lightdm.conf",
-                ]
-            )
-        lrun(
-            [
+            cmd = [
                 "sudo",
-                "sh",
-                "-c",
-                f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\n"
-                + "greeter-session=lightdm-slick-greeter\\nautologin-user-timeout=0\\nautologin-guest=false'"
-                + " /etc/lightdm/lightdm.conf",
+                "cp",
+                "/etc/lightdm/lightdm.conf.bak",
+                "/etc/lightdm/lightdm.conf",
             ]
-        )
+            if chroot and mnt_dir:
+                run_chroot_cmd(mnt_dir, cmd)
+            else:
+                lrun(cmd)
+        cmd = [
+            "sudo",
+            "sh",
+            "-c",
+            f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\n"
+            + "greeter-session=lightdm-slick-greeter\\nautologin-user-timeout=0\\nautologin-guest=false'"
+            + " /etc/lightdm/lightdm.conf",
+        ]
+        if chroot and mnt_dir:
+            run_chroot_cmd(mnt_dir, cmd)
+        else:
+            lrun(cmd)
     elif dm == "gdm":
         lp("Enabling autologin for " + username + " in " + dm)
 
@@ -1753,23 +1932,40 @@ DefaultSession={de}
 #Enable=true
 """
         cmd = f'echo "{config}" > /etc/gdm/custom.conf'
-        lrun(["sudo", "sh", "-c", cmd])
-    groupadd(username, "autologin")
+        if chroot and mnt_dir:
+            run_chroot_cmd(mnt_dir, ["sudo", "sh", "-c", cmd])
+        else:
+            lrun(["sudo", "sh", "-c", cmd])
+    groupadd(username, "autologin", chroot, mnt_dir)
 
 
-def enable_autologin_tty(username: str) -> None:
-    # sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
-    lrun(["sudo", "mkdir", "-p", "/etc/systemd/system/getty@tty1.service.d/"])
+def enable_autologin_tty(
+    username: str, chroot: bool = False, mnt_dir: str = None
+) -> None:
+    cmd_mkdir = ["sudo", "mkdir", "-p", "/etc/systemd/system/getty@tty1.service.d/"]
+    if chroot and mnt_dir:
+        run_chroot_cmd(mnt_dir, cmd_mkdir)
+    else:
+        lrun(cmd_mkdir)
+
     overrideconf = f"""[Service]
 ExecStart=
 ExecStart=-/usr/bin/agetty --autologin {username} --noclear %I $TERM
 """
-    cmd = f'echo "{overrideconf}" | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf'
-    lrun(["sudo", "sh", "-c", cmd])
+    cmd_override = f'echo "{overrideconf}" | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf'
+    if chroot and mnt_dir:
+        run_chroot_cmd(mnt_dir, ["sudo", "sh", "-c", cmd_override])
+    else:
+        lrun(["sudo", "sh", "-c", cmd_override])
 
-
-def set_hostname(hostname: str) -> None:
-    lrun(["sudo", "bash", "-c", "echo " + hostname + " > /etc/hostname"])
+        def set_hostname(
+            hostname: str, chroot: bool = False, mnt_dir: str = None
+        ) -> None:
+            cmd = ["sudo", "bash", "-c", f"echo {hostname} > /etc/hostname"]
+            if chroot and mnt_dir:
+                run_chroot_cmd(mnt_dir, cmd)
+            else:
+                lrun(cmd)
 
 
 # Support functions
