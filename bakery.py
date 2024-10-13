@@ -1019,13 +1019,19 @@ _kblangmap = {
 
 
 @catch_exceptions
-def locales(only_enabled: bool = False) -> list:
+def locales(
+    only_enabled: bool = False, chroot: bool = False, mnt_dir: str = None
+) -> list:
     """
     Returns all possible locales.
 
     Uses /etc/locale.gen since there is no standard on arm.
     """
-    with open("/etc/locale.gen") as localef:
+    if chroot:
+        file = mnt_dir + "/etc/locale.gen"
+    else:
+        file = "/etc/locale.gen"
+    with open(file) as localef:
         data = localef.read().split("\n")
         for i in range(len(data) - 1, -1, -1):
             if (
@@ -1044,8 +1050,8 @@ def locales(only_enabled: bool = False) -> list:
 @catch_exceptions
 def enable_locales(to_en: list, chroot: bool = False, mnt_dir: str = None) -> None:
     to_add = set()
-    enabled = locales(True)
-    all_loc = locales()
+    enabled = locales(True, chroot, mnt_dir)
+    all_loc = locales(chroot=chroot, mnt_dir=mnt_dir)
     for locale in to_en:
         if locale not in enabled:
             if locale in all_loc:
@@ -1074,7 +1080,7 @@ def enable_locales(to_en: list, chroot: bool = False, mnt_dir: str = None) -> No
 
 @catch_exceptions
 def set_locale(locale: str, chroot: bool = False, mnt_dir: str = None) -> None:
-    if locale not in locales(True):
+    if locale not in locales(True, chroot, mnt_dir):
         if dryrun:
             lp("The locale " + locale + " is not enabled, but this is a dryrun.")
         else:
