@@ -1868,6 +1868,12 @@ def unpack_sqfs(sqfs_file: str, mnt_dir: str) -> None:
 
 
 @catch_exceptions
+def unmount_all(mnt_dir: str) -> None:
+    lp("Unmounting all partitions")
+    lrun(["sudo", "umount", "-R", mnt_dir])
+
+
+@catch_exceptions
 def copy_kern_from_iso(mnt_dir: str) -> None:
     lp("Copying kernel and initramfs from ISO to " + mnt_dir)
     arch = platform.machine()
@@ -2738,6 +2744,8 @@ def install(settings=None, do_deferred: bool = True) -> int:
             reset_timer()
 
             final_setup(settings, mnt_dir)
+
+            unmount_all(mnt_dir)
 
             lp("Took {:.5f}".format(get_timer()))
             st(7)  # Cleanup
