@@ -1930,7 +1930,7 @@ def regenerate_initramfs(mnt_dir: str) -> None:
         ]
     )
     lp("Regenerating initramfs")
-    run_chroot_cmd(mnt_dir, ["mkinitcpio", "-P"])
+    run_chroot_cmd(mnt_dir, ["mkinitcpio", "-P"], postrunfn=expected_to_fail)
     lp("Initramfs regeneration complete")
 
 
