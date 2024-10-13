@@ -19,6 +19,7 @@ import platform
 import tempfile
 from typing import Callable
 import parted
+import psutil
 import toml
 import subprocess
 import os
@@ -1767,9 +1768,17 @@ def partition_disk(partitions: dict) -> None:
     # {'type': 'guided', 'efi': True, 'disk': '/dev/nvme1n1', 'mode': 'erase_all', 'partitions': {'/dev/nvme1n1': [{'EFI': [256.0, 2048, 524288, 'fat32']}, {'swap': [2048.0, 526336, 4196352, 'swap']}, {'BredOS': [241891, 4198400, 500117680, 'btrfs']}]}}
     # OR
     # {'type': 'manual', 'efi': True, 'disk': '/dev/nvme1n1', 'partitions': {'/dev/nvme1n1p1': {'fs': 'fat32', 'mp': 'Use as boot'}, '/dev/nvme1n1p2': {'fs': 'btrfs', 'mp': 'Use as root'}, '/dev/nvme1n1p3': {'fs': None, 'mp': 'Use as home'}}}
+    disk = partitions["disk"]
+    # make sure the disk doesn't have any mounted partitions
+    partitions = psutil.disk_partitions()
+
+    # Find partitions on the specified disk
+    for partition in partitions:
+        if partition.device.startswith(disk):
+            lp("Unmounting partition: " + partition.device)
+            lrun(["sudo", "umount", partition.device])
     if partitions["type"] == "guided":
         if partitions["mode"] == "erase_all":
-            disk = partitions["disk"]
             if "nvme" in disk or "mmcblk" in disk:
                 part_prefix = "p"
             else:
@@ -1800,7 +1809,6 @@ def partition_disk(partitions: dict) -> None:
                 disk + part_prefix + "2", "btrfs", subvols=True, home_subvol=True
             )
     elif partitions["type"] == "manual":
-        disk = partitions["disk"]
         # Check if user wants seperate home partition
         home_subvol = True
         for part, options in partitions["partitions"].items():
