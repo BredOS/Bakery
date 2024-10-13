@@ -318,17 +318,14 @@ logging_handler = LoggingHandler(
 
 
 def post_run_cmd(info, exitcode) -> None:
-    """
-    Post run function for commands. Checks if the command failed and raises an exception if it did.
-    Parameters:
-    - info: The output of the command
-    - exitcode: The exit code of the command
-
-    Returns: None
-    """
     if exitcode:
         lp(f"Command failed with exit code {exitcode}", mode="error")
-        # raise Exception(f"Command failed with exit code {exitcode}")
+        raise Exception(f"Command failed with exit code {exitcode}")
+
+
+def expected_to_fail(info, exitcode) -> None:
+    if exitcode:
+        lp(f"Command failed with exit code {exitcode}", mode="error")
 
 
 def lrun(
@@ -389,6 +386,7 @@ def catch_exceptions(func):
         except Exception as e:
             lp(f"Exception in {func.__name__}: {e}", mode="error")
             lp(print_exception(), mode="error")
+            raise e
 
     return wrapper
 
@@ -1614,7 +1612,7 @@ def format_partition(
             lp("Creating subvolumes")
             try:
                 lrun(["sudo", "mount", partition, temp_dir])
-                subvolumes = ["@", "@log", "@pkg", "@.snapshots"]
+                subvolumes = ["@", "@cache", "@log", "@pkg", "@.snapshots"]
                 if home_subvol:
                     subvolumes.append("@home")
                 for subvol in subvolumes:
@@ -1674,29 +1672,25 @@ def mount_partition(
         else:
             lrun(["sudo", "mount", "-o", "subvol=@", partition, mount_point])
         lp("Mounting btrfs subvolumes")
-        subvolumes = ["log", "pkg", ".snapshots"]
+        subvolumes = {
+            "log": "/var/log",
+            "cache": "/var/cache",
+            "pkg": "/var/cache/pacman/pkg",
+        }
         if home_subvol:
-            subvolumes.append("home")
-        for subvol in subvolumes:
-            subvol_path = os.path.join(mount_point, subvol)
-            os.makedirs(subvol_path, exist_ok=True)
-            lp("Mounting btrfs subvolume: " + subvol)
-            if opts:
-                lrun(
-                    [
-                        "sudo",
-                        "mount",
-                        "-o",
-                        "subvol=@" + subvol,
-                        opts,
-                        partition,
-                        subvol_path,
-                    ]
-                )
-            else:
-                lrun(
-                    ["sudo", "mount", "-o", "subvol=@" + subvol, partition, subvol_path]
-                )
+            subvolumes["home"] = "/home"
+        for subvol, path in subvolumes.items():
+            lp("Mounting subvolume: " + subvol + " to " + path)
+            lrun(
+                [
+                    "sudo",
+                    "mount",
+                    "-o",
+                    "subvol=@" + subvol,
+                    partition,
+                    mount_point + path,
+                ]
+            )
 
 
 @catch_exceptions
@@ -1838,9 +1832,8 @@ def partition_disk(partitions: dict) -> None:
 # ISO functions
 
 
-@catch_exceptions
-def run_chroot_cmd(work_dir: str, cmd: list) -> None:
-    lrun(["arch-chroot", work_dir] + cmd)
+def run_chroot_cmd(work_dir: str, cmd: list, *args, **kwargs) -> None:
+    lrun(["arch-chroot", work_dir] + cmd, *args, **kwargs)
 
 
 @catch_exceptions
@@ -1957,9 +1950,9 @@ def remove_packages(packages: list, chroot: bool = False, mnt_dir: str = None) -
         cmd = ["pacman", "-R", "--noconfirm", package]
         lp("Removing package: " + package)
         if chroot and mnt_dir is not None:
-            run_chroot_cmd(mnt_dir, cmd)
+            run_chroot_cmd(mnt_dir, cmd, postrunfn=expected_to_fail)
         else:
-            lrun(cmd)
+            lrun(cmd, postrunfn=expected_to_fail)
 
 
 def final_setup(settings, mnt_dir: str = None) -> None:
@@ -2649,10 +2642,10 @@ def install(settings=None, do_deferred: bool = True) -> int:
             arch = platform.machine()
             if arch == "aarch64":
                 grub_arch = "arm64-efi"
-                sqfs_file = "/run/archiso/bootmnt/aarch64/airootfs.sfs"
+                sqfs_file = "/run/archiso/bootmnt/arch/aarch64/airootfs.sfs"
             else:
                 grub_arch = "x86_64-efi"
-                sqfs_file = "/run/archiso/bootmnt/x86_64/airootfs.sfs"
+                sqfs_file = "/run/archiso/bootmnt/arch/x86_64/airootfs.sfs"
 
             mnt_dir = tempfile.mkdtemp()
             # Mount partitions
