@@ -1893,7 +1893,8 @@ def copy_kern_from_iso(mnt_dir: str) -> None:
             "-avr",
             "/run/archiso/bootmnt/arch/boot/" + arch + "/*",
             mnt_dir + "/boot",
-        ]
+        ],
+        shell=True,
     )
     if arch == "x86_64":
         lrun(
