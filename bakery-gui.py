@@ -202,6 +202,7 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.cancel_dialog.set_property("hide-on-close", True)
         self.install_type = None
         self.install_source = detect_install_source()
+        self.install_source = "from_iso"
         self.install_device = detect_install_device()
         self.session_configuration = detect_session_configuration()
         # self.online_install.connect("clicked", self.main_button_clicked)
@@ -289,6 +290,7 @@ class BakeryWindow(Adw.ApplicationWindow):
 
     def on_done_clicked(self, button) -> None:
         # quit the app
+
         self.close()
         reboot()  # We are on a hurry passed here!
         run_deferred()
@@ -332,35 +334,61 @@ class BakeryWindow(Adw.ApplicationWindow):
         user_event = threading.Event()
         part_event = threading.Event()
         self.check_thread = CheckThread(all_pages["User"])
-        self.check_part_thread = CheckPartitioningThread(all_pages["Partitioning"])
 
-        if self.current_page == self.pages.index("User"):
-            self.next_btn.set_sensitive(False)
-            # start the thread to check when all fields are filled
-            self.next_btn.set_label(_("Next"))
-            self.check_thread.start()
-        elif self.current_page == self.pages.index("Partitioning"):
-            self.next_btn.set_sensitive(False)
-            # start the thread to check when all fields are filled
-            self.next_btn.set_label(_("Next"))
-            self.check_part_thread.start()
-        elif self.current_page == self.pages.index("Summary"):
-            user_event.set()
-            all_pages["Summary"].page_shown()
-            # change the next button to install
-            self.next_btn.set_label(_("Install"))
-            self.next_btn.set_sensitive(self.current_page < num_pages - 1)
-            self.back_btn.set_sensitive(self.current_page > 0)
-        elif self.current_page == self.pages.index("Install"):
-            self.back_btn.set_sensitive(False)
-            self.next_btn.set_sensitive(False)
-            self.cancel_btn.set_sensitive(False)
+        if self.install_source == "from_iso":
+            self.check_part_thread = CheckPartitioningThread(all_pages["Partitioning"])
+
+            if self.current_page == self.pages.index("User"):
+                self.next_btn.set_sensitive(False)
+                # start the thread to check when all fields are filled
+                self.next_btn.set_label(_("Next"))
+                self.check_thread.start()
+            elif self.current_page == self.pages.index("Partitioning"):
+                user_event.set()
+                self.next_btn.set_sensitive(False)
+                # start the thread to check when all fields are filled
+                self.next_btn.set_label(_("Next"))
+                self.check_part_thread.start()
+            elif self.current_page == self.pages.index("Summary"):
+                user_event.set()
+                all_pages["Summary"].page_shown()
+                # change the next button to install
+                self.next_btn.set_label(_("Install"))
+                self.next_btn.set_sensitive(self.current_page < num_pages - 1)
+                self.back_btn.set_sensitive(self.current_page > 0)
+            elif self.current_page == self.pages.index("Install"):
+                self.back_btn.set_sensitive(False)
+                self.next_btn.set_sensitive(False)
+                self.cancel_btn.set_sensitive(False)
+            else:
+                self.next_btn.set_label(_("Next"))
+                user_event.set()
+                part_event.set()
+                self.next_btn.set_sensitive(self.current_page < num_pages - 1)
+                self.back_btn.set_sensitive(self.current_page > 0)
         else:
-            self.next_btn.set_label(_("Next"))
-            user_event.set()
-            part_event.set()
-            self.next_btn.set_sensitive(self.current_page < num_pages - 1)
-            self.back_btn.set_sensitive(self.current_page > 0)
+            if self.current_page == self.pages.index("User"):
+                self.next_btn.set_sensitive(False)
+                # start the thread to check when all fields are filled
+                self.next_btn.set_label(_("Next"))
+                self.check_thread.start()
+            elif self.current_page == self.pages.index("Summary"):
+                user_event.set()
+                all_pages["Summary"].page_shown()
+                # change the next button to install
+                self.next_btn.set_label(_("Install"))
+                self.next_btn.set_sensitive(self.current_page < num_pages - 1)
+                self.back_btn.set_sensitive(self.current_page > 0)
+            elif self.current_page == self.pages.index("Install"):
+                self.back_btn.set_sensitive(False)
+                self.next_btn.set_sensitive(False)
+                self.cancel_btn.set_sensitive(False)
+            else:
+                self.next_btn.set_label(_("Next"))
+                user_event.set()
+                part_event.set()
+                self.next_btn.set_sensitive(self.current_page < num_pages - 1)
+                self.back_btn.set_sensitive(self.current_page > 0)
 
     def on_cancel_clicked(self, button) -> None:
         # connect the yes button to the delete_pages function
@@ -413,8 +441,10 @@ class BakeryWindow(Adw.ApplicationWindow):
             installer["ui"] = "gui"
             installer["shown_pages"] = self.pages
             data["installer"] = installer
-            data["packages"] = []
-            data["de_packages"] = []
+            data["packages"] = {}
+            if self.install_source == "from_iso":
+                data["packages"]["to_remove"] = config.iso_packages_to_remove
+                data["packages"]["de_packages"] = []
             try:
                 data["partitions"] = all_pages["Partitioning"].collect_data()
             except:
@@ -459,6 +489,7 @@ class BakeryWindow(Adw.ApplicationWindow):
         )
         self.install_type = install_type
         self.current_page = 0
+
         self.update_buttons()
         self.main_stk.set_visible_child(self.install_page.get_child())
 
@@ -1141,6 +1172,7 @@ class partitioning_screen(Adw.Bin):
         self.selection = {}
 
         self.is_efi = check_efi()
+        self.device = detect_install_device()
         if self.is_efi:
             self.sys_type.set_label(_("System type: ") + "UEFI")
         else:
@@ -1169,8 +1201,6 @@ class partitioning_screen(Adw.Bin):
         # Else need atleast 1 /boot that is either fat32E
         root_found = False
         boot_found = False
-        print(self.selection)
-        print(self.selected_mode_view)
         if self.selected_mode_view == "manual":
             for part, details in self.selection.items():
                 fs = details["fs"]
@@ -1484,6 +1514,7 @@ class partitioning_screen(Adw.Bin):
     def collect_data(self) -> dict:
         data = {}
         data["type"] = self.selected_mode_view
+        data["efi"] = self.is_efi
         if self.selected_mode_view == "manual":
             data["disk"] = self.disk
             data["partitions"] = self.selection
@@ -1506,7 +1537,6 @@ class CheckPartitioningThread(threading.Thread):
         while True:
             if part_event.is_set():
                 break
-            print(self.window.collect_data())
             if self.window.validate_selection():
                 win.next_btn.set_sensitive(True)
             else:

@@ -80,3 +80,12 @@ colors = [
     "color14",
     "color15",
 ]
+
+sbcs = [""]
+
+iso_packages_to_remove = [
+    "bakery-gui",
+    "bakery",
+    "mkinitcpio-archiso",
+    "mkinitcpio-nfs-utils",
+]
