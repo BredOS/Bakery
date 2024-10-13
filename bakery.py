@@ -1770,10 +1770,10 @@ def partition_disk(partitions: dict) -> None:
     # {'type': 'manual', 'efi': True, 'disk': '/dev/nvme1n1', 'partitions': {'/dev/nvme1n1p1': {'fs': 'fat32', 'mp': 'Use as boot'}, '/dev/nvme1n1p2': {'fs': 'btrfs', 'mp': 'Use as root'}, '/dev/nvme1n1p3': {'fs': None, 'mp': 'Use as home'}}}
     disk = partitions["disk"]
     # make sure the disk doesn't have any mounted partitions
-    partitions = psutil.disk_partitions()
+    parts = psutil.disk_partitions()
 
     # Find partitions on the specified disk
-    for partition in partitions:
+    for partition in parts:
         if partition.device.startswith(disk):
             lp("Unmounting partition: " + partition.device)
             lrun(["sudo", "umount", partition.device])
