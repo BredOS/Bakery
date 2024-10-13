@@ -1680,6 +1680,7 @@ def mount_partition(
         if home_subvol:
             subvolumes["home"] = "/home"
         for subvol, path in subvolumes.items():
+            os.makedirs(mount_point + path, exist_ok=True)
             lp("Mounting subvolume: " + subvol + " to " + path)
             lrun(
                 [
