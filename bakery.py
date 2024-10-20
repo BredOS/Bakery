@@ -139,21 +139,43 @@ logging_handler = None
 st_msgs = []
 
 
-def populate_messages(lang=None) -> None:
+def populate_messages(
+    lang=None,
+    type: str = "on_device_offline",
+) -> None:
     global _
     _ = setup_translations(lang=lang)
     global st_msgs
     st_msgs.clear()
-    st_msgs += [
-        [_("Preparing for installation"), 0],  # 0
-        [_("Applying Locale Settings"), 10],  # 1
-        [_("Applying Keyboard Settings"), 20],  # 2
-        [_("Applying Timezone Settings"), 30],  # 3
-        [_("Creating User account"), 40],  # 4
-        [_("Setting Hostname"), 50],  # 5
-        [_("Finalizing installation"), 90],  # 6
-        [_("Cleaning up installation"), 100],  # 7
-    ]
+    if type == "on_device_offline":
+        st_msgs += [
+            [_("Preparing for installation"), 0],  # 0
+            [_("Applying Locale Settings"), 10],  # 1
+            [_("Applying Keyboard Settings"), 20],  # 2
+            [_("Applying Timezone Settings"), 30],  # 3
+            [_("Creating User account"), 40],  # 4
+            [_("Setting Hostname"), 50],  # 5
+            [_("Finalizing installation"), 90],  # 6
+            [_("Cleaning up installation"), 100],  # 7
+        ]
+    elif type == "from_iso_offline":
+        st_msgs += [
+            [_("Preparing for installation"), 0],  # 0
+            [_("Partitioning Disk"), 0],  # 1
+            [_("Mounting Disk"), 15],  # 2
+            [_("Copying Files from iso"), 20],  # 3
+            [_("Regenerating initramfs"), 24],  # 4
+            [_("Generating fstab"), 28],  # 5
+            [_("Setting up bootloader"), 32],  # 6
+            [_("Removing packages"), 40],  # 7
+            [_("Applying Locale Settings"), 50],  # 8
+            [_("Applying Keyboard Settings"), 60],  # 9
+            [_("Applying Timezone Settings"), 70],  # 10
+            [_("Creating User account"), 80],  # 11
+            [_("Setting Hostname"), 85],  # 12
+            [_("Finalizing installation"), 90],  # 13
+            [_("Cleaning up installation"), 100],  # 14
+        ]
 
 
 populate_messages()
@@ -2593,7 +2615,11 @@ def install(settings=None, do_deferred: bool = True) -> int:
                 lp("Invalid installer manifest, does not contain " + i, mode="error")
                 return 2
         lp("Manifest validated")
-
+        populate_messages(
+            type=settings["install_type"]["source"]
+            + "_"
+            + settings["install_type"]["type"]
+        )
         lp("Took {:.5f}".format(get_timer()))
         st(1)  # Locales
         reset_timer()
@@ -2677,6 +2703,9 @@ def install(settings=None, do_deferred: bool = True) -> int:
                 sleep(0.15)
             return 0
         elif settings["install_type"]["source"] == "from_iso":
+            lp("Took {:.5f}".format(get_timer()))
+            st(1)  # Partitioning
+            reset_timer()
             # Partition disk
             partition_disk(settings["partitions"])
 
@@ -2688,35 +2717,57 @@ def install(settings=None, do_deferred: bool = True) -> int:
                 grub_arch = "x86_64-efi"
                 sqfs_file = "/run/archiso/bootmnt/arch/x86_64/airootfs.sfs"
 
+            lp("Took {:.5f}".format(get_timer()))
+            st(2)  # Mounting
+            reset_timer()
+
             mnt_dir = tempfile.mkdtemp()
             # Mount partitions
             mount_all_partitions(settings["partitions"], mnt_dir)
 
+            lp("Took {:.5f}".format(get_timer()))
+            st(3)  # Unsquash
+            reset_timer()
             # unpack squashfs
             unpack_sqfs(sqfs_file, mnt_dir)
 
             # Copy kernel and initramfs
             copy_kern_from_iso(mnt_dir)
 
+            lp("Took {:.5f}".format(get_timer()))
+            st(4)  # initramfs
+            reset_timer()
             # Regenerate initramfs
             regenerate_initramfs(mnt_dir)
 
+            lp("Took {:.5f}".format(get_timer()))
+            st(5)  # fstab
+            reset_timer()
             # Generate fstab
             generate_fstab(mnt_dir)
 
+            lp("Took {:.5f}".format(get_timer()))
+            st(6)  # Grub
+            reset_timer()
             # Install grub
             grub_install(mnt_dir, arch=grub_arch)
 
+            lp("Took {:.5f}".format(get_timer()))
+            st(7)  # Removing packages
+            reset_timer()
             # Remove packages
             remove_packages(
                 settings["packages"]["to_remove"], chroot=True, mnt_dir=mnt_dir
             )
 
+            lp("Took {:.5f}".format(get_timer()))
+            st(8)  # Locale
+            reset_timer()
             enable_locales([settings["locale"]], chroot=True, mnt_dir=mnt_dir)
             set_locale(settings["locale"], chroot=True, mnt_dir=mnt_dir)
 
             lp("Took {:.5f}".format(get_timer()))
-            st(2)  # keyboard
+            st(9)  # keyboard
             reset_timer()
 
             kb_set(
@@ -2728,7 +2779,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
             )
 
             lp("Took {:.5f}".format(get_timer()))
-            st(3)  # TZ
+            st(10)  # TZ
             reset_timer()
 
             tz_set(
@@ -2740,7 +2791,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
             tz_ntp(settings["timezone"]["ntp"], chroot=True, mnt_dir=mnt_dir)
 
             lp("Took {:.5f}".format(get_timer()))
-            st(4)  # Configure users
+            st(11)  # Configure users
             reset_timer()
 
             adduser(
@@ -2769,13 +2820,13 @@ def install(settings=None, do_deferred: bool = True) -> int:
                 )
 
             lp("Took {:.5f}".format(get_timer()))
-            st(5)  # Configure hostname
+            st(12)  # Configure hostname
             reset_timer()
 
             set_hostname(settings["hostname"], chroot=True, mnt_dir=mnt_dir)
 
             lp("Took {:.5f}".format(get_timer()))
-            st(6)  # finishing up
+            st(13)  # finishing up
             reset_timer()
 
             final_setup(settings, mnt_dir)
@@ -2783,7 +2834,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
             unmount_all(mnt_dir)
 
             lp("Took {:.5f}".format(get_timer()))
-            st(7)  # Cleanup
+            st(14)  # Cleanup
             reset_timer()
 
             # Done
