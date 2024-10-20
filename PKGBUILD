@@ -1,8 +1,8 @@
 # Maintainer: Bill Sideris <bill88t@feline.gr>
 pkgname=('bakery' 'bakery-gui')
 pkgbase="bakery"
-pkgver=1.0.0
-pkgrel=6
+pkgver=1.1.0
+pkgrel=1
 pkgdesc="BredOS Installer"
 arch=('any')
 url="https://github.com/BredOS/Bakery"
@@ -25,7 +25,7 @@ build() {
 
 package_bakery() {
         cd "$srcdir/$pkgbase/build"
-        depends=('python-pyrunning' 'python-toml' 'python-requests')
+        depends=('python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts')
         DESTDIR="$pkgdir" meson install
         rm -rf "$pkgdir/usr/share/bakery/data/"*.ui
         rm -rf "$pkgdir/usr/share/bakery/bakery-gui.py"

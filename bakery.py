@@ -408,7 +408,6 @@ def catch_exceptions(func):
             return func(*args, **kwargs)
         except Exception as e:
             lp(f"Exception in {func.__name__}: {e}", mode="error")
-            lp(print_exception(), mode="error")
             raise e
 
     return wrapper
@@ -2703,159 +2702,161 @@ def install(settings=None, do_deferred: bool = True) -> int:
                 sleep(0.15)
             return 0
         elif settings["install_type"]["source"] == "from_iso":
-            lp("Took {:.5f}".format(get_timer()))
-            st(1)  # Partitioning
-            reset_timer()
-            # Partition disk
-            partition_disk(settings["partitions"])
+            try:
+                lp("Took {:.5f}".format(get_timer()))
+                st(1)  # Partitioning
+                reset_timer()
+                # Partition disk
+                partition_disk(settings["partitions"])
 
-            arch = platform.machine()
-            if arch == "aarch64":
-                grub_arch = "arm64-efi"
-                sqfs_file = "/run/archiso/bootmnt/arch/aarch64/airootfs.sfs"
-            else:
-                grub_arch = "x86_64-efi"
-                sqfs_file = "/run/archiso/bootmnt/arch/x86_64/airootfs.sfs"
+                arch = platform.machine()
+                if arch == "aarch64":
+                    grub_arch = "arm64-efi"
+                    sqfs_file = "/run/archiso/bootmnt/arch/aarch64/airootfs.sfs"
+                else:
+                    grub_arch = "x86_64-efi"
+                    sqfs_file = "/run/archiso/bootmnt/arch/x86_64/airootfs.sfs"
 
-            lp("Took {:.5f}".format(get_timer()))
-            st(2)  # Mounting
-            reset_timer()
+                lp("Took {:.5f}".format(get_timer()))
+                st(2)  # Mounting
+                reset_timer()
 
-            mnt_dir = tempfile.mkdtemp()
-            # Mount partitions
-            mount_all_partitions(settings["partitions"], mnt_dir)
+                mnt_dir = tempfile.mkdtemp()
+                # Mount partitions
+                mount_all_partitions(settings["partitions"], mnt_dir)
 
-            lp("Took {:.5f}".format(get_timer()))
-            st(3)  # Unsquash
-            reset_timer()
-            # unpack squashfs
-            unpack_sqfs(sqfs_file, mnt_dir)
+                lp("Took {:.5f}".format(get_timer()))
+                st(3)  # Unsquash
+                reset_timer()
+                # unpack squashfs
+                unpack_sqfs(sqfs_file, mnt_dir)
 
-            # Copy kernel and initramfs
-            copy_kern_from_iso(mnt_dir)
+                # Copy kernel and initramfs
+                copy_kern_from_iso(mnt_dir)
 
-            lp("Took {:.5f}".format(get_timer()))
-            st(4)  # initramfs
-            reset_timer()
-            # Regenerate initramfs
-            regenerate_initramfs(mnt_dir)
+                lp("Took {:.5f}".format(get_timer()))
+                st(4)  # initramfs
+                reset_timer()
+                # Regenerate initramfs
+                regenerate_initramfs(mnt_dir)
 
-            lp("Took {:.5f}".format(get_timer()))
-            st(5)  # fstab
-            reset_timer()
-            # Generate fstab
-            generate_fstab(mnt_dir)
+                lp("Took {:.5f}".format(get_timer()))
+                st(5)  # fstab
+                reset_timer()
+                # Generate fstab
+                generate_fstab(mnt_dir)
 
-            lp("Took {:.5f}".format(get_timer()))
-            st(6)  # Grub
-            reset_timer()
-            # Install grub
-            grub_install(mnt_dir, arch=grub_arch)
+                lp("Took {:.5f}".format(get_timer()))
+                st(6)  # Grub
+                reset_timer()
+                # Install grub
+                grub_install(mnt_dir, arch=grub_arch)
 
-            lp("Took {:.5f}".format(get_timer()))
-            st(7)  # Removing packages
-            reset_timer()
-            # Remove packages
-            remove_packages(
-                settings["packages"]["to_remove"], chroot=True, mnt_dir=mnt_dir
-            )
+                lp("Took {:.5f}".format(get_timer()))
+                st(7)  # Removing packages
+                reset_timer()
+                # Remove packages
+                remove_packages(
+                    settings["packages"]["to_remove"], chroot=True, mnt_dir=mnt_dir
+                )
 
-            lp("Took {:.5f}".format(get_timer()))
-            st(8)  # Locale
-            reset_timer()
-            enable_locales([settings["locale"]], chroot=True, mnt_dir=mnt_dir)
-            set_locale(settings["locale"], chroot=True, mnt_dir=mnt_dir)
+                lp("Took {:.5f}".format(get_timer()))
+                st(8)  # Locale
+                reset_timer()
+                enable_locales([settings["locale"]], chroot=True, mnt_dir=mnt_dir)
+                set_locale(settings["locale"], chroot=True, mnt_dir=mnt_dir)
 
-            lp("Took {:.5f}".format(get_timer()))
-            st(9)  # keyboard
-            reset_timer()
+                lp("Took {:.5f}".format(get_timer()))
+                st(9)  # keyboard
+                reset_timer()
 
-            kb_set(
-                settings["layout"]["model"],
-                settings["layout"]["layout"],
-                settings["layout"]["variant"],
-                chroot=True,
-                mnt_dir=mnt_dir,
-            )
-
-            lp("Took {:.5f}".format(get_timer()))
-            st(10)  # TZ
-            reset_timer()
-
-            tz_set(
-                settings["timezone"]["region"],
-                settings["timezone"]["zone"],
-                chroot=True,
-                mnt_dir=mnt_dir,
-            )
-            tz_ntp(settings["timezone"]["ntp"], chroot=True, mnt_dir=mnt_dir)
-
-            lp("Took {:.5f}".format(get_timer()))
-            st(11)  # Configure users
-            reset_timer()
-
-            adduser(
-                settings["user"]["username"],
-                settings["user"]["password"],
-                settings["user"]["uid"],
-                settings["user"]["gid"],
-                settings["user"]["shell"],
-                settings["user"]["groups"],
-                chroot=True,
-                mnt_dir=mnt_dir,
-            )
-            sudo_nopasswd(settings["user"]["sudo_nopasswd"])
-            # ideally, we should have a way to check which DM/DE is installed
-            if settings["user"]["autologin"]:
-                enable_autologin(
-                    settings["user"]["username"],
-                    settings["session_configuration"],
-                    settings["install_type"],
+                kb_set(
+                    settings["layout"]["model"],
+                    settings["layout"]["layout"],
+                    settings["layout"]["variant"],
                     chroot=True,
                     mnt_dir=mnt_dir,
                 )
 
-                enable_autologin_tty(
-                    settings["user"]["username"], chroot=True, mnt_dir=mnt_dir
+                lp("Took {:.5f}".format(get_timer()))
+                st(10)  # TZ
+                reset_timer()
+
+                tz_set(
+                    settings["timezone"]["region"],
+                    settings["timezone"]["zone"],
+                    chroot=True,
+                    mnt_dir=mnt_dir,
                 )
+                tz_ntp(settings["timezone"]["ntp"], chroot=True, mnt_dir=mnt_dir)
 
-            lp("Took {:.5f}".format(get_timer()))
-            st(12)  # Configure hostname
-            reset_timer()
+                lp("Took {:.5f}".format(get_timer()))
+                st(11)  # Configure users
+                reset_timer()
 
-            set_hostname(settings["hostname"], chroot=True, mnt_dir=mnt_dir)
-
-            lp("Took {:.5f}".format(get_timer()))
-            st(13)  # finishing up
-            reset_timer()
-
-            final_setup(settings, mnt_dir)
-
-            unmount_all(mnt_dir)
-
-            lp("Took {:.5f}".format(get_timer()))
-            st(14)  # Cleanup
-            reset_timer()
-
-            # Done
-            lp(
-                "Installation finished. Total time: {:.5f}".format(
-                    monotonic() - start_time
+                adduser(
+                    settings["user"]["username"],
+                    settings["user"]["password"],
+                    settings["user"]["uid"],
+                    settings["user"]["gid"],
+                    settings["user"]["shell"],
+                    settings["user"]["groups"],
+                    chroot=True,
+                    mnt_dir=mnt_dir,
                 )
-            )
-            if len(defer):
-                lp("There are still deferred commands:")
-                for i in defer:
-                    lp(str(i))
-                lp("These commands will NOT be logged.")
-            sleep(0.15)
-            copy_logs(settings["user"]["username"])
-            sleep(0.15)
-            if do_deferred:
-                run_deferred()
+                sudo_nopasswd(settings["user"]["sudo_nopasswd"])
+                # ideally, we should have a way to check which DM/DE is installed
+                if settings["user"]["autologin"]:
+                    enable_autologin(
+                        settings["user"]["username"],
+                        settings["session_configuration"],
+                        settings["install_type"],
+                        chroot=True,
+                        mnt_dir=mnt_dir,
+                    )
+
+                    enable_autologin_tty(
+                        settings["user"]["username"], chroot=True, mnt_dir=mnt_dir
+                    )
+
+                lp("Took {:.5f}".format(get_timer()))
+                st(12)  # Configure hostname
+                reset_timer()
+
+                set_hostname(settings["hostname"], chroot=True, mnt_dir=mnt_dir)
+
+                lp("Took {:.5f}".format(get_timer()))
+                st(13)  # finishing up
+                reset_timer()
+
+                final_setup(settings, mnt_dir)
+
+                unmount_all(mnt_dir)
+
+                lp("Took {:.5f}".format(get_timer()))
+                st(14)  # Cleanup
+                reset_timer()
+
+                # Done
+                lp(
+                    "Installation finished. Total time: {:.5f}".format(
+                        monotonic() - start_time
+                    )
+                )
+                if len(defer):
+                    lp("There are still deferred commands:")
+                    for i in defer:
+                        lp(str(i))
+                    lp("These commands will NOT be logged.")
                 sleep(0.15)
-            return 0
-
+                copy_logs(settings["user"]["username"])
+                sleep(0.15)
+                if do_deferred:
+                    run_deferred()
+                    sleep(0.15)
+                return 0
+            except:
+                return 1
     elif settings["install_type"]["type"] == "custom":
         lp("Custom mode not yet implemented!", mode="error")
         return 3
