@@ -1290,11 +1290,10 @@ def tz_set(region: str, zone: str, chroot: bool = False, mnt_dir: str = None) ->
 @catch_exceptions
 def tz_ntp(ntp: bool, chroot: bool = False, mnt_dir: str = None) -> None:
     lp("Setting ntp to " + str(ntp))
-    cmd = ["sudo", "timedatectl", "set-ntp", str(int(ntp))]
     if chroot:
-        run_chroot_cmd(mnt_dir, cmd)
+        run_chroot_cmd(mnt_dir, ["systemctl", "enable", "systemd-timesyncd"])
     else:
-        lrun(cmd)
+        lrun(["sudo", "timedatectl", "set-ntp", str(int(ntp))])
 
 
 # Package functions
