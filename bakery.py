@@ -1088,7 +1088,6 @@ def set_locale(locale: str, chroot: bool = False, mnt_dir: str = None) -> None:
     lc = locale.split(" ")[0]
     lp("Setting locale to: " + lc)
     if chroot:
-        run_chroot_cmd(mnt_dir, ["sudo", "localectl", "set-locale", "LANG=" + lc])
         run_chroot_cmd(
             mnt_dir,
             [
@@ -1231,7 +1230,20 @@ def kb_set(
     if variant not in [None, "normal"]:
         cmd.append(variant)
     if chroot:
-        run_chroot_cmd(mnt_dir, cmd)
+        kbconf = f"""# Written by systemd-localed(8), read by systemd-localed and Xorg. It's
+# probably wise not to edit this file manually. Use localectl(1) to
+# update this file.
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "{layout}"
+        Option "XkbModel" "{model}"
+        Option "XkbVariant" "{variant}"
+EndSection
+"""
+        os.makedirs(mnt_dir + "/etc/X11/xorg.conf.d/", exist_ok=True)
+        with open(mnt_dir + "/etc/X11/xorg.conf.d/00-keyboard.conf", "w") as f:
+            f.write(kbconf)
     else:
         lrun(cmd)
 
@@ -1257,11 +1269,19 @@ def tz_list() -> dict:
 def tz_set(region: str, zone: str, chroot: bool = False, mnt_dir: str = None) -> None:
     tzs = tz_list()
     if region in tzs.keys() and zone in tzs[region]:
-        cmd = ["sudo", "timedatectl", "set-timezone", region + "/" + zone]
         if chroot:
-            run_chroot_cmd(mnt_dir, cmd)
+            # in chroot use symlink
+            lrun(
+                [
+                    "sudo",
+                    "ln",
+                    "-sfv",
+                    "/usr/share/zoneinfo/" + region + "/" + zone,
+                    mnt_dir + "/etc/localtime",
+                ]
+            )
         else:
-            lrun(cmd)
+            lrun(["sudo", "timedatectl", "set-timezone", region + "/" + zone])
     else:
         lp("Timezone " + region + "/" + zone + " not a valid timezone!")
         raise TypeError("Timezone " + region + "/" + zone + " not a valid timezone!")
@@ -1417,7 +1437,7 @@ def check_efi() -> bool:
                     return True
     except FileNotFoundError:
         lp("System is MBR/BIOS", mode="debug")
-    return False
+        return False
 
 
 def check_partition_table(disk: str) -> str:

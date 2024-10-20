@@ -118,15 +118,18 @@ class BakeryApp(Adw.Application):
             developer_name="BredOS",
             debug_info=self.win.collect_data(show_pass=False),
             version=config.installer_version,
-            developers=["Panda", "bill88t"],
-            designers=["Panda", "DustyDaimler"],
+            developers=["Panda <panda@bredos.org>", "bill88t <bill88t@bredos.org>"],
+            designers=["Panda <panda@bredos.org>", "DustyDaimler"],
+            documenters=["Panda <panda@bredos.org>", "DroidMaster"],
             translator_credits=_("translator-credits"),
             copyright=_("Copyright The BredOS developers"),
             comments=_("Bakery is a simple installer for BredOS"),
             license_type=Gtk.License.GPL_3_0,
             website="https://BredOS.org",
+            issue_url="https://github.com/BredOS/Bakery/issues",
+            support_url="https://discord.gg/jwhxuyKXaa",
         )
-        translators = ["Bill88t", "Panda"]
+        translators = ["Bill88t", "Panda <panda@bredos.org>"]
         about.add_credit_section(_("Translated by"), translators)
         about.add_acknowledgement_section(_("Special thanks to"), ["Shivanandvp"])
         about.present()
@@ -202,7 +205,6 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.cancel_dialog.set_property("hide-on-close", True)
         self.install_type = None
         self.install_source = detect_install_source()
-        self.install_source = "from_iso"
         self.install_device = detect_install_device()
         self.session_configuration = detect_session_configuration()
         # self.online_install.connect("clicked", self.main_button_clicked)
