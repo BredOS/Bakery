@@ -52,7 +52,6 @@ from bakery import (
     detect_install_device,
     detect_install_source,
     detect_session_configuration,
-    run_deferred,
     reboot,
     upload_log,
     log_path,
@@ -292,10 +291,8 @@ class BakeryWindow(Adw.ApplicationWindow):
 
     def on_done_clicked(self, button) -> None:
         # quit the app
-
         self.close()
-        reboot()  # We are on a hurry passed here!
-        run_deferred()
+        reboot()
 
     @debounce(0.3)
     def on_next_clicked(self, button) -> None:
@@ -758,7 +755,7 @@ class InstallThread(threading.Thread):
             "Starting install with data: "
             + str(self.window.collect_data(show_pass=False))
         )
-        res = bakery.install(install_data, do_deferred=False)
+        res = bakery.install(install_data)
         if res == 0:
             # Change to finish page
             self.window.current_page = self.window.pages.index("Finish")

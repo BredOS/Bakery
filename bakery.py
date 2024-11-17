@@ -86,9 +86,6 @@ import config
 
 dryrun = False if "DO_DRYRUN" not in os.listdir() else True
 
-defer = []
-
-
 # Timer functions
 
 _stimer = monotonic()
@@ -295,7 +292,6 @@ def copy_logs(new_usern: str, chroot: bool = False, mnt_dir: str = None) -> None
     if chroot:
         subprocess.run(
             [
-                "sudo",
                 "cp",
                 "-v",
                 log_path,
@@ -305,7 +301,6 @@ def copy_logs(new_usern: str, chroot: bool = False, mnt_dir: str = None) -> None
     else:
         subprocess.run(
             [
-                "sudo",
                 "cp",
                 "-vr",
                 "/home/bred/.bredos",
@@ -314,7 +309,6 @@ def copy_logs(new_usern: str, chroot: bool = False, mnt_dir: str = None) -> None
         )
         subprocess.run(
             [
-                "sudo",
                 "chown",
                 "-R",
                 new_usern + ":" + new_usern,
@@ -1086,15 +1080,15 @@ def enable_locales(to_en: list, chroot: bool = False, mnt_dir: str = None) -> No
             lp("Enabling locale: " + i)
             if chroot:
                 run_chroot_cmd(
-                    mnt_dir, ["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"]
+                    mnt_dir, ["bash", "-c", "echo " + i + ">> /etc/locale.gen"]
                 )
             else:
-                lrun(["sudo", "bash", "-c", "echo " + i + ">> /etc/locale.gen"])
+                lrun(["bash", "-c", "echo " + i + ">> /etc/locale.gen"])
         lp("Generating locales")
         if chroot:
-            run_chroot_cmd(mnt_dir, ["sudo", "locale-gen"])
+            run_chroot_cmd(mnt_dir, ["locale-gen"])
         else:
-            lrun(["sudo", "locale-gen"])
+            lrun(["locale-gen"])
     else:
         lp("No locales were enabled, not regenerating locale database.")
 
@@ -1112,17 +1106,15 @@ def set_locale(locale: str, chroot: bool = False, mnt_dir: str = None) -> None:
         run_chroot_cmd(
             mnt_dir,
             [
-                "sudo",
                 "bash",
                 "-c",
                 "echo LANG=" + lc + " > /etc/locale.conf",
             ],
         )
     else:
-        lrun(["sudo", "localectl", "set-locale", "LANG=" + lc])
+        lrun(["localectl", "set-locale", "LANG=" + lc])
         lrun(
             [
-                "sudo",
                 "bash",
                 "-c",
                 "echo LANG=" + lc + " > /etc/locale.conf",
@@ -1247,7 +1239,7 @@ def kb_set(
     if (variant not in [None, "normal"]) and variant not in kb_variants(layout):
         lp("Keyboard layout variant " + variant + " not found!")
         raise TypeError("Keyboard layout variant " + variant + " not found!")
-    cmd = ["sudo", "localectl", "set-x11-keymap", layout, model]
+    cmd = ["localectl", "set-x11-keymap", layout, model]
     if variant not in [None, "normal"]:
         cmd.append(variant)
     if chroot:
@@ -1294,7 +1286,6 @@ def tz_set(region: str, zone: str, chroot: bool = False, mnt_dir: str = None) ->
             # in chroot use symlink
             lrun(
                 [
-                    "sudo",
                     "ln",
                     "-sfv",
                     "/usr/share/zoneinfo/" + region + "/" + zone,
@@ -1302,7 +1293,7 @@ def tz_set(region: str, zone: str, chroot: bool = False, mnt_dir: str = None) ->
                 ]
             )
         else:
-            lrun(["sudo", "timedatectl", "set-timezone", region + "/" + zone])
+            lrun(["timedatectl", "set-timezone", region + "/" + zone])
     else:
         lp("Timezone " + region + "/" + zone + " not a valid timezone!")
         raise TypeError("Timezone " + region + "/" + zone + " not a valid timezone!")
@@ -1314,7 +1305,7 @@ def tz_ntp(ntp: bool, chroot: bool = False, mnt_dir: str = None) -> None:
     if chroot:
         run_chroot_cmd(mnt_dir, ["systemctl", "enable", "systemd-timesyncd"])
     else:
-        lrun(["sudo", "timedatectl", "set-ntp", str(int(ntp))])
+        lrun(["timedatectl", "set-ntp", str(int(ntp))])
 
 
 # Package functions
@@ -1326,7 +1317,7 @@ def ensure_localdb(retries: int = 3) -> None:
         raise OSError("Internet Unavailable.")
     tried = 0
     while tried < retries:
-        lrun(["sudo", "pacman", "-Sy"], force=True)
+        lrun(["pacman", "-Sy"], force=True)
         if len(os.listdir("/var/lib/pacman/sync/")):
             break
         tried += 1
@@ -1435,7 +1426,7 @@ def detect_install_device() -> str:
 def enable_services(services: list, chroot: bool = False, mnt_dir: str = None) -> None:
     try:
         for i in services:
-            cmd = ["sudo", "systemctl", "enable", i]
+            cmd = ["systemctl", "enable", i]
             if chroot:
                 run_chroot_cmd(mnt_dir, cmd)
             else:
@@ -1646,19 +1637,19 @@ def format_partition(
 ) -> None:
     if fs == "fat32":
         lp("Formatting partition: " + partition + " as fat32")
-        lrun(["sudo", "mkfs.fat", "-F32", partition])
+        lrun(["mkfs.fat", "-F32", partition])
     elif fs == "ext4":
         lp("Formatting partition: " + partition + " as ext4")
-        lrun(["sudo", "mkfs.ext4", partition])
+        lrun(["mkfs.ext4", partition])
     elif fs == "btrfs":
         lp("Formatting partition: " + partition + " as btrfs")
-        lrun(["sudo", "mkfs.btrfs", "-f", partition])
+        lrun(["mkfs.btrfs", "-f", partition])
         if subvols:
             temp_dir = tempfile.mkdtemp()
             lp("Mounting partition: " + partition + " to " + temp_dir)
             lp("Creating subvolumes")
             try:
-                lrun(["sudo", "mount", partition, temp_dir])
+                lrun(["mount", partition, temp_dir])
                 subvolumes = ["@", "@cache", "@log", "@pkg", "@.snapshots"]
                 if home_subvol:
                     subvolumes.append("@home")
@@ -1666,7 +1657,6 @@ def format_partition(
                     lp("Creating subvolume: " + subvol)
                     lrun(
                         [
-                            "sudo",
                             "btrfs",
                             "subvolume",
                             "create",
@@ -1676,7 +1666,7 @@ def format_partition(
             finally:
                 lp("Done creating subvolumes")
                 lp("Unmounting partition: " + partition)
-                lrun(["sudo", "umount", temp_dir])
+                lrun(["umount", temp_dir])
                 os.rmdir(temp_dir)
 
 
@@ -1688,7 +1678,7 @@ def get_fs(partition: str) -> str:
 
 @catch_exceptions
 def get_uuid(partition: str) -> str:
-    cmd = ["sudo", "blkid", "-s", "UUID", "-o", "value", partition]
+    cmd = ["blkid", "-s", "UUID", "-o", "value", partition]
     return subprocess.check_output(cmd).decode("utf-8").strip()
 
 
@@ -1709,15 +1699,15 @@ def mount_partition(
     if not btrfs:
         lp("Mounting partition: " + partition + " to " + mount_point)
         if opts:
-            lrun(["sudo", "mount", "-o", opts, partition, mount_point])
+            lrun(["mount", "-o", opts, partition, mount_point])
         else:
-            lrun(["sudo", "mount", partition, mount_point])
+            lrun(["mount", partition, mount_point])
     else:
         lp("Mounting btrfs partition: " + partition + " to " + mount_point)
         if opts:
-            lrun(["sudo", "mount", "-o", "subvol=@", opts, partition, mount_point])
+            lrun(["mount", "-o", "subvol=@", opts, partition, mount_point])
         else:
-            lrun(["sudo", "mount", "-o", "subvol=@", partition, mount_point])
+            lrun(["mount", "-o", "subvol=@", partition, mount_point])
         lp("Mounting btrfs subvolumes")
         subvolumes = {
             "log": "/var/log",
@@ -1731,7 +1721,6 @@ def mount_partition(
             lp("Mounting subvolume: " + subvol + " to " + path)
             lrun(
                 [
-                    "sudo",
                     "mount",
                     "-o",
                     "subvol=@" + subvol,
@@ -1806,7 +1795,7 @@ def mount_all_partitions(partitions: dict, mnt_dir: str) -> None:
 @catch_exceptions
 def rescan_partitions() -> None:
     lp("Rescanning partitions")
-    lrun(["sudo", "partprobe"])
+    lrun(["partprobe"])
 
 
 @catch_exceptions
@@ -1822,7 +1811,7 @@ def partition_disk(partitions: dict) -> None:
     for partition in parts:
         if partition.device.startswith(disk):
             lp("Unmounting partition: " + partition.device)
-            lrun(["sudo", "umount", partition.device])
+            lrun(["umount", partition.device])
     if partitions["type"] == "guided":
         if partitions["mode"] == "erase_all":
             if "nvme" in disk or "mmcblk" in disk:
@@ -1831,7 +1820,6 @@ def partition_disk(partitions: dict) -> None:
                 part_prefix = ""
             # size = get_disk_size(disk)
             parted_cmd = [
-                "sudo",
                 "parted",
                 "--script",
                 disk,
@@ -1916,16 +1904,16 @@ def unpack_sqfs(sqfs_file: str, mnt_dir: str) -> None:
     lp("Mounting squashfs file: " + sqfs_file + " to " + squashfs_mnt)
     mount_partition(sqfs_file, squashfs_mnt, "loop")
     lp("Copying files from squashfs to " + mnt_dir)
-    lrun(["sudo", "cp", "-apr", squashfs_mnt + "/*", mnt_dir], shell=True)
+    lrun(["cp", "-apr", squashfs_mnt + "/*", mnt_dir], shell=True)
     lp("Done copying files! Unmounting squashfs")
-    lrun(["sudo", "umount", squashfs_mnt])
+    lrun(["umount", squashfs_mnt])
     os.rmdir(squashfs_mnt)
 
 
 @catch_exceptions
 def unmount_all(mnt_dir: str) -> None:
     lp("Unmounting all partitions")
-    lrun(["sudo", "umount", "-R", mnt_dir])
+    lrun(["umount", "-R", mnt_dir])
 
 
 @catch_exceptions
@@ -1934,7 +1922,6 @@ def copy_kern_from_iso(mnt_dir: str) -> None:
     arch = platform.machine()
     lrun(
         [
-            "sudo",
             "cp",
             "-avr",
             "/run/archiso/bootmnt/arch/boot/" + arch + "/*",
@@ -1945,7 +1932,6 @@ def copy_kern_from_iso(mnt_dir: str) -> None:
     if arch == "x86_64":
         lrun(
             [
-                "sudo",
                 "cp",
                 "-avr",
                 "/run/archiso/bootmnt/arch/boot/intel-ucode.img",
@@ -1954,7 +1940,6 @@ def copy_kern_from_iso(mnt_dir: str) -> None:
         )
         lrun(
             [
-                "sudo",
                 "cp",
                 "-avr",
                 "/run/archiso/bootmnt/arch/boot/amd-ucode.img",
@@ -1969,7 +1954,6 @@ def regenerate_initramfs(mnt_dir: str) -> None:
     # mnt_dir/etc/mkinitcpio.conf.bak -> mnt_dir/etc/mkinitcpio.conf
     lrun(
         [
-            "sudo",
             "mv",
             mnt_dir + "/etc/mkinitcpio.conf.bak",
             mnt_dir + "/etc/mkinitcpio.conf",
@@ -1983,7 +1967,7 @@ def regenerate_initramfs(mnt_dir: str) -> None:
 @catch_exceptions
 def generate_fstab(mnt_dir: str) -> None:
     lp("Generating fstab")
-    lrun(["sudo", "genfstab", "-U", mnt_dir, ">", mnt_dir + "/etc/fstab"], shell=True)
+    lrun(["genfstab", "-U", mnt_dir, ">", mnt_dir + "/etc/fstab"], shell=True)
     lp("Fstab generated")
 
 
@@ -2019,7 +2003,7 @@ def remove_packages(packages: list, chroot: bool = False, mnt_dir: str = None) -
 
 def final_setup(settings, mnt_dir: str = None) -> None:
     if settings["install_type"]["source"] == "on_device":
-        lrun(["sudo", "systemctl", "disable", "resizefs.service"], silent=True)
+        lrun(["systemctl", "disable", "resizefs.service"], silent=True)
         enable_services(
             ["bluetooth.service", "fstrim.timer", "oemcleanup.service", "cups.socket"],
         )
@@ -2028,11 +2012,9 @@ def final_setup(settings, mnt_dir: str = None) -> None:
             and settings["user"]["autologin"] == True
         ):
             # rm /etc/gdm/custom.conf
-            lrun(["sudo", "rm", "/etc/gdm/custom.conf"], silent=True)
-        global defer
-        defer.append(
+            lrun(["rm", "/etc/gdm/custom.conf"], silent=True)
+        lrun(
             [
-                "sudo",
                 "rm",
                 "-f",
                 "/etc/sudoers.d/g_wheel",
@@ -2056,17 +2038,15 @@ def final_setup(settings, mnt_dir: str = None) -> None:
                 and settings["user"]["autologin"] == True
             ):
                 # rm /etc/gdm/custom.conf
-                lrun(["sudo", "rm", mnt_dir + "/etc/gdm/custom.conf"], silent=True)
+                lrun(["rm", mnt_dir + "/etc/gdm/custom.conf"], silent=True)
             lrun(
                 [
-                    "sudo",
                     "rm",
                     "-f",
                     mnt_dir + "/etc/sudoers.d/g_wheel",
                     mnt_dir + "/etc/polkit-1/rules.d/49-nopasswd_global.rules",
                 ]
             )
-            defer.append(["echo", "Done"])
 
 
 dms = {
@@ -2220,17 +2200,14 @@ def adduser(
         raise OSError("Used GID")
     lp("Making group " + username + " on gid " + gid)
     if chroot:
-        run_chroot_cmd(mnt_dir, ["sudo", "groupadd", username, "-g", gid])
+        run_chroot_cmd(mnt_dir, ["groupadd", username, "-g", gid])
     else:
-        lrun(
-            ["sudo", "groupadd", username, "-g", gid]
-        )  # May silently fail, which is fine.
+        lrun(["groupadd", username, "-g", gid])  # May silently fail, which is fine.
     lp("Adding user " + username + " on " + uid + ":" + gid + " with shell " + shell)
     if chroot:
         run_chroot_cmd(
             mnt_dir,
             [
-                "sudo",
                 "useradd",
                 "-N",
                 username,
@@ -2244,9 +2221,7 @@ def adduser(
             ],
         )
     else:
-        lrun(
-            ["sudo", "useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell]
-        )
+        lrun(["useradd", "-N", username, "-u", uid, "-g", gid, "-m", "-s", shell])
     for i in groups:
         groupadd(username, i, chroot, mnt_dir)
     passwd(username, password, chroot, mnt_dir)
@@ -2256,7 +2231,7 @@ def groupadd(
     username: str, group: str, chroot: bool = False, mnt_dir: str = None
 ) -> None:
     lp("Adding " + username + " to group " + group)
-    cmd = ["sudo", "usermod", "-aG", group, username]
+    cmd = ["usermod", "-aG", group, username]
     if chroot:
         run_chroot_cmd(mnt_dir, cmd)
     else:
@@ -2267,7 +2242,7 @@ def passwd(
     username: str, password: str, chroot: bool = False, mnt_dir: str = None
 ) -> None:
     lp("Setting user " + username + " password")
-    cmd = ["sudo", "passwd", username]
+    cmd = ["passwd", username]
     if dryrun:
         lp("Would have run: " + str(cmd) + ", with the password via stdin.")
     elif dryrun and chroot:
@@ -2281,7 +2256,7 @@ def passwd(
 
 
 def sudo_nopasswd(no_passwd: bool, chroot: bool = False, mnt_dir: str = None) -> None:
-    cmd = ["sudo", "sh", "-c", "echo '%wheel ALL=(ALL) "]
+    cmd = ["sh", "-c", "echo '%wheel ALL=(ALL) "]
     if no_passwd:
         cmd[-1] += "NOPASSWD: "
     cmd[-1] += "ALL' > /etc/sudoers.d/10-installer"
@@ -2307,7 +2282,6 @@ def enable_autologin(
             install_type["source"] == "from_iso" and install_type["type"] == "offline"
         ):
             cmd = [
-                "sudo",
                 "cp",
                 "/etc/lightdm/lightdm.conf.bak",
                 "/etc/lightdm/lightdm.conf",
@@ -2317,7 +2291,6 @@ def enable_autologin(
             else:
                 lrun(cmd)
         cmd = [
-            "sudo",
             "sh",
             "-c",
             f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\n"
@@ -2355,16 +2328,16 @@ DefaultSession={de}
 """
         cmd = f'echo "{config}" > /etc/gdm/custom.conf'
         if chroot and mnt_dir:
-            run_chroot_cmd(mnt_dir, ["sudo", "sh", "-c", cmd])
+            run_chroot_cmd(mnt_dir, ["sh", "-c", cmd])
         else:
-            lrun(["sudo", "sh", "-c", cmd])
+            lrun(["sh", "-c", cmd])
     groupadd(username, "autologin", chroot, mnt_dir)
 
 
 def enable_autologin_tty(
     username: str, chroot: bool = False, mnt_dir: str = None
 ) -> None:
-    cmd_mkdir = ["sudo", "mkdir", "-p", "/etc/systemd/system/getty@tty1.service.d/"]
+    cmd_mkdir = ["mkdir", "-p", "/etc/systemd/system/getty@tty1.service.d/"]
     if chroot and mnt_dir:
         run_chroot_cmd(mnt_dir, cmd_mkdir)
     else:
@@ -2374,15 +2347,15 @@ def enable_autologin_tty(
 ExecStart=
 ExecStart=-/usr/bin/agetty --autologin {username} --noclear %I $TERM
 """
-    cmd_override = f'echo "{overrideconf}" | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf'
+    cmd_override = f'echo "{overrideconf}" |  tee /etc/systemd/system/getty@tty1.service.d/override.conf'
     if chroot and mnt_dir:
-        run_chroot_cmd(mnt_dir, ["sudo", "sh", "-c", cmd_override])
+        run_chroot_cmd(mnt_dir, ["sh", "-c", cmd_override])
     else:
-        lrun(["sudo", "sh", "-c", cmd_override])
+        lrun(["sh", "-c", cmd_override])
 
 
 def set_hostname(hostname: str, chroot: bool = False, mnt_dir: str = None) -> None:
-    cmd = ["sudo", "bash", "-c", f"echo {hostname} > /etc/hostname"]
+    cmd = ["bash", "-c", f"echo {hostname} > /etc/hostname"]
     if chroot and mnt_dir:
         run_chroot_cmd(mnt_dir, cmd)
     else:
@@ -2450,25 +2423,15 @@ def reboot(time: int = 5) -> None:
     if time < 0:
         raise ValueError("Time cannot be lower than 0")
     if not dryrun:
-        subprocess.run(["sudo", "sh", "-c", f"sleep {time} && shutdown -r now &"])
+        subprocess.run(["sh", "-c", f"sleep {time} && shutdown -r now &"])
     else:
         print("Skipping reboot during dryrun.")
-
-
-def run_deferred():
-    global defer
-    if len(defer):
-        lp("Running deferred commands..")
-        sleep(0.15)
-        for i in defer:
-            lrun(i)
-        defer.clear()
 
 
 # Main functions
 
 
-def install(settings=None, do_deferred: bool = True) -> int:
+def install(settings=None) -> int:
     """
     The main install function.
 
@@ -2657,6 +2620,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
                 settings["user"]["groups"],
             )
             sudo_nopasswd(settings["user"]["sudo_nopasswd"])
+            passwd("root", settings["user"]["password"])
             # ideally, we should have a way to check which DM/DE is installed
             if settings["user"]["autologin"]:
                 enable_autologin(
@@ -2689,17 +2653,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
                     monotonic() - start_time
                 )
             )
-            if len(defer):
-                lp("There are still deferred commands:")
-                for i in defer:
-                    lp(str(i))
-                lp("These commands will NOT be logged.")
-            sleep(0.15)
             copy_logs(settings["user"]["username"])
-            sleep(0.15)
-            if do_deferred:
-                run_deferred()
-                sleep(0.15)
             return 0
         elif settings["install_type"]["source"] == "from_iso":
             try:
@@ -2805,6 +2759,9 @@ def install(settings=None, do_deferred: bool = True) -> int:
                     mnt_dir=mnt_dir,
                 )
                 sudo_nopasswd(settings["user"]["sudo_nopasswd"])
+                passwd(
+                    "root", settings["user"]["password"], chroot=True, mnt_dir=mnt_dir
+                )
                 # ideally, we should have a way to check which DM/DE is installed
                 if settings["user"]["autologin"]:
                     enable_autologin(
@@ -2843,17 +2800,7 @@ def install(settings=None, do_deferred: bool = True) -> int:
                         monotonic() - start_time
                     )
                 )
-                if len(defer):
-                    lp("There are still deferred commands:")
-                    for i in defer:
-                        lp(str(i))
-                    lp("These commands will NOT be logged.")
-                sleep(0.15)
                 copy_logs(settings["user"]["username"])
-                sleep(0.15)
-                if do_deferred:
-                    run_deferred()
-                    sleep(0.15)
                 return 0
             except:
                 return 1
