@@ -2287,6 +2287,7 @@ def sudo_nopasswd(no_passwd: bool, chroot: bool = False, mnt_dir: str = None) ->
             content = "%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
         else:
             content = "%wheel ALL=(ALL:ALL) ALL"
+        lp(f"Setting {path} to {content}")
         with open(path, "w") as f:
             f.write(content)
 
@@ -2825,7 +2826,7 @@ def install(settings=None) -> int:
                         monotonic() - start_time
                     )
                 )
-                copy_logs(settings["user"]["username"])
+                copy_logs(settings["user"]["username"], chroot=True, mnt_dir=mnt_dir)
                 return 0
             except:
                 return 1
