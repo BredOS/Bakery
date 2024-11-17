@@ -36,6 +36,10 @@ if compile_schemas.found()
        args: ['--strict', '--dry-run', meson.current_source_dir()])
 endif
 
+
+install_data('main.css',
+  install_dir: join_paths(get_option('datadir'), 'bakery/data')
+)
 install_data('window.ui',
   install_dir: join_paths(get_option('datadir'), 'bakery/data')
 )
