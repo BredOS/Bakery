@@ -1224,13 +1224,12 @@ class partitioning_screen(Adw.Bin):
 
     def on_term_button_clicked(self, button) -> None:
         try:
-            lrun(["gtk-open", "gnome-terminal"])
+            lrun(["gtk-open", "org.gnome.Terminal"], wait=False, force=True)
         except:
-            lrun(["gtk-launch", "kgx"])
+            lrun(["gtk-launch", "kgx"], wait=False, force=True)
 
     def on_gparted_button_clicked(self, button) -> None:
-        lrun(["gparted"])
-        print(self.selection)
+        lrun(["gparted"], wait=False, force=True)
 
     def on_guided_partitioning_clicked(self, button) -> None:
         self.selected_mode_view = "guided"

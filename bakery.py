@@ -352,6 +352,7 @@ def lrun(
     shell: bool = False,
     cwd: str = ".",
     postrunfn: Callable = post_run_cmd,
+    wait=True,
 ) -> None:
     """
     Run a command and log the output
@@ -367,7 +368,7 @@ def lrun(
     if dryrun and not force:
         lp("Would have run: " + " ".join(cmd))
     else:
-        if shell:
+        if shell and wait:
             new_cmd = " ".join(cmd)
             Command.Shell(
                 new_cmd,
@@ -377,7 +378,17 @@ def lrun(
                 do_send_output_to_post_run_function=True,
                 do_send_exit_code_to_post_run_function=True,
             ).run_log_and_wait(logging_handler=logging_handler)
-        else:
+        elif shell and not wait:
+            new_cmd = " ".join(cmd)
+            Command.Shell(
+                new_cmd,
+                is_silent=silent,
+                working_directory=cwd,
+                post_run_function=partial(postrunfn),
+                do_send_output_to_post_run_function=True,
+                do_send_exit_code_to_post_run_function=True,
+            ).run_and_log(logging_handler=logging_handler)
+        elif not shell and wait:
             Command(
                 cmd,
                 is_silent=silent,
@@ -386,6 +397,15 @@ def lrun(
                 do_send_output_to_post_run_function=True,
                 do_send_exit_code_to_post_run_function=True,
             ).run_log_and_wait(logging_handler=logging_handler)
+        elif not shell and not wait:
+            Command(
+                cmd,
+                is_silent=silent,
+                working_directory=cwd,
+                post_run_function=partial(postrunfn),
+                do_send_output_to_post_run_function=True,
+                do_send_exit_code_to_post_run_function=True,
+            ).run_and_log(logging_handler=logging_handler)
 
 
 lp("Logger initialized.")

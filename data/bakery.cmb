@@ -507,7 +507,7 @@
 	(3,75,"GtkStackPage","child",None,None,None,None,None,76,None,None,None,None),
 	(3,75,"GtkStackPage","name","manual",None,None,None,None,None,None,None,None,None),
 	(3,75,"GtkStackPage","title","manual",None,None,None,None,None,None,None,None,None),
-	(3,76,"AdwStatusPage","description","i can add text here btwwww",None,None,None,None,None,None,None,None,None),
+	(3,76,"AdwStatusPage","description","You must select at least one boot partition and one root partition.",None,None,None,None,None,None,None,None,None),
 	(3,76,"AdwStatusPage","title","Manual partitioning",None,None,None,None,None,None,None,None,None),
 	(3,78,"AdwPreferencesGroup","header-suffix",None,None,None,None,None,79,None,None,None,None),
 	(3,78,"AdwPreferencesGroup","title","Available partitions",None,None,None,None,None,None,None,None,None),

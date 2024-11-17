@@ -349,7 +349,7 @@
               <object class="GtkStackPage">
                 <property name="child">
                   <object class="AdwStatusPage">
-                    <property name="description">i can add text here btwwww</property>
+                    <property name="description">You must select at least one boot partition and one root partition.</property>
                     <property name="title">Manual partitioning</property>
                     <child>
                       <object class="AdwPreferencesPage">
