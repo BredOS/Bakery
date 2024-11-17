@@ -2276,14 +2276,19 @@ def passwd(
 
 
 def sudo_nopasswd(no_passwd: bool, chroot: bool = False, mnt_dir: str = None) -> None:
-    cmd = ["sh", "-c", "echo '%wheel ALL=(ALL) "]
-    if no_passwd:
-        cmd[-1] += "NOPASSWD: "
-    cmd[-1] += "ALL' > /etc/sudoers.d/10-installer"
-    if chroot:
-        run_chroot_cmd(mnt_dir, cmd)
+    if dryrun:
+        lp("Would have set sudoers to " + str(not no_passwd))
     else:
-        lrun(cmd)
+        if chroot:
+            path = mnt_dir + "/etc/sudoers.d/10-installer"
+        else:
+            path = "/etc/sudoers.d/10-installer"
+        if no_passwd:
+            content = "%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
+        else:
+            content = "%wheel ALL=(ALL:ALL) ALL"
+        with open(path, "w") as f:
+            f.write(content)
 
 
 def enable_autologin(
