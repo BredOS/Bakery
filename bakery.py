@@ -1987,7 +1987,31 @@ def regenerate_initramfs(mnt_dir: str) -> None:
 @catch_exceptions
 def generate_fstab(mnt_dir: str) -> None:
     lp("Generating fstab")
-    lrun(["genfstab", "-U", mnt_dir, ">", mnt_dir + "/etc/fstab"], shell=True)
+    fstab_path = os.path.join(mnt_dir, "etc", "fstab")
+
+    # Generate the fstab file
+    lrun(["genfstab", "-U", mnt_dir, ">", fstab_path], shell=True)
+
+    # Process the generated fstab
+    with open(fstab_path, "r") as f:
+        lines = f.readlines()
+
+    updated_lines = []
+    skip_next = False
+
+    for line in lines:
+        if skip_next:
+            skip_next = False
+            continue
+        if line.startswith("# /dev/zram0"):
+            updated_lines.append(line)
+            skip_next = True
+        else:
+            updated_lines.append(line)
+
+    with open(fstab_path, "w") as f:
+        f.writelines(updated_lines)
+
     lp("Fstab generated")
 
 
@@ -2784,6 +2808,7 @@ def install(settings=None) -> int:
                     chroot=True,
                     mnt_dir=mnt_dir,
                 )
+                lp("sudo_nopasswd")
                 sudo_nopasswd(settings["user"]["sudo_nopasswd"])
                 passwd(
                     "root", settings["user"]["password"], chroot=True, mnt_dir=mnt_dir
