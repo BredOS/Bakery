@@ -1187,7 +1187,7 @@ class partitioning_screen(Adw.Bin):
         for disk in self.disks:
             self.disk_model.append(disk + ": " + self.disks[disk])
         self.part_table.set_label(
-            _("Partition table: ") + check_partition_table(self.disk)
+            _("Partition table: ") + str(check_partition_table(self.disk))
         )
         self.partitions = {}
         self.partitions[self.disk] = self.all_partitions[self.disk]
