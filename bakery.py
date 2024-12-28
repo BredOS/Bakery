@@ -2304,15 +2304,15 @@ def sudo_nopasswd(no_passwd: bool, chroot: bool = False, mnt_dir: str = None) ->
         lp("Would have set sudoers to " + str(not no_passwd))
     else:
         if chroot:
-            path = mnt_dir + "/etc/sudoers.d/10-installer"
+            path = mnt_dir + "/etc/sudoers"
         else:
-            path = "/etc/sudoers.d/10-installer"
+            path = "/etc/sudoers"
         if no_passwd:
             content = "%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
         else:
             content = "%wheel ALL=(ALL:ALL) ALL"
         lp(f"Setting {path} to {content}")
-        with open(path, "w") as f:
+        with open(path, "a") as f:
             f.write(content)
 
 
