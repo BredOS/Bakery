@@ -1186,9 +1186,8 @@ class partitioning_screen(Adw.Bin):
         self.all_partitions = get_partitions()
         for disk in self.disks:
             self.disk_model.append(disk + ": " + self.disks[disk])
-        self.part_table.set_label(
-            _("Partition table: ") + str(check_partition_table(self.disk))
-        )
+        partition_table = check_partition_table(self.disk)
+        self.part_table.set_label(_("Partition table: ") + str(partition_table))
         self.partitions = {}
         self.partitions[self.disk] = self.all_partitions[self.disk]
         self.populate_available_parts(self.partitions)
@@ -1453,7 +1452,7 @@ class partitioning_screen(Adw.Bin):
         if selected is not None:
             self.disk = selected.props.string.split(":")[0]
             self.part_table.set_label(
-                "Partition table: " + check_partition_table(self.disk)
+                "Partition table: " + str(check_partition_table(self.disk))
             )
             self.partitions = {}
             self.partitions[self.disk] = self.all_partitions[self.disk]
