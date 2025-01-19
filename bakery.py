@@ -2823,7 +2823,9 @@ def install(settings=None) -> int:
                     mnt_dir=mnt_dir,
                 )
                 lp("sudo_nopasswd")
-                sudo_nopasswd(settings["user"]["sudo_nopasswd"])
+                sudo_nopasswd(
+                    settings["user"]["sudo_nopasswd"], chroot=True, mnt_dir=mnt_dir
+                )
                 passwd(
                     "root", settings["user"]["password"], chroot=True, mnt_dir=mnt_dir
                 )
