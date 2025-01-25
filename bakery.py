@@ -16,29 +16,16 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 import platform
-import tempfile
+import toml, os, io, sys, re, time, json, tempfile, parted, psutil, subprocess, gettext, socket, requests, gi
 from typing import Callable
-import parted
-import psutil
-import toml
-import subprocess
-import os
-import gettext
-import io
-import sys
 from time import sleep, monotonic
 from pathlib import Path
-import socket
 from datetime import datetime
-import requests
-import json
 from traceback import print_exception
 from threading import Lock
 from functools import partial, wraps
-import time
 
 from pyrunning import logging, LogMessage, LoggingHandler, Command, LoggingLevel
-import gi
 
 gi.require_version("NM", "1.0")
 from gi.repository import GLib, NM
@@ -1930,6 +1917,115 @@ def grub_install(mnt_dir: str, arch: str = "arm64-efi") -> None:
     lp("Generating GRUB configuration")
     run_chroot_cmd(mnt_dir, ["grub-mkconfig", "-o", "/boot/grub/grub.cfg"])
     lp("GRUB configuration generated")
+
+
+def file_update(file_path: str, comment_keys: list = [], updates: dict = {}):
+    """
+    Validates a file exists and updates specific lines' values, while retaining the order and optionally commenting/uncommenting lines.
+
+    Args:
+        file_path (str): The path to the file to validate and update.
+        updates (dict, optional): A dictionary where keys are line keys and values are the new values to set.
+        comment_keys (list, optional): A list of keys to comment out.
+
+    Returns:
+        bool: If the operation was successful or not.
+    """
+    # Check if the file exists
+    if not os.path.isfile(file_path):
+        return False
+
+    # Read the file
+    try:
+        with open(file_path, "r") as file:
+            lines = file.readlines()
+    except Exception as e:
+        lp(f"Error reading {file_path}: {e}")
+        return False
+
+    # Pattern to match lines (supports whitespace variations)
+    pattern = re.compile(r"^\s*#?\s*(\w+)\s*=\s*(.*)$")
+    updated_lines = []
+    modified = False
+
+    for line in lines:
+        match = pattern.match(line)
+        if match:
+            key = match.group(1)
+            value = match.group(2)
+
+            # Handle updates
+            if key in updates:
+                updated_value = updates[key]
+                updated_lines.append(f"{key} = {updated_value}\n")
+                modified = True
+            # Handle commenting out lines
+            elif key in comment_keys:
+                updated_lines.append(f"# {key} = {value}\n")
+                modified = True
+            else:
+                updated_lines.append(line)
+        else:
+            updated_lines.append(line)
+
+    # Write back the updated file if changes were made
+    if modified:
+        try:
+            with open(file_path, "w") as file:
+                file.writelines(updated_lines)
+        except Exception as e:
+            lp(f"Error writing to the file: {e}")
+            return False
+    return True
+
+
+@catch_exceptions
+def grub_cfg(
+    cmdline: str = None,
+    dtb: str = None,
+    distribution: str = "BredOS",
+    timeout: int = 5,
+    update: bool = True,
+    chroot: bool = False,
+    mnt_dir: str = None,
+) -> None:
+    grubpath = (mnt_dir if chroot else "") + "/etc/default/grub"
+    lp("Configuring GRUB..")
+    updates = {}
+    comment_keys = []
+
+    if cmdline is not None:
+        lp(f'Setting cmdline to "{cmdline}"')
+        updates["GRUB_CMDLINE_LINUX_DEFAULT"] = cmdline
+
+    if dtb is not None:
+        if dtb:
+            lp('Setting Device Tree to "{dtb}"')
+            updates["GRUB_DTB"] = dtb
+        else:
+            lp("Disabling Device Tree")
+            comment_keys.append("GRUB_DTB")
+
+    if distribution:
+        lp("Configuring distribution name..")
+        updates["GRUB_DISTRIBUTOR"] = distribution
+
+    if file_update(grubpath, comment_keys, updates):
+        lp("Reconfiguration complete.")
+    else:
+        lp("Failed to update GRUB configuration!")
+        raise RuntimeError("Failed to update GRUB configuration!")
+
+    if not update:
+        lp("Skipping GRUB regeneration..")
+        return
+
+    cmd = ["grub-mkconfig", "-o", "/boot/grub/grub.cfg"]
+    if chroot and mnt_dir is not None:
+        run_chroot_cmd(mnt_dir, cmd)
+    else:
+        lrun(cmd)
+    lp("GRUB update complete")
 
 
 @catch_exceptions
