@@ -1996,19 +1996,26 @@ def grub_cfg(
 
     if cmdline is not None:
         lp(f'Setting cmdline to "{cmdline}"')
-        updates["GRUB_CMDLINE_LINUX_DEFAULT"] = cmdline
+        updates["GRUB_CMDLINE_LINUX_DEFAULT"] = f'"{cmdline}"'
 
     if dtb is not None:
         if dtb:
             lp('Setting Device Tree to "{dtb}"')
-            updates["GRUB_DTB"] = dtb
+            updates["GRUB_DTB"] = f'"{dtb}"'
         else:
             lp("Disabling Device Tree")
             comment_keys.append("GRUB_DTB")
 
     if distribution:
         lp("Configuring distribution name..")
-        updates["GRUB_DISTRIBUTOR"] = distribution
+        updates["GRUB_DISTRIBUTOR"] = f'"{distribution}"'
+
+    if timeout > 0:
+        lp("Setting timeout..")
+        updates["GRUB_TIMEOUT"] = str(timeout)
+    else:
+        lp("Disabling timeout..")
+        comment_keys.append("GRUB_TIMEOUT")
 
     if file_update(grubpath, comment_keys, updates):
         lp("Reconfiguration complete.")
