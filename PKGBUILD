@@ -25,7 +25,7 @@ build() {
 
 package_bakery() {
         cd "$srcdir/$pkgbase/build"
-        depends=('python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts')
+        depends=('python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts' 'bakery-device-tweaks')
         DESTDIR="$pkgdir" meson install
         rm -rf "$pkgdir/usr/share/bakery/data/"*.ui
         rm -rf "$pkgdir/usr/share/bakery/data/"*.css

@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 import platform
-import toml, os, io, sys, re, time, json, tempfile, parted, psutil, subprocess, gettext, socket, requests, gi
+import toml, os, io, sys, re, time, json, tempfile, parted, psutil, subprocess, gettext, socket, requests, gi, yaml
 from typing import Callable
 from time import sleep, monotonic
 from pathlib import Path
@@ -26,6 +26,7 @@ from threading import Lock
 from functools import partial, wraps
 
 from pyrunning import logging, LogMessage, LoggingHandler, Command, LoggingLevel
+import yaml
 
 gi.require_version("NM", "1.0")
 from gi.repository import GLib, NM
@@ -290,7 +291,7 @@ def copy_logs(new_usern: str, chroot: bool = False, mnt_dir: str = None) -> None
             [
                 "cp",
                 "-vr",
-                "/home/bred/.bredos",
+                "/root/.bredos",
                 "/home/" + new_usern + "/.bredos",
             ]
         )
@@ -305,13 +306,6 @@ def copy_logs(new_usern: str, chroot: bool = False, mnt_dir: str = None) -> None
 
 
 # Logger config
-
-# class StdErrRedirector(io.TextIOBase):
-#     def write(self, message):
-#         if message.strip():
-#                 lp(message, mode="info")
-
-# sys.stderr = StdErrRedirector()
 
 print("Starting logger..")
 logger = setup_logging()
@@ -414,37 +408,67 @@ def catch_exceptions(func):
     return wrapper
 
 
-# TOML
+# CFG/Tweaks functions
 
 
 @catch_exceptions
-def check_override_config() -> bool:
-    # check if a /boot/override.toml exists.
-    try:
-        with open("/boot/override.toml"):
-            pass
+def resolve_placeholders(config, context=None):
+    """
+    Recursively resolves placeholders in the configuration using the context.
+    Re-evaluates until no placeholders remain.
+    """
+    if context is None:
+        context = config  # Use the entire configuration as the context
+
+    def resolve_value(value, context):
+        """Resolve a single value with placeholders."""
+        if isinstance(value, str):
+            # Keep resolving placeholders until none are left
+            while True:
+                placeholders = re.findall(r"{{\s*([\w.]+)\s*}}", value)
+                if not placeholders:
+                    break  # Stop if no placeholders are left
+                for placeholder in placeholders:
+                    keys = placeholder.split(".")
+                    resolved = context
+                    for key in keys:
+                        resolved = resolved.get(
+                            key, f"{{{{ {placeholder} }}}}"
+                        )  # Leave unresolved if missing
+                    value = value.replace(f"{{{{ {placeholder} }}}}", resolved)
+        return value
+
+    if isinstance(config, dict):
+        return {
+            key: resolve_placeholders(value, context) for key, value in config.items()
+        }
+    elif isinstance(config, list):
+        return [resolve_placeholders(item, context) for item in config]
+    else:
+        return resolve_value(config, context)
+
+
+@catch_exceptions
+def check_tweaks_config() -> bool:
+    # curr dir + tweaks.yaml or /usr/share/bakery/tweaks.yaml prefer curr dir
+    if os.path.isfile("tweaks.yaml"):
         return True
-    except:
-        return False
+    elif os.path.isfile("/usr/share/bakery/tweaks.yaml"):
+        return True
+    return False
 
 
 @catch_exceptions
-def load_config(file_path: str = "/bakery/config.toml") -> dict:
-    # Load a config file as a dict.
-    lp("Loaded config: " + file_path)
-    return toml.load(file_path)
-
-
-@catch_exceptions
-def export_config(config: dict, file_path: str = "/bakery/output.toml") -> bool:
-    # Export a config file from a stored config dict.
-    try:
-        with open(file_path, "w") as f:
-            lp("Exporting config to: " + file_path)
-            f.write(toml.dumps(config))
-    except:
-        return False
-    return True
+def load_config() -> dict:
+    # curr dir + tweaks.yaml or /usr/share/bakery/tweaks.yaml prefer curr dir
+    if os.path.isfile("tweaks.yaml"):
+        with open("tweaks.yaml", "r") as f:
+            cfg = yaml.safe_load(f)
+            return resolve_placeholders(cfg)
+    elif os.path.isfile("/usr/share/bakery/tweaks.yaml"):
+        with open("/usr/share/bakery/tweaks.yaml", "r") as f:
+            cfg = yaml.safe_load(f)
+            return resolve_placeholders(cfg)
 
 
 # Networking functions
@@ -1430,6 +1454,12 @@ def detect_install_device() -> str:
             return "unknown"
 
 
+def is_sbc(device: str) -> bool:
+    if device in config.sbcs:
+        return True
+    return False
+
+
 def enable_services(services: list, chroot: bool = False, mnt_dir: str = None) -> None:
     try:
         for i in services:
@@ -2183,6 +2213,37 @@ def final_setup(settings, mnt_dir: str = None) -> None:
             ]
         )
     elif settings["install_type"]["source"] == "from_iso":
+        cfg = load_config()
+        if is_sbc(settings["install_type"]["device"]):
+            tweaks = cfg["devices"][settings["install_type"]["device"]].get("dt")
+            if tweaks:
+                grub_cfg(
+                    cmdline=tweaks.get("cmdline", None),
+                    dtb=tweaks.get("dtb", None),
+                    timeout=tweaks.get("timeout", 5),
+                    update=True,
+                    chroot=True,
+                    mnt_dir=mnt_dir,
+                )
+            pythontweaks = tweaks.get("tweaks", None)
+            if pythontweaks:
+                exec(pythontweaks["python"])
+        else:
+            arch = platform.machine()
+            tweaks = cfg.get(f"arch_{arch}")
+            if tweaks:
+                grub_cfg(
+                    cmdline=tweaks.get("cmdline", None),
+                    dtb=tweaks.get("dtb", None),
+                    timeout=tweaks.get("timeout", 5),
+                    update=True,
+                    chroot=True,
+                    mnt_dir=mnt_dir,
+                )
+                pythontweaks = tweaks.get("tweaks", None)
+                if pythontweaks:
+                    exec(pythontweaks["python"])
+
         if settings["install_type"]["type"] == "offline":
             enable_services(
                 [
