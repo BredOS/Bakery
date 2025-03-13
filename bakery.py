@@ -2518,7 +2518,7 @@ def enable_autologin(
                 run_chroot_cmd(mnt_dir, cmd)
             else:
                 lrun(cmd)
-        if dm == "cinnamon" and is_wayland:
+        if dm == "x-cinnamon" and is_wayland:
             dm = "cinnamon-wayland"
         cmd = [
             "sh",
