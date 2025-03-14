@@ -2523,7 +2523,7 @@ def enable_autologin(
         cmd = [
             "sh",
             "-c",
-            f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\n"
+            f"sed -i '/^[Seat:\*]$/a autologin-user={username}\\nuser-session={de}\\n"
             + "greeter-session=lightdm-slick-greeter\\nautologin-user-timeout=0\\nautologin-guest=false'"
             + " /etc/lightdm/lightdm.conf",
         ]
@@ -2900,6 +2900,10 @@ def install(settings=None) -> int:
                 else:
                     grub_arch = "x86_64-efi"
                     sqfs_file = "/run/archiso/bootmnt/arch/x86_64/airootfs.sfs"
+
+                if not os.path.isfile(sqfs_file):
+                    lp("Using fallback RAM squashfs")
+                    sqfs_file = "/run/archiso/copytoram/airootfs.sfs"
 
                 lp("Took {:.5f}".format(get_timer()))
                 st(2)  # Mounting
