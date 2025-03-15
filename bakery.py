@@ -1987,11 +1987,11 @@ def file_update(file_path: str, comment_keys: list = [], updates: dict = {}):
             # Handle updates
             if key in updates:
                 updated_value = updates[key]
-                updated_lines.append(f"{key} = {updated_value}\n")
+                updated_lines.append(f"{key}={updated_value}\n")
                 modified = True
             # Handle commenting out lines
             elif key in comment_keys:
-                updated_lines.append(f"# {key} = {value}\n")
+                updated_lines.append(f"# {key}={value}\n")
                 modified = True
             else:
                 updated_lines.append(line)
