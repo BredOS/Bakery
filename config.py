@@ -132,6 +132,7 @@ sbcs = [
 ]
 
 iso_packages_to_remove = [
+    "bakery-device-tweaks",
     "bakery-gui",
     "bakery",
     "mkinitcpio-archiso",
