@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-# Launch DIR/gui.py, DIR/tui.py, or DIR/tui.py with --simple when --gui, --tui, or --simple is passed
-
 ui=""
 extra_args=()
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)" # to be changed to future install dir
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 if [[ $script_dir == "/usr/bin" ]]; then
     script_dir="/usr/share/bakery"
