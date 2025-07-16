@@ -272,7 +272,7 @@ def main_menu():
                     return
             elif stage == 1:
                 locale = None
-                locale = locale_menu()
+                locale = _, locale_menu()
                 stage = 0 if locale is None else 2
             elif stage == 2:
                 keyboard = None
