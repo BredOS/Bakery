@@ -245,6 +245,10 @@ def keyboard_menu() -> dict | None:
     return
 
 
+def timezone_menu() -> dict | None:
+    pass
+
+
 def main_menu():
     c.init()
     stage = 0
@@ -279,7 +283,9 @@ def main_menu():
                 keyboard = keyboard_menu()
                 stage = 1 if keyboard is None else 3
             elif stage == 3:
+                timezone = None
                 timezone = timezone_menu()
+                stage = 2 if timezone is None else 4
             elif stage == 4:
                 user = user_menu()
             elif stage == 5:
