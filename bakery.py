@@ -1987,11 +1987,11 @@ def file_update(file_path: str, comment_keys: list = [], updates: dict = {}):
             # Handle updates
             if key in updates:
                 updated_value = updates[key]
-                updated_lines.append(f"{key} = {updated_value}\n")
+                updated_lines.append(f"{key}={updated_value}\n")
                 modified = True
             # Handle commenting out lines
             elif key in comment_keys:
-                updated_lines.append(f"# {key} = {value}\n")
+                updated_lines.append(f"# {key}={value}\n")
                 modified = True
             else:
                 updated_lines.append(line)
@@ -2518,10 +2518,12 @@ def enable_autologin(
                 run_chroot_cmd(mnt_dir, cmd)
             else:
                 lrun(cmd)
+        if dm == "x-cinnamon" and is_wayland:
+            dm = "cinnamon-wayland"
         cmd = [
             "sh",
             "-c",
-            f"sed -i '/^\[Seat:\*\]$/a autologin-user={username}\\nuser-session={de}\\n"
+            f"sed -i '/^[Seat:\*]$/a autologin-user={username}\\nuser-session={de}\\n"
             + "greeter-session=lightdm-slick-greeter\\nautologin-user-timeout=0\\nautologin-guest=false'"
             + " /etc/lightdm/lightdm.conf",
         ]
@@ -2898,6 +2900,10 @@ def install(settings=None) -> int:
                 else:
                     grub_arch = "x86_64-efi"
                     sqfs_file = "/run/archiso/bootmnt/arch/x86_64/airootfs.sfs"
+
+                if not os.path.isfile(sqfs_file):
+                    lp("Using fallback RAM squashfs")
+                    sqfs_file = "/run/archiso/copytoram/airootfs.sfs"
 
                 lp("Took {:.5f}".format(get_timer()))
                 st(2)  # Mounting

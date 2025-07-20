@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-# Launch DIR/gui.py or DIR/tui.py when --gui or --tui is passed
-
 ui=""
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)" # to be changed to future install dir
+extra_args=()
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 if [[ $script_dir == "/usr/bin" ]]; then
     script_dir="/usr/share/bakery"
@@ -13,6 +12,11 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --gui|--tui)
             ui="${1#--}"
+            shift
+            ;;
+        --simple)
+            ui="tui"
+            extra_args+=("--simple")
             shift
             ;;
         *)
@@ -25,12 +29,13 @@ done
 if [[ $ui == "gui" || $ui == "tui" ]]; then
     script_name="bakery-$ui.py"
     if [[ -f "$script_dir/$script_name" ]]; then
-        python "$script_dir/$script_name"
+        python "$script_dir/$script_name" "${extra_args[@]}"
     else
         echo "Error: bakery-$ui is not installed"
         echo "Please install bakery-$ui with 'sudo pacman -S bakery-$ui'"
         exit 1
     fi
 else
-    echo "Error: Unknown UI $ui"
+    echo "Error: No UI specified."
+    exit 1
 fi

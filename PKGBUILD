@@ -1,8 +1,8 @@
 # Maintainer: Bill Sideris <bill88t@feline.gr>
-pkgname=('bakery' 'bakery-gui')
+pkgname=('bakery' 'bakery-gui' 'bakery-tui')
 pkgbase="bakery"
-pkgver=1.1.0
-pkgrel=12
+pkgver=1.3.0
+pkgrel=1
 pkgdesc="BredOS Installer"
 arch=('any')
 url="https://github.com/BredOS/Bakery"
@@ -25,7 +25,7 @@ build() {
 
 package_bakery() {
         cd "$srcdir/$pkgbase/build"
-        depends=('python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts' 'bakery-device-tweaks')
+        depends=('python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts' 'bakery-device-tweaks' 'python-yaml')
         DESTDIR="$pkgdir" meson install
         rm -rf "$pkgdir/usr/share/bakery/data/"*.ui
         rm -rf "$pkgdir/usr/share/bakery/data/"*.css
@@ -39,6 +39,16 @@ package_bakery-gui() {
         DESTDIR="$pkgdir" meson install
         rm -rf "$pkgdir/usr/share/locale"
         rm -rf "$pkgdir/usr/share/bakery/"{bakery-tui.py,bakery.py,config.py}
+        rm -rf "$pkgdir/usr/share/licenses/"
+        rm -rf "$pkgdir/usr/bin"
+}
+
+package_bakery-tui() {
+        cd "$srcdir/$pkgbase/build"
+        depends=('bakery' 'python-babel' 'python-pyrunning' 'python-psutil' 'python-bredos-common>=1.6.0')
+        DESTDIR="$pkgdir" meson install
+        rm -rf "$pkgdir/usr/share/locale"
+        rm -rf "$pkgdir/usr/share/bakery/"{bakery-gui.py,bakery.py,config.py}
         rm -rf "$pkgdir/usr/share/licenses/"
         rm -rf "$pkgdir/usr/bin"
 }
