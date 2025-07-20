@@ -2518,19 +2518,34 @@ def enable_autologin(
                 run_chroot_cmd(mnt_dir, cmd)
             else:
                 lrun(cmd)
-        if dm == "x-cinnamon" and is_wayland:
-            dm = "cinnamon-wayland"
-        cmd = [
-            "sh",
-            "-c",
-            f"sed -i '/^[Seat:\*]$/a autologin-user={username}\\nuser-session={de}\\n"
-            + "greeter-session=lightdm-slick-greeter\\nautologin-user-timeout=0\\nautologin-guest=false'"
-            + " /etc/lightdm/lightdm.conf",
-        ]
-        if chroot and mnt_dir:
-            run_chroot_cmd(mnt_dir, cmd)
+        new_content = (
+            "autologin-user=" + username + "\n"
+            "user-session=" + de + "\n"
+            "greeter-session=lightdm-slick-greeter\n"
+            "autologin-user-timeout=0\n"
+            "autologin-guest=false"
+        )
+        if dryrun:
+            lp("Would have replaced [Seat:*] section in lightdm.conf with:")
+            lp(new_content)
         else:
-            lrun(cmd)
+            if chroot and mnt_dir:
+                with open(mnt_dir + "/etc/lightdm/lightdm.conf", "r") as f:
+                    content = f.read()
+            else:
+                with open("/etc/lightdm/lightdm.conf", "r") as f:
+                    content = f.read()
+
+            modified_content = content.replace(
+                "\n[Seat:*]", "\n[Seat:*]\n" + new_content
+            )
+
+            if chroot and mnt_dir:
+                with open(mnt_dir + "/etc/lightdm/lightdm.conf", "w") as f:
+                    f.write(modified_content)
+            else:
+                with open("/etc/lightdm/lightdm.conf", "w") as f:
+                    f.write(modified_content)
     elif dm == "gdm":
         lp("Enabling autologin for " + username + " in " + dm)
 
