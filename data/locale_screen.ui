@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.92.0 -->
+<!-- Created with Cambalache 0.95.0 -->
 <interface domain="bakery">
+  <!-- interface-name locale_screen.ui -->
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.2"/>
   <template class="locale_screen" parent="AdwBin">
@@ -93,7 +94,7 @@
             <property name="margin-end">15</property>
             <property name="margin-start">15</property>
             <property name="margin-top">15</property>
-            <property name="valign">GTK_ALIGN_END</property>
+            <property name="valign">end</property>
             <property name="vexpand">true</property>
             <style>
               <class name="suggested-action"/>

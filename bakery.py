@@ -2635,14 +2635,14 @@ def debounce(wait):
     return decorator
 
 
-def time_fn(func):
-    def wrapped(*args, **kwargs):
-        start_time = time.time()  # Record the start time
-        result = func(*args, **kwargs)  # Call the original function
-        end_time = time.time()  # Record the end time
-        duration = end_time - start_time  # Calculate the duration
-        print(f"Function '{func.__name__}' took {duration:.4f} seconds to execute.")
-        return result  # Return the result of the original function
+def time_fn(func: Callable) -> Callable:
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs) -> Any:
+        start_time = time.perf_counter()  # More precise than time.time()
+        result = func(*args, **kwargs)
+        duration = time.perf_counter() - start_time
+        lp(f"Function '{func.__name__}' took {duration:.4f} seconds to execute.")
+        return result
 
     return wrapped
 
