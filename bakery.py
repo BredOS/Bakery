@@ -1610,16 +1610,31 @@ def gen_new_partitions(old_partitions: dict, action: str, part_to_replace=None) 
     length = device.length
     drive_size = length * sector_size / 1024 / 1024  # in MB
     if action == "erase_all":
-        # efi 256M, root rest
+        # efi 256M, swap 2G, root rest
+        swap_size_mb = 2048  # 2GB swap
+        efi_size_mb = 256
+        
         new_partitions = {}
         for disk, partitions in old_partitions.items():
+            # Calculate sectors
+            efi_start = 2048
+            efi_end = efi_start + (efi_size_mb * 1024 * 1024 // sector_size)
+            
+            swap_start = efi_end
+            swap_end = swap_start + (swap_size_mb * 1024 * 1024 // sector_size)
+            
+            root_start = swap_end
+            root_end = length - sector_size
+            root_size_mb = int(drive_size) - efi_size_mb - swap_size_mb - 1
+            
             new_partitions[disk] = [
-                {"EFI": [float(256), 2048, 256 * 1024 * 1024 // sector_size, "fat32"]},
+                {"EFI": [float(efi_size_mb), efi_start, efi_end, "fat32"]},
+                {"swap": [float(swap_size_mb), swap_start, swap_end, "swap"]},
                 {
                     "BredOS": [
-                        int(drive_size) - 257,
-                        257 * 1024 * 1024 // sector_size,
-                        length - sector_size,
+                        root_size_mb,
+                        root_start,
+                        root_end,
                         "btrfs",
                     ]
                 },

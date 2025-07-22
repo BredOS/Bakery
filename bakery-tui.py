@@ -367,7 +367,7 @@ def simple_partitioning_mode(sidebar: dict) -> dict | None:
                         f"Device: {selected_device}",
                         "",
                         "WARNING: This will ERASE ALL DATA on the selected drive!",
-                        "A 256MB EFI partition and BredOS root partition will be created.",
+                        "A 256MB EFI partition, 2GB swap partition, and BredOS root partition will be created.",
                         "",
                         "Do you want to continue?",
                     ],
@@ -511,6 +511,7 @@ def manual_partition_assignment(sidebar: dict) -> dict | None:
         "Do not use",
         "Use as root",
         "Use as home",
+        "Use as swap",
     ]
     
     if is_efi:
@@ -582,6 +583,13 @@ def manual_partition_assignment(sidebar: dict) -> dict | None:
                                 c.message([
                                     "Invalid filesystem for root partition!",
                                     "Root partition must be ext4 or btrfs.",
+                                ], "Error")
+                                continue
+                        elif role == "Use as swap":
+                            if fs not in ["Keep current", "swap"]:
+                                c.message([
+                                    "Invalid filesystem for swap partition!",
+                                    "Swap partition must use swap filesystem.",
                                 ], "Error")
                                 continue
                         

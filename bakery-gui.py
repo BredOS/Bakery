@@ -1470,7 +1470,7 @@ class partitioning_screen(Adw.Bin):
         if mode == "erase_all":
             self.selectable = False
             self.info_label.set_label(
-                "A new 256MB EFI partition will be created and the rest will be used for BredOS"
+                "A new 256MB EFI partition, 2GB swap partition, and BredOS root partition will be created"
             )
             self.new_partitions = gen_new_partitions(self.partitions, "erase_all")
             self.populate_disk_preview(self.new_partitions, new=True)
