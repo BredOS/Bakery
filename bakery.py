@@ -1580,19 +1580,22 @@ def get_partitions() -> list:
         except Exception as e:
             lp(f"Error while processing disk {disk}: {str(e)}", mode="error")
             # if str(e) contains "unrecognised disk label" then the disk is not partitioned and we have to return free_space for the whole disk
-            if "unrecognised disk label" in str(e):
-                partitions_dict[disk] = [
-                    {
-                        "Free space": [
-                            int(
-                                device.length * device.sectorSize / 1024 / 1024
-                            ),  # Size in MB
-                            0,  # Start sector
-                            device.length,  # End sector
-                            None,  # Filesystem type
-                        ]
-                    }
-                ]
+            try:
+                if "unrecognised disk label" in str(e):
+                    partitions_dict[disk] = [
+                        {
+                            "Free space": [
+                                int(
+                                    device.length * device.sectorSize / 1024 / 1024
+                                ),  # Size in MB
+                                0,  # Start sector
+                                device.length,  # End sector
+                                None,  # Filesystem type
+                            ]
+                        }
+                    ]
+            except:
+                pass
 
     return partitions_dict  # {disk: [{part1: [size, start, end, fs]}, {part2: [size, start, end, fs]}, {"free_space": [size, start, end, None]}]}
 

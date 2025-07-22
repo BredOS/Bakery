@@ -18,7 +18,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import os, sys, time, curses, bakery, pwd
-import argparse, signal, config, re
+import argparse, signal, config, re, json
+import subprocess
 from bakery import lp
 from time import sleep
 from pytz import timezone
@@ -37,17 +38,19 @@ SIDEBAR = {
     "Locale": False,
     "Keyboard": False,
     "Timezone": False,
+    "Partitioning": False,
     "User": False,
     "Summary": False,
     "Install": False,
     "Finish": False,
 }
+INSTALL_TYPE = bakery.detect_install_source()
 
 # ------------ Irrelevant --------------
 
 
 def check_root() -> None:
-    if os.geteuid():
+    if (not DRYRUN) and os.geteuid():
         print("Bakery must be run as root!", file=sys.stderr)
         exit(1)
 
@@ -100,6 +103,25 @@ signal.signal(signal.SIGTSTP, handle_stupid)
 def dump_logs() -> None:
     lp("test")
     c.message(LOGS, "logs dump")
+
+
+def device_size(dev_path: str) -> int:
+    result = subprocess.run(
+        ["lsblk", "--json", "--bytes", dev_path],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    data = json.loads(result.stdout)
+    return int(data["blockdevices"][0]["size"])
+
+
+def valid_install_medium(dev_path) -> bool:
+    try:
+        size = device_size(dev_path)
+        return size > 8 * 1024**3  # 8 GiB
+    except:
+        return False
 
 
 # -------------- Installation steps --------------
@@ -268,6 +290,221 @@ def timezone_menu() -> dict | None:
                 return
         except KeyboardInterrupt:
             break
+
+
+def partitioning_menu() -> dict | None:
+    sidebar = SIDEBAR.copy()
+    sidebar["Partitioning"] = True
+
+    while True:
+        try:
+            mode_choice = c.selector(
+                ["Simple (Automatic)", "Advanced (Manual)"],
+                False,
+                "Partitioning: Choose Mode",
+                sidebar=sidebar,
+            )
+
+            if isinstance(mode_choice, int):
+                if not mode_choice:
+                    return simple_partitioning_mode(sidebar)
+                else:
+                    return advanced_partitioning_mode(sidebar)
+            else:
+                break
+        except KeyboardInterrupt:
+            break
+
+
+def simple_partitioning_mode(sidebar: dict) -> dict | None:
+    c.suspend()
+    print("Loading available drives...")
+    drives = bakery.list_drives()
+    invalid = []
+    for i in drives.keys():
+        print(f"{i}: ", end="")
+        if not valid_install_medium(i):
+            invalid.append(i)
+            print("invalid")
+        else:
+            print("valid")
+    for i in invalid:
+        del drives[i]
+
+    sleep(0.4)
+    c.resume()
+
+    if not drives:
+        c.message(["No installable drives found!"], "Error")
+        return None
+
+    drive_list = []
+    drive_keys = list(drives.keys())
+
+    for device, model in drives.items():
+        try:
+            device_obj = parted.getDevice(device)
+            size_gb = round(device_obj.length * device_obj.sectorSize / (1024**3), 1)
+            drive_list.append(f"{device}: {model} ({size_gb} GB)")
+        except:
+            drive_list.append(f"{device}: {model}")
+
+    while True:
+        try:
+            selected = c.selector(
+                drive_list,
+                False,
+                "Partitioning: Select Drive for Automatic Installation",
+                sidebar=sidebar,
+            )
+
+            if isinstance(selected, int):
+                selected_device = drive_keys[selected]
+
+                if c.confirm(
+                    [
+                        f"Selected drive: {drives[selected_device]}",
+                        f"Device: {selected_device}",
+                        "",
+                        "WARNING: This will ERASE ALL DATA on the selected drive!",
+                        "A 256MB EFI partition and BredOS root partition will be created.",
+                        "",
+                        "Do you want to continue?",
+                    ],
+                    "Partitioning: Confirm Drive Selection",
+                    sidebar=sidebar,
+                ):
+                    return {
+                        "type": "guided",
+                        "mode": "erase_all",
+                        "disk": selected_device,
+                        "efi": bakery.check_efi(),
+                    }
+            else:
+                break
+        except KeyboardInterrupt:
+            break
+
+
+def advanced_partitioning_mode(sidebar: dict) -> dict | None:
+    instructions = [
+        "Usage of `parted` and/or `fdisk` recommended.",
+        "",
+        "Requirements:",
+        "  - EFI Partition: FAT32/FAT16/FAT12, minimum 16MB in size, bootable.",
+        "  - ROOT Filesystem: BTRFS/EXT4, minimum 5GB in size.",
+        "Optional, accepted secondary partitions:",
+        "  - BOOT Partition: FAT32/EXT4, minimum 512MB in size, bootable.",
+        "  - HOME Partition: BTRFS/EXT4, no size requirement.",
+        "",
+        "Make sure to keep note of the created partitions.",
+    ]
+
+    if c.confirm(
+        [
+            "Advanced Partitioning Mode",
+            "",
+            "You will now access a ROOT shell to manually partition your drives.",
+            "You are free to create the partitions however you like.",
+            "",
+        ]
+        + instructions
+        + [
+            "",
+            "Press Y and Enter confirm and open the shell, or N and Enter to go back.",
+        ],
+        "Advanced Partitioning",
+        sidebar=sidebar,
+    ):
+        while True:
+            c.suspend()
+            print(
+                "\x1b[2J\x1b[3J\x1b[H"
+                + ("=" * 69)
+                + "\n-!!- ADVANCED PARTITIONING SHELL -!!-\n\n"
+                + "\n".join(instructions)
+                + "\n\nBe careful and good luck.\n"
+                + "Type 'exit' to return to Bakery.\n"
+                + ("=" * 69)
+                + "\n"
+            )
+
+            try:
+                subprocess.run(["/bin/bash"], check=False)
+            except Exception as e:
+                print(f"Error opening shell: {e}")
+
+            print("\nReturning to installer...")
+            sleep(0.4)
+            c.resume()
+
+            try:
+                partitioning_done = c.confirm(
+                    [
+                        "Have you finished setting up your partitions?",
+                        "",
+                        "Press Y to continue or N to re-enter the shell.",
+                        "(If you wish to go back in setup, continue.)",
+                    ]
+                    + instructions,
+                    "Advanced Partitioning: Confirmation",
+                    sidebar=sidebar,
+                )
+
+                if isinstance(partitioning_done, bool):
+                    if partitioning_done:
+                        return manual_partition_assignment(sidebar)
+                else:  # Go back through install
+                    break
+            except KeyboardInterrupt:
+                break
+
+
+def manual_partition_assignment(sidebar: dict) -> dict | None:
+    c.suspend()
+    print("Scanning for partitions...")
+    all_partitions = bakery.get_partitions()
+    sleep(0.4)
+    c.resume()
+
+    if not all_partitions:
+        c.message(["No partitions found! Please create partitions first."], "Error")
+        return None
+
+    # Build list of actual partitions (not free space)
+    available_partitions = []
+    partition_details = {}
+
+    for disk, partitions in all_partitions.items():
+        for partition_info in partitions:
+            for part_name, details in partition_info.items():
+                if part_name != "Free space":
+                    size_mb, start, end, fs_type = details
+                    size_gb = round(size_mb / 1024, 1)
+                    fs_display = fs_type if fs_type else "Unknown"
+                    display_name = f"{part_name} ({size_gb}GB, {fs_display})"
+                    available_partitions.append(display_name)
+                    partition_details[part_name] = {
+                        "size": size_mb,
+                        "fs": fs_type,
+                        "display": display_name,
+                    }
+
+    if not available_partitions:
+        c.message(["No usable partitions found!"], "Error")
+        return None
+
+    # Assignment logic would continue here...
+    # This is a simplified version - you'd need to implement the full
+    # partition assignment interface similar to the GUI version
+
+    selected_disk = list(all_partitions.keys())[0]  # Simplified
+    return {
+        "type": "manual",
+        "disk": selected_disk,
+        "efi": bakery.check_efi(),
+        "partitions": {},  # Would be populated by assignment interface
+    }
 
 
 def user_menu() -> None:
@@ -500,6 +737,16 @@ def summary_confirm(manifest: dict) -> bool:
         " - Autologin     : " + str(manifest["user"]["autologin"]),
     ]
 
+    if manifest["partitions"]:
+        data += [
+            "",
+            "Partitioning:",
+            " - Type : " + manifest["partitions"]["type"],
+            " - Mode : " + manifest["partitions"]["mode"],
+            " - Disk : " + manifest["partitions"]["disk"],
+            " - EFI  : " + ("YES" if manifest["partitions"]["efi"] else "NO"),
+        ]
+
     return c.confirm(
         data,
         "Summary: Confirm",
@@ -520,6 +767,7 @@ def main_menu() -> None:
     locale = None
     keyboard = None
     timezone = None
+    parts = None
     user = None
     while True:
         try:
@@ -540,7 +788,6 @@ def main_menu() -> None:
                 elif DRYRUN:
                     return
             elif stage == 1:
-                locale = None
                 locale = locale_menu()
                 if locale is None:
                     stage = 0
@@ -548,22 +795,25 @@ def main_menu() -> None:
                     stage = 2
                     locale = locale[1]
             elif stage == 2:
-                keyboard = None
                 keyboard = keyboard_menu()
                 stage = 1 if keyboard is None else 3
             elif stage == 3:
-                timezone = None
                 timezone = timezone_menu()
                 stage = 2 if timezone is None else 4
             elif stage == 4:
-                user = None
-                user = user_menu()
-                stage = 3 if user is None else 5
+                if INSTALL_TYPE == "from_iso" or True:
+                    parts = partitioning_menu()
+                    stage = 3 if parts is None else 5
+                else:
+                    stage = 5
             elif stage == 5:
+                user = user_menu()
+                stage = (4 if INSTALL_TYPE == "from_iso" else 3) if user is None else 6
+            elif stage == 6:
                 manifest = {
                     "install_type": {
                         "type": "offline",
-                        "source": bakery.detect_install_source(),
+                        "source": INSTALL_TYPE,
                         "device": bakery.detect_install_device(),
                     },
                     "session_configuration": bakery.detect_session_configuration(),
@@ -577,19 +827,19 @@ def main_menu() -> None:
                         "ui": "tui",
                     },
                     "packages": {},
-                    "partitions": [],
+                    "partitions": parts if parts is not None else [],
                 }
 
-                if manifest["install_type"]["source"] == "from_iso":
+                if INSTALL_TYPE == "from_iso":
                     manifest["packages"]["to_remove"] = config.iso_packages_to_remove
                     manifest["packages"]["de_packages"] = []
 
                 if summary_confirm(manifest):
-                    stage = 6 if install(manifest) else 7
+                    stage = 7 if install(manifest) else 8
                 else:
-                    stage = 4
+                    stage = 5
             else:
-                success = stage == 6
+                success = stage == 7
                 c.message(
                     [
                         "Installation finished!",
