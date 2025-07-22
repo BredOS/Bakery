@@ -19,7 +19,7 @@
 
 import os, sys, time, curses, bakery, pwd
 import argparse, signal, config, re, json
-import subprocess
+import subprocess, parted
 from bakery import lp
 from time import sleep
 from pytz import timezone
@@ -374,11 +374,17 @@ def simple_partitioning_mode(sidebar: dict) -> dict | None:
                     "Partitioning: Confirm Drive Selection",
                     sidebar=sidebar,
                 ):
+                    # Get current partitions and generate new layout
+                    current_partitions = bakery.get_partitions()
+                    disk_partitions = {selected_device: current_partitions.get(selected_device, [])}
+                    new_partitions = bakery.gen_new_partitions(disk_partitions, "erase_all")
+                    
                     return {
                         "type": "guided",
                         "mode": "erase_all",
                         "disk": selected_device,
                         "efi": bakery.check_efi(),
+                        "partitions": new_partitions,
                     }
             else:
                 break
@@ -481,29 +487,165 @@ def manual_partition_assignment(sidebar: dict) -> dict | None:
                 if part_name != "Free space":
                     size_mb, start, end, fs_type = details
                     size_gb = round(size_mb / 1024, 1)
-                    fs_display = fs_type if fs_type else "Unknown"
+                    fs_display = fs_type if fs_type else "Unformatted"
                     display_name = f"{part_name} ({size_gb}GB, {fs_display})"
                     available_partitions.append(display_name)
                     partition_details[part_name] = {
                         "size": size_mb,
                         "fs": fs_type,
                         "display": display_name,
+                        "disk": disk,
                     }
 
     if not available_partitions:
         c.message(["No usable partitions found!"], "Error")
         return None
 
-    # Assignment logic would continue here...
-    # This is a simplified version - you'd need to implement the full
-    # partition assignment interface similar to the GUI version
+    # Partition assignment interface
+    partition_assignments = {}
+    partition_names = list(partition_details.keys())
+    is_efi = bakery.check_efi()
+    
+    # Role options
+    role_options = [
+        "Do not use",
+        "Use as root",
+        "Use as home",
+    ]
+    
+    if is_efi:
+        role_options.insert(1, "Use as boot (EFI)")
+    else:
+        role_options.insert(1, "Use as boot")
+    
+    # Filesystem options
+    fs_options = ["Keep current", "fat32", "ext4", "btrfs", "swap"]
 
-    selected_disk = list(all_partitions.keys())[0]  # Simplified
+    c.message([
+        f"Found {len(available_partitions)} partition(s).",
+        "You will now assign roles to each partition.",
+        "",
+        "Requirements:",
+        f"- {'EFI' if is_efi else 'Boot'} partition: Required for booting",
+        "- Root partition: Required for system installation",
+        "- Home partition: Optional for user data",
+    ], "Partition Assignment")
+
+    # Assign roles to each partition
+    for i, partition_name in enumerate(partition_names):
+        details = partition_details[partition_name]
+        
+        while True:
+            try:
+                # Select role for this partition
+                role_choice = c.selector(
+                    role_options,
+                    False,
+                    f"Partition Assignment: {details['display']}\nSelect role for this partition:",
+                    sidebar=sidebar,
+                )
+                
+                if not isinstance(role_choice, int):
+                    return None  # User canceled
+                
+                role = role_options[role_choice]
+                
+                if role == "Do not use":
+                    partition_assignments[partition_name] = {"fs": None, "mp": "Do not use"}
+                    break
+                
+                # Select filesystem for this partition
+                while True:
+                    try:
+                        fs_choice = c.selector(
+                            fs_options,
+                            False,
+                            f"Partition Assignment: {details['display']}\nRole: {role}\nSelect filesystem:",
+                            sidebar=sidebar,
+                        )
+                        
+                        if not isinstance(fs_choice, int):
+                            break  # Go back to role selection
+                        
+                        fs = fs_options[fs_choice]
+                        
+                        # Validate filesystem choice for role
+                        if role.startswith("Use as boot"):
+                            if fs not in ["Keep current", "fat32"] and (not is_efi or fs != "ext4"):
+                                c.message([
+                                    "Invalid filesystem for boot partition!",
+                                    f"Boot partition must be fat32{' or ext4' if not is_efi else ''}.",
+                                ], "Error")
+                                continue
+                        elif role == "Use as root":
+                            if fs not in ["Keep current", "ext4", "btrfs"]:
+                                c.message([
+                                    "Invalid filesystem for root partition!",
+                                    "Root partition must be ext4 or btrfs.",
+                                ], "Error")
+                                continue
+                        
+                        # Store assignment
+                        if fs == "Keep current":
+                            fs = details["fs"] if details["fs"] else None
+                        
+                        partition_assignments[partition_name] = {"fs": fs, "mp": role}
+                        break
+                        
+                    except KeyboardInterrupt:
+                        break
+                break
+                
+            except KeyboardInterrupt:
+                if i > 0:
+                    # Go back to previous partition
+                    prev_partition = partition_names[i-1]
+                    if prev_partition in partition_assignments:
+                        del partition_assignments[prev_partition]
+                    break
+                else:
+                    return None
+
+    # Validate assignments
+    boot_assigned = False
+    root_assigned = False
+    
+    for part_name, assignment in partition_assignments.items():
+        role = assignment["mp"]
+        if role.startswith("Use as boot"):
+            boot_assigned = True
+        elif role == "Use as root":
+            root_assigned = True
+    
+    if not boot_assigned:
+        c.message([
+            "Error: No boot partition assigned!",
+            f"You must assign a {'EFI' if is_efi else 'boot'} partition.",
+        ], "Validation Error")
+        return None
+    
+    if not root_assigned:
+        c.message([
+            "Error: No root partition assigned!",
+            "You must assign a root partition.",
+        ], "Validation Error")
+        return None
+
+    # Find the primary disk (disk containing root partition)
+    selected_disk = None
+    for part_name, assignment in partition_assignments.items():
+        if assignment["mp"] == "Use as root":
+            selected_disk = partition_details[part_name]["disk"]
+            break
+    
+    if not selected_disk:
+        selected_disk = list(all_partitions.keys())[0]
+
     return {
         "type": "manual",
         "disk": selected_disk,
-        "efi": bakery.check_efi(),
-        "partitions": {},  # Would be populated by assignment interface
+        "efi": is_efi,
+        "partitions": partition_assignments,
     }
 
 
