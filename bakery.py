@@ -24,6 +24,7 @@ from datetime import datetime
 from traceback import print_exception
 from threading import Lock
 from functools import partial, wraps
+from typing import Any
 
 from pyrunning import logging, LogMessage, LoggingHandler, Command, LoggingLevel
 import yaml
@@ -2653,7 +2654,7 @@ def debounce(wait):
 
 
 def time_fn(func: Callable) -> Callable:
-    @functools.wraps(func)
+    @wraps(func)
     def wrapped(*args, **kwargs) -> Any:
         start_time = time.perf_counter()  # More precise than time.time()
         result = func(*args, **kwargs)

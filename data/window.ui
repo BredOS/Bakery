@@ -46,7 +46,7 @@
                                     <property name="orientation">vertical</property>
                                     <child>
                                       <object class="GtkImage">
-                                        <property name="icon-name">application-x-executable</property>
+                                        <property name="icon-name">drive-harddisk</property>
                                         <property name="pixel-size">128</property>
                                       </object>
                                     </child>
@@ -57,6 +57,29 @@
                                     </child>
                                   </object>
                                 </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="online_install">
+                                <property name="child">
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="icon-name">drive-harddisk</property>
+                                        <property name="pixel-size">128</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="label" translatable="yes">Install offline</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                                <property name="focus-on-click">False</property>
+                                <property name="focusable">False</property>
+                                <property name="sensitive">False</property>
                               </object>
                             </child>
                             <child>

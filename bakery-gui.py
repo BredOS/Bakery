@@ -86,6 +86,9 @@ class BakeryApp(Adw.Application):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.connect("activate", self.on_activate)
+        # Force dark mode
+        style_manager = Adw.StyleManager.get_default()
+        style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
         self.css_provider = self.load_css(script_dir + "/data/main.css")
 
     def on_activate(self, app) -> None:
