@@ -29,6 +29,12 @@ done
 if [[ $ui == "gui" || $ui == "tui" ]]; then
     script_name="bakery-$ui.py"
     if [[ -f "$script_dir/$script_name" ]]; then
+        if [[ $ui == "gui" ]]; then
+            #check if mesa-panfork/mesa-panfork-git is installed then export LIBGL_ALWAYS_SOFTWARE=1
+            if pacman -Q mesa-panfork &>/dev/null || pacman -Q mesa-panfork-git &>/dev/null; then
+                export LIBGL_ALWAYS_SOFTWARE=1
+            fi
+        fi
         python "$script_dir/$script_name" "${extra_args[@]}"
     else
         echo "Error: bakery-$ui is not installed"
