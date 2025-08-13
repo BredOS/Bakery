@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
-<!-- Created with Cambalache 0.97.4 -->
+<!-- Created with Cambalache 0.96.1 -->
 <cambalache-project version="0.96.0" target_tk="gtk-4.0">
   <css filename="main.css" is_global="1"/>
-  <ui template-class="BakeryWindow" filename="window.ui" sha256="c5eaa93dbb6557f464b4d7f16edd58f0b30144bda961bff6a38feec55de587b3"/>
+  <ui template-class="BakeryWindow" filename="window.ui" sha256="9d0dd46e3e6b12bdece7aecd10b6914ac84059375bc0f87a60396d379ff5288d"/>
   <ui template-class="partitioning_screen" filename="partitioning_screen.ui" sha256="8907df8e437e70f5016d26efa0e0444cce13d2f0b14c8f2d5484f3318f6816de"/>
   <ui template-class="kb_screen" filename="kb_screen.ui" sha256="7e0860b64c7162284d69aa8f30ca7c76d846a5d4bef749d70676d58d74e56994"/>
   <ui template-class="locale_screen" filename="locale_screen.ui" sha256="31f4ba67e435c431d4d6c8cf73d033e5155e99d81c9a52153005ef873f7fb3b0"/>

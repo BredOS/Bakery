@@ -117,7 +117,7 @@ class BakeryApp(Adw.Application):
         """Callback for the app.about action."""
         about = Adw.AboutWindow(
             transient_for=self.props.active_window,
-            application_name=_("BredOS Installer"),
+            application_name=_("BredOS Installer"), # pyright: ignore[reportCallIssue]
             application_icon="org.bredos.bakery",
             developer_name="BredOS",
             debug_info=self.win.collect_data(show_pass=False),
@@ -125,17 +125,17 @@ class BakeryApp(Adw.Application):
             developers=["Panda <panda@bredos.org>", "bill88t <bill88t@bredos.org>"],
             designers=["Panda <panda@bredos.org>", "DustyDaimler"],
             documenters=["Panda <panda@bredos.org>", "DroidMaster"],
-            translator_credits=_("translator-credits"),
-            copyright=_("Copyright The BredOS developers"),
-            comments=_("Bakery is a simple installer for BredOS"),
+            translator_credits=_("translator-credits"),  # pyright: ignore[reportCallIssue]
+            copyright=_("Copyright The BredOS developers"),  # pyright: ignore[reportCallIssue]
+            comments=_("Bakery is a simple installer for BredOS"),  # pyright: ignore[reportCallIssue]
             license_type=Gtk.License.GPL_3_0,
             website="https://BredOS.org",
             issue_url="https://github.com/BredOS/Bakery/issues",
             support_url="https://discord.gg/jwhxuyKXaa",
         )
-        translators = ["Bill88t", "Panda <panda@bredos.org>"]
-        about.add_credit_section(_("Translated by"), translators)
-        about.add_acknowledgement_section(_("Special thanks to"), ["Shivanandvp"])
+        translators = ["Bill88t  <bill88t@bredos.org>", "Panda <panda@bredos.org>"]
+        about.add_credit_section(_("Translated by"), translators)  # pyright: ignore[reportCallIssue]
+        about.add_acknowledgement_section(_("Special thanks to"), ["Shivanandvp"])  # pyright: ignore[reportCallIssue]
         about.present()
 
     def create_action(self, name, callback, shortcuts=None) -> None:
@@ -227,9 +227,9 @@ class BakeryWindow(Adw.ApplicationWindow):
             self.err_dialog.hide()
             logurl = upload_log()
             if logurl == "error":
-                self.log_dialog.set_heading(_("Log upload failed"))
+                self.log_dialog.set_heading(_("Log upload failed"))  # pyright: ignore[reportCallIssue]
                 self.log_dialog.set_body(
-                    _("The log file could not be uploaded it can still be found at")
+                    _("The log file could not be uploaded it can still be found at")  # pyright: ignore[reportCallIssue]
                     + '<br><a href="file://'
                     + log_path
                     + '">'
@@ -237,9 +237,9 @@ class BakeryWindow(Adw.ApplicationWindow):
                     + "</a>"
                 )
             else:
-                self.log_dialog.set_heading(_("Log uploaded"))
+                self.log_dialog.set_heading(_("Log uploaded"))  # pyright: ignore[reportCallIssue]
                 self.log_dialog.set_body(
-                    _("The log file has been uploaded, you can find it at")
+                    _("The log file has been uploaded, you can find it at")  # pyright: ignore[reportCallIssue]
                     + '\n<a href="'
                     + logurl
                     + '">'
@@ -345,19 +345,19 @@ class BakeryWindow(Adw.ApplicationWindow):
             if self.current_page == self.pages.index("User"):
                 self.next_btn.set_sensitive(False)
                 # start the thread to check when all fields are filled
-                self.next_btn.set_label(_("Next"))
+                self.next_btn.set_label(_("Next"))  # pyright: ignore[reportCallIssue]
                 self.check_thread.start()
             elif self.current_page == self.pages.index("Partitioning"):
                 user_event.set()
                 self.next_btn.set_sensitive(False)
                 # start the thread to check when all fields are filled
-                self.next_btn.set_label(_("Next"))
+                self.next_btn.set_label(_("Next"))  # pyright: ignore[reportCallIssue]
                 self.check_part_thread.start()
             elif self.current_page == self.pages.index("Summary"):
                 user_event.set()
                 all_pages["Summary"].page_shown()
                 # change the next button to install
-                self.next_btn.set_label(_("Install"))
+                self.next_btn.set_label(_("Install"))  # pyright: ignore[reportCallIssue]
                 self.next_btn.set_sensitive(self.current_page < num_pages - 1)
                 self.back_btn.set_sensitive(self.current_page > 0)
             elif self.current_page == self.pages.index("Install"):
@@ -365,7 +365,7 @@ class BakeryWindow(Adw.ApplicationWindow):
                 self.next_btn.set_sensitive(False)
                 self.cancel_btn.set_sensitive(False)
             else:
-                self.next_btn.set_label(_("Next"))
+                self.next_btn.set_label(_("Next"))  # pyright: ignore[reportCallIssue]
                 user_event.set()
                 part_event.set()
                 self.next_btn.set_sensitive(self.current_page < num_pages - 1)
@@ -374,13 +374,13 @@ class BakeryWindow(Adw.ApplicationWindow):
             if self.current_page == self.pages.index("User"):
                 self.next_btn.set_sensitive(False)
                 # start the thread to check when all fields are filled
-                self.next_btn.set_label(_("Next"))
+                self.next_btn.set_label(_("Next"))  # pyright: ignore[reportCallIssue]
                 self.check_thread.start()
             elif self.current_page == self.pages.index("Summary"):
                 user_event.set()
                 all_pages["Summary"].page_shown()
                 # change the next button to install
-                self.next_btn.set_label(_("Install"))
+                self.next_btn.set_label(_("Install"))  # pyright: ignore[reportCallIssue]
                 self.next_btn.set_sensitive(self.current_page < num_pages - 1)
                 self.back_btn.set_sensitive(self.current_page > 0)
             elif self.current_page == self.pages.index("Install"):
@@ -388,7 +388,7 @@ class BakeryWindow(Adw.ApplicationWindow):
                 self.next_btn.set_sensitive(False)
                 self.cancel_btn.set_sensitive(False)
             else:
-                self.next_btn.set_label(_("Next"))
+                self.next_btn.set_label(_("Next"))  # pyright: ignore[reportCallIssue]
                 user_event.set()
                 part_event.set()
                 self.next_btn.set_sensitive(self.current_page < num_pages - 1)
@@ -698,7 +698,7 @@ class locale_screen(Adw.Bin):
         locale_ = bLocale.parse(the_locale)
         date = dates.format_date(date=datetime.utcnow(), format="full", locale=locale_)
         time = dates.format_time(time=datetime.utcnow(), format="long", locale=locale_)
-        currency = numbers.get_territory_currencies(locale_.territory)[0]
+        currency = numbers.get_territory_currencies(locale_.territory)[0] 
         currency_format = numbers.format_currency(1234.56, currency, locale=locale_)
         number_format = numbers.format_decimal(1234567.89, locale=locale_)
         self.date_preview.set_label(time + "  -  " + date)
@@ -772,7 +772,7 @@ class InstallThread(threading.Thread):
             self.window.back_btn.set_visible(False)
             self.window.next_btn.disconnect_by_func(self.window.on_install_btn_clicked)
             self.window.next_btn.connect("clicked", self.window.on_done_clicked)
-            self.window.next_btn.set_label(_("Reboot"))
+            self.window.next_btn.set_label(_("Reboot"))  # pyright: ignore[reportCallIssue]
         else:
             GLib.timeout_add(500, self.window.err_dialog.present)
 
@@ -988,7 +988,7 @@ class timezone_screen(Adw.Bin):
         if tz is not None:
             time = datetime.now(tz)
             self.curr_time.set_label(time.strftime("%Y-%m-%d %H:%M:%S"))
-            self.preview_row.set_subtitle(_("Previewing time in ") + str(tz))
+            self.preview_row.set_subtitle(_("Previewing time in ") + str(tz))  # pyright: ignore[reportCallIssue]
 
 
 @Gtk.Template.from_file(script_dir + "/data/de_screen.ui")
@@ -1178,9 +1178,9 @@ class partitioning_screen(Adw.Bin):
         self.is_efi = check_efi()
         self.device = detect_install_device()
         if self.is_efi:
-            self.sys_type.set_label(_("System type: ") + "UEFI")
+            self.sys_type.set_label(_("System type: ") + "UEFI")  # pyright: ignore[reportCallIssue]
         else:
-            self.sys_type.set_label(_("System type: ") + "BIOS")
+            self.sys_type.set_label(_("System type: ") + "BIOS")  # pyright: ignore[reportCallIssue]
         self.first_run = True
         self.new_first_run = True
 
@@ -1192,7 +1192,7 @@ class partitioning_screen(Adw.Bin):
         for disk in self.disks:
             self.disk_model.append(disk + ": " + self.disks[disk])
         partition_table = check_partition_table(self.disk)
-        self.part_table.set_label(_("Partition table: ") + str(partition_table))
+        self.part_table.set_label(_("Partition table: ") + str(partition_table))  # pyright: ignore[reportCallIssue]
         self.partitions = {}
         self.partitions[self.disk] = self.all_partitions[self.disk]
         self.populate_available_parts(self.partitions)
@@ -1227,10 +1227,28 @@ class partitioning_screen(Adw.Bin):
         self.populate_disk_preview(self.partitions)
 
     def on_term_button_clicked(self, button) -> None:
-        try:
-            lrun(["gtk-open", "org.gnome.Terminal"], wait=False, force=True)
-        except:
-            lrun(["gtk-launch", "kgx"], wait=False, force=True)
+        # List of common terminal applications to try
+        terminals = [
+            "gnome-terminal",
+            "konsole", 
+            "xfce4-terminal",
+            "mate-terminal",
+            "terminator",
+            "tilix",
+            "alacritty",
+            "kitty",
+            "xterm",
+            "kgx"  # GNOME Console
+        ]
+        
+        # Try each terminal until one works
+        for terminal in terminals:
+            try:
+                lrun([terminal], wait=False, force=True)
+                return
+            except:
+                continue
+        
 
     def on_gparted_button_clicked(self, button) -> None:
         lrun(["gparted"], wait=False, force=True)
@@ -1413,8 +1431,8 @@ class partitioning_screen(Adw.Bin):
             size_str = f"{real_size / 1024:.2f} GB"
 
         size_label = Gtk.Label(
-            label=f'<span foreground="black">{size_str}</span>'
-        )  # Set color to 'black'
+            label=f'<span foreground="white">{size_str}</span>'
+        )  # Set color to 'white'
         size_label.set_xalign(0)
         size_label.set_use_markup(True)
         try:
@@ -1422,13 +1440,13 @@ class partitioning_screen(Adw.Bin):
         except:
             pass
         label = Gtk.Label(
-            label=f'<span foreground="black">{name}</span>'
-        )  # Set color to 'black'
+            label=f'<span foreground="white">{name}</span>'
+        )  # Set color to 'white'
         label.set_xalign(0)
         label.set_use_markup(True)
 
         fstype_label = Gtk.Label(
-            label=f'<span foreground="black">{fstype if fstype else "Unknown"}</span>'
+            label=f'<span foreground="white">{fstype if fstype else "Unknown"}</span>'
         )
         fstype_label.set_xalign(0)
         fstype_label.set_use_markup(True)

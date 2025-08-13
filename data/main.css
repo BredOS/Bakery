@@ -2,7 +2,7 @@
     border-right: none;
 }
 
-.color1 {
+/* .color1 {
     background-color: #f2dede; 
 }
 
@@ -60,6 +60,66 @@
 
 .color15 {
     background-color: #e8ecef;
+} */
+
+.color1 {
+    background-color: #d9bcbc; 
+}
+
+.color2 {
+    background-color: #b7d0b3;
+}
+
+.color3 {
+    background-color: #a8cce5;
+}
+
+.color4 {
+    background-color: #e6d08c;
+}
+
+.color5 {
+    background-color: #c2b8d3;
+}
+
+.color6 {
+    background-color: #e5b88a;
+}
+
+.color7 {
+    background-color: #c7d1b0; 
+}
+
+.color8 {
+    background-color: #d6b8db;
+}
+
+.color9 {
+    background-color: #e59bbf; 
+}
+
+.color10 {
+    background-color: #b5a6d0;
+}
+
+.color11 {
+    background-color: #e6c57a;
+}
+
+.color12 {
+    background-color: #b4d88f;
+}
+
+.color13 {
+    background-color: #96d596;
+}
+
+.color14 {
+    background-color: #d8b5b8;
+}
+
+.color15 {
+    background-color: #b6c0c7;
 }
 
 .partition-box {

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.97.4 -->
+<!-- Created with Cambalache 0.96.1 -->
 <interface domain="bakery">
   <!-- interface-name window.ui -->
   <requires lib="gio" version="2.44"/>
@@ -66,13 +66,13 @@
                                     <property name="orientation">vertical</property>
                                     <child>
                                       <object class="GtkImage">
-                                        <property name="icon-name">drive-harddisk</property>
+                                        <property name="icon-name">drive-multidisk</property>
                                         <property name="pixel-size">128</property>
                                       </object>
                                     </child>
                                     <child>
                                       <object class="GtkLabel">
-                                        <property name="label" translatable="yes">Install offline</property>
+                                        <property name="label" translatable="yes">Install online</property>
                                       </object>
                                     </child>
                                   </object>
@@ -100,6 +100,7 @@
                                     </child>
                                   </object>
                                 </property>
+                                <property name="sensitive">False</property>
                                 <property name="visible">False</property>
                               </object>
                             </child>
@@ -315,24 +316,6 @@
       </object>
     </property>
     <property name="message-type">question</property>
-  </object>
-  <object class="GtkButton">
-    <property name="child">
-      <object class="GtkBox" id="online_install">
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkImage">
-            <property name="icon-name">application-x-executable</property>
-            <property name="pixel-size">128</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="label" translatable="yes">Install online</property>
-          </object>
-        </child>
-      </object>
-    </property>
   </object>
   <object class="AdwMessageDialog" id="install_cancel">
     <property name="body" translatable="yes">Are you sure you want to cancel your installation?</property>
