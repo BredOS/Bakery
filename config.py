@@ -23,7 +23,6 @@ def pages(_):
 #    "Partitioning",
 
 offline_pages_on_dev = [
-    "Partitioning",
     "Locale",
     "Keyboard",
     "Timezone",
