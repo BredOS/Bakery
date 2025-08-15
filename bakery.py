@@ -34,6 +34,7 @@ from gi.repository import GLib, NM
 
 import config
 
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
 # Config functions
 
@@ -1355,7 +1356,17 @@ def ensure_localdb(retries: int = 3) -> None:
         tried += 1
     if not len(os.listdir("/var/lib/pacman/sync/")):
         raise OSError("Could not update databases.")
+    
 
+@catch_exceptions
+def get_packages_list() -> dict:
+    """
+    Returns netinstall list of packages.
+    """
+    
+    with open(script_dir + "/data/packages.yaml", "r") as f:
+        return yaml.safe_load(f)
+    
 
 @catch_exceptions
 def package_desc(packages: list) -> dict:

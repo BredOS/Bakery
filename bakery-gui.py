@@ -27,6 +27,7 @@ from os import path
 import threading
 import locale
 import gettext
+import platform
 import bakery
 from bakery import (
     dryrun,
@@ -58,6 +59,7 @@ from bakery import (
     upload_log,
     log_path,
     time_fn,
+    get_packages_list,
 )
 from time import sleep
 from datetime import datetime
@@ -193,7 +195,7 @@ class BakeryWindow(Adw.ApplicationWindow):
     main_page = Gtk.Template.Child()
     install_page = Gtk.Template.Child()
     offline_install = Gtk.Template.Child()
-    # online_install = Gtk.Template.Child()
+    online_install = Gtk.Template.Child()
     custom_install = Gtk.Template.Child()
     install_cancel = Gtk.Template.Child()
     install_confirm = Gtk.Template.Child()
@@ -211,7 +213,7 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.install_source = detect_install_source()
         self.install_device = detect_install_device()
         self.session_configuration = detect_session_configuration()
-        # self.online_install.connect("clicked", self.main_button_clicked)
+        self.online_install.connect("clicked", self.main_button_clicked)
         self.offline_install.connect("clicked", self.main_button_clicked)
         self.custom_install.connect("clicked", self.main_button_clicked)
         self.cancel_dialog.connect("response", self.on_cancel_dialog_response)
@@ -266,8 +268,8 @@ class BakeryWindow(Adw.ApplicationWindow):
     def main_button_clicked(self, button) -> None:
         if button == self.offline_install:
             self.init_screens("offline")
-        # elif button == self.online_install:
-        #     self.init_screens("online")
+        elif button == self.online_install:
+            self.init_screens("online")
         elif button == self.custom_install:
             self.init_screens("custom")
 
@@ -999,7 +1001,7 @@ class de_screen(Adw.Bin):
         super().__init__(**kwargs)
         self.window = window
 
-
+       
 @Gtk.Template.from_file(script_dir + "/data/summary_screen.ui")
 class summary_screen(Adw.Bin):
     __gtype_name__ = "summary_screen"
@@ -1658,6 +1660,439 @@ class install_screen(Adw.Bin):
                         )
                     )
                 )
+
+@Gtk.Template.from_file(script_dir + "/data/packages_screen.ui")
+class packages_screen(Gtk.Box):
+    __gtype_name__ = "packages_screen"
+
+    packages_box = Gtk.Template.Child()
+    
+    def __init__(self, window, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.window = window
+        lp("Initializing packages screen", "info")
+        
+        # Get current architecture
+        self.current_arch = platform.machine()
+        lp(f"Current architecture: {self.current_arch}", "debug")
+        
+        # Load packages data
+        self.packages = get_packages_list()
+        lp(f"Loaded {len(self.packages) if isinstance(self.packages, list) else 1} top-level package groups", "info")
+        
+        # State tracking
+        self.selection_state = {}  # key -> bool (selected state)
+        self.checkboxes = {}       # key -> Gtk.CheckButton
+        self.group_hierarchy = {}  # group_key -> {"packages": [pkg_keys], "subgroups": [grp_keys]}
+        self.parent_map = {}       # child_key -> parent_key
+        self._updating = False     # prevent signal loops during programmatic updates
+        
+        # Package tracking
+        self.package_metadata = {}  # pkg_key -> {"name": str, "post_install": str}
+        self.group_metadata = {}    # grp_key -> {"post_install": str}
+        
+        # Build and show UI
+        self._build_ui()
+        lp("Package screen initialization complete", "info")
+    
+
+    def _escape_html(self, s, quote=True):
+        """
+        Replace special characters "&", "<" and ">" to HTML-safe sequences.
+        If the optional flag quote is true (the default), the quotation mark
+        characters, both double quote (") and single quote (') characters are also
+        translated.
+        """
+        s = s.replace("&", "&amp;") # Must be done first!
+        s = s.replace("<", "&lt;")
+        s = s.replace(">", "&gt;")
+        if quote:
+            s = s.replace('"', "&quot;")
+            s = s.replace('\'', "&#x27;")
+        return s
+
+    def _build_ui(self):
+        """Build the complete package selection UI"""
+        lp("Building package selection UI", "info")
+        
+        # Create main container with margins directly in packages_box
+        vbox = Gtk.Box.new(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        vbox.set_margin_top(margin=12)
+        vbox.set_margin_end(margin=12)
+        vbox.set_margin_bottom(margin=12)
+        vbox.set_margin_start(margin=12)
+        vbox.set_vexpand(True)
+        vbox.set_hexpand(True)
+        self.packages_box.append(vbox)
+
+        # Create scrolled window for the list box
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.set_vexpand(True)
+        scrolled_window.set_hexpand(True)
+        scrolled_window.set_size_request(800, 420)  # Set default size 420 nice
+        vbox.append(scrolled_window)
+
+        # Create the list box for expander rows
+        self.list_box = Gtk.ListBox.new()
+        self.list_box.set_selection_mode(mode=Gtk.SelectionMode.NONE)
+        self.list_box.add_css_class(css_class='boxed-list')
+        scrolled_window.set_child(self.list_box)
+
+        # Process top-level groups (filter by architecture)
+        groups = self.packages if isinstance(self.packages, list) else [self.packages]
+        for grp_data in groups:
+            if self._is_valid_group(grp_data) and self._is_arch_compatible(grp_data):
+                row = self._create_group_row(grp_data, [])
+                if row:
+                    self.list_box.append(child=row)
+        
+        lp(f"Built UI with {len([g for g in groups if self._is_arch_compatible(g)])} top-level groups", "info")
+
+    def _is_valid_group(self, data):
+        """Check if group data is valid"""
+        return isinstance(data, dict) and data.get("name")
+
+    def _create_group_row(self, group_data, parent_path):
+        """Create a group row with packages and subgroups"""
+        name = group_data.get("name", "Unnamed")
+        description = group_data.get("description", "")
+        current_path = parent_path + [name]
+        group_key = self._make_group_key(current_path)
+        
+        lp(f"Creating group row: {name}", "debug")
+        
+        # Initialize group in hierarchy
+        self.group_hierarchy[group_key] = {"packages": [], "subgroups": []}
+        
+        # Store group metadata including post-install
+        post_install = group_data.get("post-install")
+        if post_install:
+            self.group_metadata[group_key] = {"post_install": post_install}
+        
+        # Create the expander row
+        expander_row = Adw.ExpanderRow.new()
+        expander_row.set_title(title=name)
+        
+        # Add icon if specified
+        icon_name = group_data.get("icon")
+        if icon_name:
+            icon = Gtk.Image.new_from_icon_name(icon_name)
+            expander_row.add_prefix(widget=icon)
+        
+        if description:
+            # Escape HTML entities to prevent markup errors
+            safe_description = self._escape_html(description)
+            expander_row.set_subtitle(subtitle=safe_description)
+        
+        # Add group checkbox if not marked as noncheckable
+        if not group_data.get("noncheckable", False):
+            checkbox = self._create_group_checkbox(group_data, group_key)
+            expander_row.add_suffix(widget=checkbox)
+        
+        # Add packages as child rows (filter by architecture)
+        packages = group_data.get("packages", [])
+        for pkg_data in packages:
+            if self._is_valid_package(pkg_data) and self._is_arch_compatible(pkg_data):
+                pkg_row = self._create_package_row(pkg_data, current_path, group_key)
+                if pkg_row:
+                    expander_row.add_row(child=pkg_row)
+        
+        # Add subgroups as nested expander rows (filter by architecture)
+        subgroups = group_data.get("subgroups", [])
+        for sub_data in subgroups:
+            if self._is_valid_group(sub_data) and self._is_arch_compatible(sub_data):
+                sub_row = self._create_group_row(sub_data, current_path)
+                if sub_row:
+                    sub_key = self._make_group_key(current_path + [sub_data.get("name", "Unnamed")])
+                    self.group_hierarchy[group_key]["subgroups"].append(sub_key)
+                    self.parent_map[sub_key] = group_key
+                    expander_row.add_row(child=sub_row)
+        
+        # Set initial expansion state
+        expander_row.set_expanded(group_data.get("expanded", False))
+        
+        # Update group checkbox state after adding all children
+        if group_key in self.checkboxes:
+            self._update_group_checkbox(group_key)
+        
+        lp(f"Created group '{name}' with {len([p for p in packages if self._is_arch_compatible(p)])} packages and {len([s for s in subgroups if self._is_arch_compatible(s)])} subgroups", "debug")
+        return expander_row
+
+    def _is_valid_package(self, data):
+        """Check if package data is valid"""
+        if isinstance(data, str):
+            return True
+        return isinstance(data, dict) and data.get("name")
+
+    def _create_package_row(self, pkg_data, parent_path, group_key):
+        """Create a package row with checkbox"""
+        # Normalize package data
+        if isinstance(pkg_data, str):
+            name = pkg_data
+            description = ""
+            selected = False
+            immutable = False
+            post_install = None
+        else:
+            name = pkg_data.get("name", "")
+            description = pkg_data.get("description", "")
+            selected = pkg_data.get("selected", False)
+            immutable = pkg_data.get("immutable", False) or pkg_data.get("critical", False)
+            post_install = pkg_data.get("post-install")
+        
+        if not name:
+            return None
+        
+        pkg_key = self._make_package_key(parent_path, name)
+        
+        # Store package metadata including post-install
+        self.package_metadata[pkg_key] = {
+            "name": name,
+            "post_install": post_install
+        }
+        
+        # Add to group hierarchy
+        self.group_hierarchy[group_key]["packages"].append(pkg_key)
+        self.parent_map[pkg_key] = group_key
+        
+        # Create action row
+        action_row = Adw.ActionRow.new()
+        action_row.set_title(title=name)
+        
+        if description:
+            safe_description = self._escape_html(description)
+            action_row.set_subtitle(subtitle=safe_description)
+        
+        # Create checkbox
+        checkbox = Gtk.CheckButton.new()
+        checkbox.set_active(selected)
+        checkbox.set_sensitive(not immutable)
+        
+        # Store state and checkbox
+        self.selection_state[pkg_key] = selected
+        self.checkboxes[pkg_key] = checkbox
+        
+        # Connect signal
+        checkbox.connect("toggled", self._on_package_toggled, pkg_key)
+        
+        # Make row activatable and add checkbox
+        action_row.add_suffix(widget=checkbox)
+        action_row.set_activatable_widget(checkbox)
+        
+        return action_row
+
+    def _create_group_checkbox(self, group_data, group_key):
+        """Create checkbox for group"""
+        checkbox = Gtk.CheckButton.new()
+        selected = group_data.get("selected", False)
+        immutable = group_data.get("immutable", False) or group_data.get("critical", False)
+        
+        checkbox.set_active(selected)
+        checkbox.set_sensitive(not immutable)
+        
+        # Store state and checkbox
+        self.selection_state[group_key] = selected
+        self.checkboxes[group_key] = checkbox
+        
+        # Connect signal
+        checkbox.connect("toggled", self._on_group_toggled, group_key)
+        
+        return checkbox
+
+    def _make_group_key(self, path):
+        """Create unique key for group"""
+        return "grp:" + "/".join(path)
+
+    def _make_package_key(self, path, name):
+        """Create unique key for package"""
+        return "pkg:" + "/".join(path + [name])
+
+    def _on_package_toggled(self, checkbox, pkg_key):
+        """Handle package checkbox toggle"""
+        if self._updating:
+            return
+        
+        active = checkbox.get_active()
+        self.selection_state[pkg_key] = active
+        
+        pkg_name = pkg_key.split("/")[-1]
+        lp(f"Package '{pkg_name}' toggled to: {active}", "debug")
+        
+        # Print complete package selection state
+        metadata = self.get_selected_packages_with_metadata()
+        lp(f"Complete package selection state: {metadata}", "info")
+        
+        # Update parent groups
+        self._update_parent_groups(pkg_key)
+
+    def _on_group_toggled(self, checkbox, group_key):
+        """Handle group checkbox toggle"""
+        if self._updating:
+            return
+        
+        active = checkbox.get_active()
+        
+        grp_name = group_key.split("/")[-1]
+        lp(f"Group '{grp_name}' toggled to: {active}", "debug")
+        
+        # Set all children to same state
+        self._set_group_descendants(group_key, active)
+        
+        # Print complete package selection state after group change
+        metadata = self.get_selected_packages_with_metadata()
+        lp(f"Complete package selection state after group toggle: {metadata}", "info")
+        
+        # Update parent groups
+        self._update_parent_groups(group_key)
+
+    def _set_group_descendants(self, group_key, selected):
+        """Set selection state for all descendants of a group"""
+        self._updating = True
+        try:
+            hierarchy = self.group_hierarchy.get(group_key, {})
+            
+            # Update packages
+            for pkg_key in hierarchy.get("packages", []):
+                checkbox = self.checkboxes.get(pkg_key)
+                if checkbox and checkbox.get_sensitive():
+                    checkbox.set_active(selected)
+                    self.selection_state[pkg_key] = selected
+            
+            # Update subgroups recursively
+            for sub_key in hierarchy.get("subgroups", []):
+                checkbox = self.checkboxes.get(sub_key)
+                if checkbox and checkbox.get_sensitive():
+                    checkbox.set_active(selected)
+                    self.selection_state[sub_key] = selected
+                self._set_group_descendants(sub_key, selected)
+        finally:
+            self._updating = False
+
+    def _update_parent_groups(self, child_key):
+        """Update parent group checkboxes based on children state"""
+        parent_key = self.parent_map.get(child_key)
+        if not parent_key:
+            return
+        
+        self._update_group_checkbox(parent_key)
+        self._update_parent_groups(parent_key)  # Recurse up
+
+    def _update_group_checkbox(self, group_key):
+        """Update group checkbox state based on children"""
+        checkbox = self.checkboxes.get(group_key)
+        if not checkbox:
+            return
+        
+        hierarchy = self.group_hierarchy.get(group_key, {})
+        all_children = hierarchy.get("packages", []) + hierarchy.get("subgroups", [])
+        
+        if not all_children:
+            return
+        
+        # Count selected children
+        selected_count = 0
+        total_count = 0
+        
+        for child_key in all_children:
+            child_checkbox = self.checkboxes.get(child_key)
+            if child_checkbox and child_checkbox.get_sensitive():
+                total_count += 1
+                if self.selection_state.get(child_key, False):
+                    selected_count += 1
+        
+        if total_count == 0:
+            return
+        
+        self._updating = True
+        try:
+            if selected_count == 0:
+                checkbox.set_inconsistent(False)
+                checkbox.set_active(False)
+                self.selection_state[group_key] = False
+            elif selected_count == total_count:
+                checkbox.set_inconsistent(False)
+                checkbox.set_active(True)
+                self.selection_state[group_key] = True
+            else:
+                checkbox.set_inconsistent(True)
+                self.selection_state[group_key] = False
+        finally:
+            self._updating = False
+
+    def get_selected_packages_with_metadata(self):
+        """Get selected packages and post-install scripts"""
+        selected_packages = []
+        post_install_scripts = []
+        
+        # Collect selected packages
+        for key, is_selected in self.selection_state.items():
+            if key.startswith("pkg:") and is_selected:
+                metadata = self.package_metadata.get(key, {})
+                pkg_name = metadata.get("name", key.split("/")[-1])
+                selected_packages.append(pkg_name)
+                
+                # Add post-install script if exists
+                post_install = metadata.get("post_install")
+                if post_install:
+                    post_install_scripts.append(post_install)
+        
+        # Collect post-install scripts from selected groups
+        for key, is_selected in self.selection_state.items():
+            if key.startswith("grp:") and is_selected:
+                metadata = self.group_metadata.get(key, {})
+                post_install = metadata.get("post_install")
+                if post_install:
+                    post_install_scripts.append(post_install)
+        
+        # Remove duplicates while preserving order
+        unique_packages = list(dict.fromkeys(selected_packages))
+        unique_scripts = list(dict.fromkeys(post_install_scripts))
+        
+        lp(f"Selected {len(unique_packages)} packages with {len(unique_scripts)} post-install scripts", "info")
+        
+        return {
+            "packages": sorted(unique_packages),
+            "post_install_scripts": unique_scripts
+        }
+
+    def get_selected_packages(self):
+        """Get list of selected package names (backward compatibility)"""
+        metadata = self.get_selected_packages_with_metadata()
+        result = metadata["packages"]
+        
+        # Print the current list of selected packages
+        print(f"\n=== SELECTED PACKAGES ({len(result)}) ===")
+        for i, pkg in enumerate(result, 1):
+            print(f"{i:3d}. {pkg}")
+        print("=" * 40)
+        
+        # Print post-install scripts if any
+        scripts = metadata["post_install_scripts"]
+        if scripts:
+            print(f"\n=== POST-INSTALL SCRIPTS ({len(scripts)}) ===")
+            for i, script in enumerate(scripts, 1):
+                print(f"{i:3d}. {script}")
+            print("=" * 40)
+        
+        return result
+
+    def _is_arch_compatible(self, item_data):
+        """Check if package/group is compatible with current architecture"""
+        if not isinstance(item_data, dict):
+            return True  # String packages have no arch restrictions
+        
+        required_arch = item_data.get("arch")
+        if not required_arch:
+            return True  # No arch restriction means compatible with all
+        
+        # Handle both single arch and list of arches
+        if isinstance(required_arch, str):
+            required_archs = [required_arch]
+        else:
+            required_archs = required_arch
+        
+        return self.current_arch in required_archs
 
 
 @Gtk.Template.from_file(script_dir + "/data/finish_screen.ui")

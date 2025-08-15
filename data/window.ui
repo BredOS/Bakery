@@ -79,7 +79,6 @@
                                 </property>
                                 <property name="focus-on-click">False</property>
                                 <property name="focusable">False</property>
-                                <property name="sensitive">False</property>
                               </object>
                             </child>
                             <child>
