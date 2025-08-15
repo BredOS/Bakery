@@ -466,6 +466,10 @@ class BakeryWindow(Adw.ApplicationWindow):
                 data["partitions"] = all_pages["Partitioning"].collect_data()
             except:
                 data["partitions"] = []
+            if self.install_type == "online":
+                data["packages"]["extra_to_install"] = all_pages["Packages"].collect_data()
+                data["packages"]["de_packages"] = []
+
             return data
         else:
             return {"install_type": "None"}
@@ -496,6 +500,7 @@ class BakeryWindow(Adw.ApplicationWindow):
                 self.steps_box.remove(sep)
         self.step_separators = []
         self.step_circles = []  # Store circle buttons
+        self.step_names = []    # Store name labels
 
         pages_dict = config.pages(_)
         num_pages = len(self.pages)
@@ -535,6 +540,7 @@ class BakeryWindow(Adw.ApplicationWindow):
             name_label.set_halign(Gtk.Align.CENTER)
             name_label.set_valign(Gtk.Align.CENTER)
             step_container.append(name_label)
+            self.step_names.append(name_label)  # Store reference
 
             circle_button = Gtk.Button(label="")
             circle_button.set_can_target(False)
@@ -586,6 +592,12 @@ class BakeryWindow(Adw.ApplicationWindow):
                     sep_ctx.add_class("separator-current")
                 else:
                     sep_ctx.add_class("separator-inactive")
+            # Update name label style for current step
+            name_label = self.step_names[i]
+            name_ctx = name_label.get_style_context()
+            name_ctx.remove_class("current-step-name")
+            if i == self.current_page:
+                name_ctx.add_class("current-step-name")
 
     def init_screens(self, install_type) -> None:
         if install_type == "online":
