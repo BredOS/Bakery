@@ -13,6 +13,7 @@ def pages(_):
         "Timezone": ["timezone_screen", _("Timezone")],
         "User": ["user_screen", _("User")],
         "Desktops": ["de_screen", _("Desktops")],
+        "Packages": ["packages_screen", _("Packages")],
         "Partitioning": ["partitioning_screen", _("Partitions")],
         "Summary": ["summary_screen", _("Summary")],
         "Install": ["install_screen", _("Install")],
@@ -32,11 +33,13 @@ offline_pages_on_dev = [
     "Finish",
 ]
 online_pages_on_dev = [
+        "Packages",
+    "Desktops",
+
     "Locale",
     "Keyboard",
     "Timezone",
     "User",
-    "Desktops",
     "Summary",
     "Install",
     "Finish",

@@ -139,3 +139,96 @@
 .partition-box.selected {
     box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5);
 }
+
+.step-indicator-container {
+    margin: 0 8px;
+}
+
+.step-name {
+    font-size: 0.85em;
+    color: #deddda;
+    margin-top: 4px;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.step-line {
+    background: #77767b;
+    opacity: 0.5;
+    border: none;
+    margin: 4px 0 0 0;
+    z-index: 0;
+}
+
+/* Step indicator circle styles */
+.circular {
+    border-radius: 50%;
+    min-width: 24px;
+    min-height: 24px;
+    background: #222;
+    color: transparent;
+    border: 2px solid #808080;
+    margin: 0px;
+    box-shadow: none;
+    transition: border-color 0.2s, background 0.2s;
+    padding: 0;
+    position: relative;
+    /* For stacking pseudo-elements */
+    overflow: visible;
+}
+
+/* Completed step: blue fill, blue ring (outer border) */
+.completed-step {
+    background: #3584e4;
+    border: 2px solid #3584e4;
+    z-index: 2;
+}
+
+/* Current step: blue wave fill, gray border */
+.current-step {
+    border: 4px solid #808080;
+    background: #3584e4;
+    /* Simulate a wave: bottom half blue, top half gray */
+    position: relative;
+    z-index: 3;
+}
+
+/* Optionally, add a subtle "wave" border on current step */
+.current-step::after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    border-bottom: 2px solid #3584e4;
+    /* This adds a blue "wave" at the bottom edge */
+    pointer-events: none;
+}
+
+/* Uncompleted step: fully gray */
+.inactive-step {
+    background: linear-gradient(to top, #222 50%, #222 50%);
+    position: relative;
+    border: 4px solid #808080;
+}
+
+/* Separator styles between circles */
+.step-separator {
+    min-width: 15px;
+    min-height: 4px;
+    background: #808080;
+    border-radius: 2px;
+}
+
+.separator-completed {
+    background: #3584e4;
+}
+
+.separator-current {
+    background: #3584e4;
+}
+
+.separator-inactive {
+    background: #808080;
+}

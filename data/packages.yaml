@@ -218,7 +218,7 @@
   description: Behind-the-scenes working of your Operating System
   noncheckable: true
   expanded: false
-  selected: false
+  selected: true
   icon: applications-system-symbolic
   packages:
     - name: base-devel

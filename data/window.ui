@@ -119,44 +119,6 @@
                 <property name="child">
                   <object class="GtkBox">
                     <child>
-                      <object class="AdwStatusPage">
-                        <property name="child">
-                          <object class="GtkBox">
-                            <property name="height-request">0</property>
-                            <property name="orientation">vertical</property>
-                            <property name="vexpand">True</property>
-                            <child>
-                              <object class="GtkStackSidebar" id="stack1_sidebar">
-                                <property name="can-focus">False</property>
-                                <property name="can-target">False</property>
-                                <property name="focus-on-click">False</property>
-                                <property name="height-request">440</property>
-                                <property name="stack">stack1</property>
-                                <property name="valign">start</property>
-                                <property name="vexpand">True</property>
-                                <property name="width-request">40</property>
-                                <style>
-                                  <class name="rm-border"/>
-                                </style>
-                              </object>
-                            </child>
-                          </object>
-                        </property>
-                        <property name="icon-name">org.bredos.bakery-big</property>
-                        <style>
-                          <class name="compact"/>
-                          <class name="add-border"/>
-                        </style>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkSeparator">
-                        <style>
-                          <class name=".vertical"/>
-                        </style>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkBox">
                         <property name="orientation">vertical</property>
                         <child>
@@ -166,33 +128,37 @@
                         </child>
                         <child>
                           <object class="GtkBox" id="button_box">
-                            <property name="halign">end</property>
-                            <property name="margin-bottom">5</property>
-                            <property name="margin-end">5</property>
+                            <property name="margin-bottom">12</property>
+                            <property name="margin-end">12</property>
+                            <property name="margin-start">12</property>
                             <property name="margin-top">5</property>
-                            <property name="spacing">5</property>
                             <property name="valign">end</property>
                             <child>
-                              <object class="GtkButton" id="cancel_btn">
-                                <property name="halign">end</property>
-                                <property name="label" translatable="yes" context="Button&#10;">Cancel</property>
+                              <object class="GtkButton" id="back_btn">
+                                <property name="halign">start</property>
+                                <property name="hexpand">True</property>
+                                <property name="label" translatable="yes" context="Button">Back</property>
                                 <property name="valign">end</property>
-                                <property name="vexpand">True</property>
-                                <style>
-                                  <class name="destructive-action"/>
-                                </style>
+                                <style/>
                               </object>
                             </child>
                             <child>
-                              <object class="GtkButton" id="back_btn">
-                                <property name="label" translatable="yes" context="Button">Back</property>
-                                <style/>
+                              <object class="GtkBox" id="steps_box">
+                                <property name="halign">start</property>
+                                <property name="hexpand">True</property>
+                                <property name="homogeneous">True</property>
+                                <property name="margin-bottom">10</property>
+                                <property name="valign">center</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkButton" id="next_btn">
+                                <property name="halign">end</property>
                                 <property name="label" translatable="yes" context="Button">Next</property>
-                                <style/>
+                                <property name="valign">end</property>
+                                <style>
+                                  <class name="suggested-action"/>
+                                </style>
                               </object>
                             </child>
                             <child>
@@ -216,7 +182,9 @@
                                 </child>
                               </object>
                             </child>
-                            <style/>
+                            <style>
+                              <class name="."/>
+                            </style>
                           </object>
                         </child>
                       </object>
@@ -241,81 +209,6 @@
       <attribute name="about_menu_item">name</attribute>
     </item>
   </menu>
-  <object class="GtkMessageDialog" id="custom_install_window">
-    <property name="child">
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="justify">center</property>
-            <property name="label" translatable="yes" comments="Dont change the bakery_recipe.conf name">You selected custom installation. Please provide a URL or PATH to the Bakery_recipe.conf</property>
-            <property name="lines">3</property>
-            <property name="margin-bottom">10</property>
-            <property name="margin-end">10</property>
-            <property name="margin-start">10</property>
-            <property name="margin-top">20</property>
-            <property name="natural-wrap-mode">word</property>
-            <property name="wrap">True</property>
-            <style/>
-          </object>
-        </child>
-        <child>
-          <object class="GtkGrid">
-            <property name="margin-end">10</property>
-            <property name="margin-start">10</property>
-            <property name="valign">center</property>
-            <property name="vexpand">True</property>
-            <child>
-              <object class="GtkEntry">
-                <property name="hexpand">True</property>
-                <layout>
-                  <property name="column">0</property>
-                  <property name="column-span">1</property>
-                  <property name="row">0</property>
-                  <property name="row-span">1</property>
-                </layout>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="child">
-                  <object class="AdwButtonContent">
-                    <property name="icon-name">document-open-symbolic</property>
-                    <property name="label" translatable="yes" context="button">Open File</property>
-                  </object>
-                </property>
-                <property name="halign">end</property>
-                <property name="valign">end</property>
-                <layout>
-                  <property name="column">1</property>
-                  <property name="column-span">1</property>
-                  <property name="row">0</property>
-                  <property name="row-span">1</property>
-                </layout>
-              </object>
-            </child>
-            <style>
-              <class name="linked"/>
-            </style>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="custom_install_window_done">
-            <property name="halign">end</property>
-            <property name="label" translatable="yes" comments="done button">Done</property>
-            <property name="margin-bottom">10</property>
-            <property name="margin-end">10</property>
-            <property name="valign">end</property>
-            <property name="vexpand">True</property>
-            <style>
-              <class name="suggested-action"/>
-            </style>
-          </object>
-        </child>
-      </object>
-    </property>
-    <property name="message-type">question</property>
-  </object>
   <object class="AdwMessageDialog" id="install_cancel">
     <property name="body" translatable="yes">Are you sure you want to cancel your installation?</property>
     <property name="default-response">no</property>

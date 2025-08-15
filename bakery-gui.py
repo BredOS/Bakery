@@ -175,19 +175,23 @@ class BakeryApp(Adw.Application):
 
     def add_custom_styling(self, widget):
         self._add_widget_styling(widget)
-        # iterate children recursive
-        for child in widget:
-            self.add_custom_styling(child)
-
+        # Recursively apply styling to all descendants
+        if hasattr(widget, "get_first_child"):
+            child = widget.get_first_child()
+            while child:
+                self.add_custom_styling(child)
+                child = child.get_next_sibling()
+        elif hasattr(widget, "__iter__"):
+            for child in widget:
+                self.add_custom_styling(child)
 
 @Gtk.Template.from_file(script_dir + "/data/window.ui")
 class BakeryWindow(Adw.ApplicationWindow):
     __gtype_name__ = "BakeryWindow"
 
     stack1 = Gtk.Template.Child()
-    stack1_sidebar = Gtk.Template.Child()
+    steps_box = Gtk.Template.Child()
     button_box = Gtk.Template.Child()
-    cancel_btn = Gtk.Template.Child()
     back_btn = Gtk.Template.Child()
     next_btn = Gtk.Template.Child()
 
@@ -220,9 +224,12 @@ class BakeryWindow(Adw.ApplicationWindow):
 
         self.next_btn.connect("clicked", self.on_next_clicked)
         self.back_btn.connect("clicked", self.on_back_clicked)
-        self.cancel_btn.connect("clicked", self.on_cancel_clicked)
         self.err_dialog.connect("response", self.on_err_dialog_response)
         self.log_dialog.connect("response", self.on_log_dialog_response)
+
+        # Initialize step indicators
+        self.step_indicators = []
+        self.step_separators = []
 
     def on_err_dialog_response(self, dialog, resp) -> None:
         if resp == "yes":
@@ -318,6 +325,9 @@ class BakeryWindow(Adw.ApplicationWindow):
                 page_id = self.get_page_id(page_name)
                 self.stack1.set_visible_child_name(page_id)
                 self.update_buttons()
+            
+            # Update step indicators after page change
+            self.update_step_indicators()
 
     def on_back_clicked(self, button) -> None:
         if self.current_page > 0:
@@ -331,6 +341,9 @@ class BakeryWindow(Adw.ApplicationWindow):
             except:
                 pass
             self.update_buttons()
+            
+            # Update step indicators after page change
+            self.update_step_indicators()
 
     def update_buttons(self) -> None:
         num_pages = len(self.pages)
@@ -365,7 +378,6 @@ class BakeryWindow(Adw.ApplicationWindow):
             elif self.current_page == self.pages.index("Install"):
                 self.back_btn.set_sensitive(False)
                 self.next_btn.set_sensitive(False)
-                self.cancel_btn.set_sensitive(False)
             else:
                 self.next_btn.set_label(_("Next"))  # pyright: ignore[reportCallIssue]
                 user_event.set()
@@ -388,7 +400,6 @@ class BakeryWindow(Adw.ApplicationWindow):
             elif self.current_page == self.pages.index("Install"):
                 self.back_btn.set_sensitive(False)
                 self.next_btn.set_sensitive(False)
-                self.cancel_btn.set_sensitive(False)
             else:
                 self.next_btn.set_label(_("Next"))  # pyright: ignore[reportCallIssue]
                 user_event.set()
@@ -475,6 +486,107 @@ class BakeryWindow(Adw.ApplicationWindow):
             all_pages[page] = page_
             stack.add_titled(page_, page, pages_dict[page][1])
 
+    def create_step_indicators(self):
+        """Create circular step indicators with page names above and horizontal lines between circles using overlays"""
+        for indicator in self.step_indicators:
+            self.steps_box.remove(indicator)
+        self.step_indicators.clear()
+        if hasattr(self, "step_separators"):
+            for sep in self.step_separators:
+                self.steps_box.remove(sep)
+        self.step_separators = []
+        self.step_circles = []  # Store circle buttons
+
+        pages_dict = config.pages(_)
+        num_pages = len(self.pages)
+        for i, page_name in enumerate(self.pages):
+            overlay = Gtk.Overlay()
+            overlay.set_halign(Gtk.Align.CENTER)
+            overlay.set_valign(Gtk.Align.START)
+            overlay.set_size_request(75, -1)
+
+            # Separator (only if not first step)
+            if i > 0:
+                separator = Gtk.Separator.new(orientation=Gtk.Orientation.HORIZONTAL)
+                separator.set_size_request(50, 4)
+                separator.set_margin_top(35)
+                separator.set_margin_end(75)
+                separator.set_halign(Gtk.Align.CENTER)
+                separator.set_valign(Gtk.Align.START)
+                separator.get_style_context().add_class("step-separator")
+                if i - 1 < self.current_page:
+                    separator.get_style_context().add_class("separator-completed")
+                elif i - 1 == self.current_page - 1:
+                    separator.get_style_context().add_class("separator-current")
+                else:
+                    separator.get_style_context().add_class("separator-inactive")
+                overlay.add_overlay(separator)
+                self.step_separators.append(separator)
+                self.get_application().add_custom_styling(separator)
+
+            # Step container (name label on top, circle below)
+            step_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            step_container.set_size_request(75, -1)
+            step_container.get_style_context().add_class("step-indicator-container")
+
+            page_display_name = pages_dict[page_name][1] if page_name in pages_dict else page_name
+            name_label = Gtk.Label(label=page_display_name)
+            name_label.get_style_context().add_class("step-name")
+            name_label.set_halign(Gtk.Align.CENTER)
+            name_label.set_valign(Gtk.Align.CENTER)
+            step_container.append(name_label)
+
+            circle_button = Gtk.Button(label="")
+            circle_button.set_can_target(False)
+            circle_button.set_size_request(24, 24)
+            circle_button.set_halign(Gtk.Align.CENTER)
+            circle_button.set_valign(Gtk.Align.CENTER)
+            circle_button.get_style_context().add_class("circular")
+            if i == self.current_page:
+                circle_button.get_style_context().add_class("current-step")
+            elif i < self.current_page:
+                circle_button.get_style_context().add_class("completed-step")
+            else:
+                circle_button.get_style_context().add_class("inactive-step")
+            step_container.append(circle_button)
+            self.step_circles.append(circle_button)  # Store reference
+
+            overlay.set_child(step_container)
+            self.steps_box.append(overlay)
+            self.step_indicators.append(overlay)
+            self.get_application().add_custom_styling(step_container)
+
+    def update_step_indicators(self):
+        """Update step indicators to show current progress and separator colors"""
+        if not self.step_indicators:
+            return
+        for i, overlay in enumerate(self.step_indicators):
+            # Use stored circle_button reference
+            circle_button = self.step_circles[i]
+            context = circle_button.get_style_context()
+            context.remove_class("current-step")
+            context.remove_class("completed-step")
+            context.remove_class("inactive-step")
+            if i == self.current_page:
+                context.add_class("current-step")
+            elif i < self.current_page:
+                context.add_class("completed-step")
+            else:
+                context.add_class("inactive-step")
+            # Update separator color if present
+            if i > 0:
+                separator = self.step_separators[i - 1]
+                sep_ctx = separator.get_style_context()
+                sep_ctx.remove_class("separator-completed")
+                sep_ctx.remove_class("separator-current")
+                sep_ctx.remove_class("separator-inactive")
+                if i - 1 < self.current_page:
+                    sep_ctx.add_class("separator-completed")
+                elif i - 1 == self.current_page - 1:
+                    sep_ctx.add_class("separator-current")
+                else:
+                    sep_ctx.add_class("separator-inactive")
+
     def init_screens(self, install_type) -> None:
         if install_type == "online":
             if self.install_source == "from_iso":
@@ -495,6 +607,9 @@ class BakeryWindow(Adw.ApplicationWindow):
         )
         self.install_type = install_type
         self.current_page = 0
+
+        # Create step indicators after pages are determined
+        self.create_step_indicators()
 
         self.update_buttons()
         self.main_stk.set_visible_child(self.install_page.get_child())
@@ -770,7 +885,6 @@ class InstallThread(threading.Thread):
             page_id = self.window.get_page_id(page_name)
             self.window.stack1.set_visible_child_name(page_id)
             self.window.button_box.set_visible(True)
-            self.window.cancel_btn.set_visible(False)
             self.window.back_btn.set_visible(False)
             self.window.next_btn.disconnect_by_func(self.window.on_install_btn_clicked)
             self.window.next_btn.connect("clicked", self.window.on_done_clicked)
@@ -1691,6 +1805,10 @@ class packages_screen(Gtk.Box):
         self.package_metadata = {}  # pkg_key -> {"name": str, "post_install": str}
         self.group_metadata = {}    # grp_key -> {"post_install": str}
         
+        # UI state
+        self.current_category = None
+        self.filtered_packages = []
+        
         # Build and show UI
         self._build_ui()
         lp("Package screen initialization complete", "info")
@@ -1712,193 +1830,734 @@ class packages_screen(Gtk.Box):
         return s
 
     def _build_ui(self):
-        """Build the complete package selection UI"""
-        lp("Building package selection UI", "info")
+        """Build the complete package selection UI with two-panel layout (Box + Separator)"""
+        lp("Building two-panel package selection UI", "info")
         
-        # Create main container with margins directly in packages_box
-        vbox = Gtk.Box.new(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        vbox.set_margin_top(margin=12)
-        vbox.set_margin_end(margin=12)
-        vbox.set_margin_bottom(margin=12)
-        vbox.set_margin_start(margin=12)
-        vbox.set_vexpand(True)
-        vbox.set_hexpand(True)
-        self.packages_box.append(vbox)
+        # Create main horizontal box container
+        main_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, spacing=5)
+        main_box.set_hexpand(True)
+        main_box.set_vexpand(True)
+        self.packages_box.append(main_box)
+        
+        # Left panel - Categories
+        left_box = self._build_categories_panel()
+        left_box.set_hexpand(False)
+        left_box.set_size_request(280, -1)  # Fixed width for categories panel
+        main_box.append(left_box)
+        
+        # Separator
+        separator = Gtk.Separator.new(Gtk.Orientation.VERTICAL)
+        separator.set_vexpand(True)
+        main_box.append(separator)
+        
+        # Right panel - Applications
+        right_box = self._build_applications_panel()
+        main_box.append(right_box)
+        
+        # Remove self._select_first_category()
+        # Instead, show instructions in applications panel
+        instruction_label = Gtk.Label.new(
+            "Select a category on the left to view and choose applications.\n"
+            "You can also search for packages or categories using the search box."
+        )
+        instruction_label.set_halign(Gtk.Align.CENTER)
+        instruction_label.set_valign(Gtk.Align.CENTER)
+        instruction_label.set_margin_top(24)
+        instruction_label.set_margin_bottom(24)
+        instruction_label.add_css_class("dim-label")
+        self.applications_list.append(instruction_label)
 
-        # Create scrolled window for the list box
-        scrolled_window = Gtk.ScrolledWindow()
-        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        scrolled_window.set_vexpand(True)
-        scrolled_window.set_hexpand(True)
-        scrolled_window.set_size_request(800, 420)  # Set default size 420 nice
-        vbox.append(scrolled_window)
+        lp("Built two-panel UI successfully", "info")
 
-        # Create the list box for expander rows
-        self.list_box = Gtk.ListBox.new()
-        self.list_box.set_selection_mode(mode=Gtk.SelectionMode.NONE)
-        self.list_box.add_css_class(css_class='boxed-list')
-        scrolled_window.set_child(self.list_box)
+    def _build_categories_panel(self):
+        """Build and return the left panel with categories and search"""
+        # Create left panel container
+        left_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, spacing=12)
+        left_box.set_margin_top(12)
+        left_box.set_margin_start(12)
+        left_box.set_margin_bottom(12)
+        left_box.set_margin_end(6)
+        left_box.set_size_request(280, -1)
+        left_box.set_hexpand(True)
+        left_box.set_vexpand(True)
+        
+        # Categories header row (label + button)
+        header_row = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, spacing=8)
+        categories_label = Gtk.Label.new("Categories")
+        categories_label.set_halign(Gtk.Align.START)
+        categories_label.add_css_class("title-2")
+        header_row.append(categories_label)
 
-        # Process top-level groups (filter by architecture)
+        reset_btn = Gtk.Button.new_with_label("Reset selection")
+        reset_btn.add_css_class("suggested-action")
+        reset_btn.set_halign(Gtk.Align.END)
+        reset_btn.set_valign(Gtk.Align.CENTER)
+        reset_btn.set_tooltip_text("Reset all selections to default")
+        reset_btn.set_hexpand(True)
+        reset_btn.connect("clicked", self._on_default_selections)
+        header_row.append(reset_btn)
+
+        left_box.append(header_row)
+        
+        # Search entry
+        self.search_entry = Gtk.SearchEntry.new()
+        self.search_entry.set_placeholder_text("Search applications and categories...")
+        self.search_entry.connect("search-changed", self._on_search_changed)
+        left_box.append(self.search_entry)
+        
+        # Categories list in scrolled window
+        categories_scrolled = Gtk.ScrolledWindow()
+        categories_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        categories_scrolled.set_vexpand(True)
+        left_box.append(categories_scrolled)
+        
+        # Categories list box
+        self.categories_list = Gtk.ListBox.new()
+        self.categories_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        self.categories_list.add_css_class("navigation-sidebar")
+        self.categories_list.connect("row-selected", self._on_category_selected)
+        categories_scrolled.set_child(self.categories_list)
+        
+        # Populate categories
+        self._populate_categories()
+        
+        return left_box
+
+    def _build_applications_panel(self):
+        """Build and return the right panel for application selection"""
+        # Create right panel container
+        right_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, spacing=12)
+        right_box.set_margin_top(12)
+        right_box.set_margin_end(12)
+        right_box.set_margin_bottom(12)
+        right_box.set_margin_start(6)
+        right_box.set_hexpand(True)
+        right_box.set_vexpand(True)
+        
+        # Applications header
+        self.applications_label = Gtk.Label.new("Select Applications")
+        self.applications_label.set_halign(Gtk.Align.START)
+        self.applications_label.add_css_class("title-2")
+        right_box.append(self.applications_label)
+        
+        # Applications description (dimmed)
+        self.category_desc_label = None  # Initialize here
+        # Applications list in scrolled window
+        apps_scrolled = Gtk.ScrolledWindow()
+        apps_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        apps_scrolled.set_vexpand(True)
+        right_box.append(apps_scrolled)
+        
+        # Applications list box
+        self.applications_list = Gtk.ListBox.new()
+        self.applications_list.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.applications_list.add_css_class("boxed-list")
+        self.applications_list.set_valign(Gtk.Align.START)  # <-- Set vertical alignment to start
+        apps_scrolled.set_child(self.applications_list)
+        
+        return right_box
+
+    def _populate_categories(self):
+        """Populate the categories list"""
         groups = self.packages if isinstance(self.packages, list) else [self.packages]
+        
         for grp_data in groups:
             if self._is_valid_group(grp_data) and self._is_arch_compatible(grp_data):
-                row = self._create_group_row(grp_data, [])
-                if row:
-                    self.list_box.append(child=row)
-        
-        lp(f"Built UI with {len([g for g in groups if self._is_arch_compatible(g)])} top-level groups", "info")
+                self._add_category_row(grp_data, [])
 
-    def _is_valid_group(self, data):
-        """Check if group data is valid"""
-        return isinstance(data, dict) and data.get("name")
-
-    def _create_group_row(self, group_data, parent_path):
-        """Create a group row with packages and subgroups"""
+    def _add_category_row(self, group_data, parent_path, depth=0):
+        """Add a category row to the categories list"""
         name = group_data.get("name", "Unnamed")
-        description = group_data.get("description", "")
         current_path = parent_path + [name]
         group_key = self._make_group_key(current_path)
         
-        lp(f"Creating group row: {name}", "debug")
+        row = Gtk.ListBoxRow.new()
+        row.group_data = group_data
+        row.group_key = group_key
+        row.depth = depth
         
-        # Initialize group in hierarchy
-        self.group_hierarchy[group_key] = {"packages": [], "subgroups": []}
+        row_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, spacing=8)
+        row_box.set_margin_top(8)
+        row_box.set_margin_bottom(8)
+        row_box.set_margin_start(8 + (depth * 16))
+        row_box.set_margin_end(8)
         
-        # Store group metadata including post-install
-        post_install = group_data.get("post-install")
-        if post_install:
-            self.group_metadata[group_key] = {"post_install": post_install}
-        
-        # Create the expander row
-        expander_row = Adw.ExpanderRow.new()
-        expander_row.set_title(title=name)
-        
-        # Add icon if specified
         icon_name = group_data.get("icon")
         if icon_name:
             icon = Gtk.Image.new_from_icon_name(icon_name)
-            expander_row.add_prefix(widget=icon)
+            icon.set_icon_size(Gtk.IconSize.NORMAL)
+            row_box.append(icon)
         
-        if description:
-            # Escape HTML entities to prevent markup errors
-            safe_description = self._escape_html(description)
-            expander_row.set_subtitle(subtitle=safe_description)
+        label = Gtk.Label.new(name)
+        label.set_halign(Gtk.Align.START)
+        label.set_hexpand(True)
+        row_box.append(label)
         
-        # Add group checkbox if not marked as noncheckable
-        if not group_data.get("noncheckable", False):
-            checkbox = self._create_group_checkbox(group_data, group_key)
-            expander_row.add_suffix(widget=checkbox)
+        # Show expand arrow as a flat button if this group/subgroup has subgroups
+        subgroups = group_data.get("subgroups", [])
+        has_subgroups = any(self._is_valid_group(sg) and self._is_arch_compatible(sg) for sg in subgroups)
+        if has_subgroups:
+            arrow_icon = Gtk.Image.new_from_icon_name("go-next-symbolic")
+            arrow_icon.set_icon_size(Gtk.IconSize.NORMAL)
+            arrow_btn = Gtk.Button.new()
+            arrow_btn.set_child(arrow_icon)
+            arrow_btn.add_css_class("flat")
+            arrow_btn.set_focusable(False)
+            row_box.append(arrow_btn)
+            row.has_subgroups = True
+            row.expanded = False
+            def on_arrow_clicked(btn, row=row, group_data=group_data, depth=depth, arrow_icon=arrow_icon):
+                if getattr(row, "expanded", False):
+                    self._collapse_category(row)
+                    arrow_icon.set_from_icon_name("go-next-symbolic")
+                else:
+                    self._expand_category(row, group_data, depth)
+                    arrow_icon.set_from_icon_name("go-down-symbolic")
+            arrow_btn.connect("clicked", on_arrow_clicked)
         
-        # Add packages as child rows (filter by architecture)
+        row.set_child(row_box)
+        self.categories_list.append(row)
+        
+        self.group_hierarchy[group_key] = {"packages": [], "subgroups": []}
+        
         packages = group_data.get("packages", [])
         for pkg_data in packages:
             if self._is_valid_package(pkg_data) and self._is_arch_compatible(pkg_data):
-                pkg_row = self._create_package_row(pkg_data, current_path, group_key)
-                if pkg_row:
-                    expander_row.add_row(child=pkg_row)
-        
-        # Add subgroups as nested expander rows (filter by architecture)
-        subgroups = group_data.get("subgroups", [])
-        for sub_data in subgroups:
-            if self._is_valid_group(sub_data) and self._is_arch_compatible(sub_data):
-                sub_row = self._create_group_row(sub_data, current_path)
-                if sub_row:
-                    sub_key = self._make_group_key(current_path + [sub_data.get("name", "Unnamed")])
-                    self.group_hierarchy[group_key]["subgroups"].append(sub_key)
-                    self.parent_map[sub_key] = group_key
-                    expander_row.add_row(child=sub_row)
-        
-        # Set initial expansion state
-        expander_row.set_expanded(group_data.get("expanded", False))
-        
-        # Update group checkbox state after adding all children
-        if group_key in self.checkboxes:
-            self._update_group_checkbox(group_key)
-        
-        lp(f"Created group '{name}' with {len([p for p in packages if self._is_arch_compatible(p)])} packages and {len([s for s in subgroups if self._is_arch_compatible(s)])} subgroups", "debug")
-        return expander_row
+                pkg_key = self._create_package_key(pkg_data, current_path, group_key)
 
-    def _is_valid_package(self, data):
-        """Check if package data is valid"""
-        if isinstance(data, str):
-            return True
-        return isinstance(data, dict) and data.get("name")
-
-    def _create_package_row(self, pkg_data, parent_path, group_key):
-        """Create a package row with checkbox"""
-        # Normalize package data
+    def _create_package_key(self, pkg_data, parent_path, group_key):
+        """Create package key and store metadata"""
         if isinstance(pkg_data, str):
             name = pkg_data
-            description = ""
-            selected = False
-            immutable = False
             post_install = None
         else:
             name = pkg_data.get("name", "")
-            description = pkg_data.get("description", "")
-            selected = pkg_data.get("selected", False)
-            immutable = pkg_data.get("immutable", False) or pkg_data.get("critical", False)
             post_install = pkg_data.get("post-install")
-        
-        if not name:
-            return None
         
         pkg_key = self._make_package_key(parent_path, name)
         
-        # Store package metadata including post-install
+        # Store package metadata
         self.package_metadata[pkg_key] = {
             "name": name,
-            "post_install": post_install
+            "post_install": post_install,
+            "data": pkg_data
         }
         
         # Add to group hierarchy
         self.group_hierarchy[group_key]["packages"].append(pkg_key)
         self.parent_map[pkg_key] = group_key
         
+        return pkg_key
+
+    def _on_category_selected(self, list_box, row):
+        """Handle category selection and expansion logic"""
+        if not row:
+            return
+
+        group_data = getattr(row, "group_data", None)
+        group_key = getattr(row, "group_key", None)
+        has_subgroups = getattr(row, "has_subgroups", False)
+        depth = getattr(row, "depth", 0)
+
+        # Check if category is empty (no packages and no valid subgroups after arch filtering)
+        packages = group_data.get("packages", []) if isinstance(group_data, dict) else []
+        has_packages = any(
+            self._is_valid_package(pkg) and self._is_arch_compatible(pkg)
+            for pkg in packages
+        )
+        subgroups = group_data.get("subgroups", []) if isinstance(group_data, dict) else []
+        has_valid_subgroups = any(
+            self._is_valid_group(sg) and self._is_arch_compatible(sg)
+            for sg in subgroups
+        )
+        if not has_packages and not has_valid_subgroups:
+            return  # Do nothing if category is truly empty
+
+        # Pre-select children if group/subgroup is selected
+        if isinstance(group_data, dict) and group_data.get("selected", False):
+            self._select_group_and_children(group_data, group_key)
+
+        # If it has subgroups, expand always
+        if has_subgroups:
+            if not getattr(row, "expanded", False):
+                self._expand_category(row, group_data, depth)
+            # Only select and show packages if there are packages
+            if has_packages:
+                self.categories_list.select_row(row)
+                self._show_category_packages(group_data, group_key)
+        else:
+            # Just select and show packages
+            self.categories_list.select_row(row)
+            self._show_category_packages(group_data, group_key)
+
+    def _select_group_and_children(self, group_data, group_key):
+        """Recursively select group/subgroup and its children packages/subgroups unless selected: false is set"""
+        # Only select if selected is True or not specified (default True)
+        selected = group_data.get("selected")
+        if selected is False:
+            return  # Do not select this group or its children
+
+        # Select the group itself
+        self.selection_state[group_key] = True
+
+        # Select all packages in this group
+        packages = group_data.get("packages", [])
+        for pkg_data in packages:
+            if self._is_valid_package(pkg_data) and self._is_arch_compatible(pkg_data):
+                if isinstance(pkg_data, dict):
+                    pkg_name = pkg_data.get("name", "")
+                else:
+                    pkg_name = pkg_data
+                pkg_key = f"pkg:{group_key}/{pkg_name}"
+                self.selection_state[pkg_key] = True
+                checkbox = self.checkboxes.get(pkg_key)
+                if checkbox:
+                    checkbox.set_active(True)
+
+        # Recurse into subgroups
+        subgroups = group_data.get("subgroups", [])
+        for sg in subgroups:
+            if self._is_valid_group(sg) and self._is_arch_compatible(sg):
+                sg_name = sg.get("name", "Unnamed")
+                sg_key = f"grp:{'/'.join(group_key.split('/')[1:] + [sg_name])}"
+                self._select_group_and_children(sg, sg_key)
+
+    def _expand_category(self, row, group_data, depth):
+        """Expand category to show subgroups (arrow down)"""
+        row.expanded = True
+        row_box = row.get_child()
+        children = []
+        child = row_box.get_first_child()
+        while child:
+            children.append(child)
+            child = child.get_next_sibling()
+        if children and isinstance(children[-1], Gtk.Image):
+            children[-1].set_from_icon_name("go-down-symbolic")
+        row_index = self._get_row_index(row)
+        subgroups = group_data.get("subgroups", [])
+        parent_path = group_data.get("name", "").split("/")
+        for i, sub_data in enumerate(subgroups):
+            if self._is_valid_group(sub_data) and self._is_arch_compatible(sub_data):
+                self._insert_category_row(sub_data, parent_path, depth + 1, row_index + i + 1)
+
+    def _collapse_category(self, row):
+        """Collapse category to hide subgroups (arrow right)"""
+        row.expanded = False
+        row_box = row.get_child()
+        children = []
+        child = row_box.get_first_child()
+        while child:
+            children.append(child)
+            child = child.get_next_sibling()
+        if children and isinstance(children[-1], Gtk.Image):
+            children[-1].set_from_icon_name("go-next-symbolic")
+        self._remove_subgroup_rows(row)
+
+    def _insert_category_row(self, group_data, parent_path, depth, index):
+        """Insert a category row at specific index"""
+        name = group_data.get("name", "Unnamed")
+        current_path = parent_path + [name]
+        group_key = self._make_group_key(current_path)
+        row = Gtk.ListBoxRow.new()
+        row.group_data = group_data
+        row.group_key = group_key
+        row.depth = depth
+        row.is_subgroup = True
+        row_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, spacing=8)
+        row_box.set_margin_top(8)
+        row_box.set_margin_bottom(8)
+        row_box.set_margin_start(8 + (depth * 16))
+        row_box.set_margin_end(8)
+        icon_name = group_data.get("icon")
+        if icon_name:
+            icon = Gtk.Image.new_from_icon_name(icon_name)
+            icon.set_icon_size(Gtk.IconSize.NORMAL)
+            row_box.append(icon)
+        label = Gtk.Label.new(name)
+        label.set_halign(Gtk.Align.START)
+        label.set_hexpand(True)
+        row_box.append(label)
+        # Show expand arrow as a flat button if this subgroup has subgroups
+        subgroups = group_data.get("subgroups", [])
+        has_subgroups = any(self._is_valid_group(sg) and self._is_arch_compatible(sg) for sg in subgroups)
+        if has_subgroups:
+            arrow_icon = Gtk.Image.new_from_icon_name("go-next-symbolic")
+            arrow_icon.set_icon_size(Gtk.IconSize.NORMAL)
+            arrow_btn = Gtk.Button.new()
+            arrow_btn.set_child(arrow_icon)
+            arrow_btn.add_css_class("flat")
+            arrow_btn.set_focusable(False)
+            row_box.append(arrow_btn)
+            row.has_subgroups = True
+            row.expanded = False
+            def on_arrow_clicked(btn, row=row, group_data=group_data, depth=depth, arrow_icon=arrow_icon):
+                if getattr(row, "expanded", False):
+                    self._collapse_category(row)
+                    arrow_icon.set_from_icon_name("go-next-symbolic")
+                else:
+                    self._expand_category(row, group_data, depth)
+                    arrow_icon.set_from_icon_name("go-down-symbolic")
+            arrow_btn.connect("clicked", on_arrow_clicked)
+        row.set_child(row_box)
+        self.categories_list.insert(row, index)
+
+    def _get_row_index(self, target_row):
+        """Get the index of a row in the list"""
+        index = 0
+        row = self.categories_list.get_row_at_index(0)
+        while row:
+            if row == target_row:
+                return index
+            index += 1
+            row = self.categories_list.get_row_at_index(index)
+        return -1
+
+    def _remove_subgroup_rows(self, parent_row):
+        """Remove all subgroup rows after the parent"""
+        parent_index = self._get_row_index(parent_row)
+        if parent_index == -1:
+            return
+        
+        rows_to_remove = []
+        index = parent_index + 1
+        row = self.categories_list.get_row_at_index(index)
+        
+        # Use Python attribute instead of get_data
+        while row and getattr(row, "is_subgroup", False):
+            rows_to_remove.append(row)
+            index += 1
+            row = self.categories_list.get_row_at_index(index)
+        
+        for row in rows_to_remove:
+            self.categories_list.remove(row)
+
+    def _show_category_packages(self, group_data, group_key):
+        """Show only packages for the selected group/subgroup"""
+        self.current_category = group_key
+        category_name = group_data.get("name", "Category")
+        self.applications_label.set_text(f"Select Applications - {category_name}")
+
+        # Remove any previous description label if present
+        if hasattr(self, "category_desc_label") and self.category_desc_label:
+            parent = self.category_desc_label.get_parent()
+            if parent:
+                parent.remove(self.category_desc_label)
+            self.category_desc_label = None
+
+        # Add category description label under header, dimmed
+        description = group_data.get("description", "")
+        if description:
+            desc_label = Gtk.Label.new(description)
+            desc_label.set_halign(Gtk.Align.START)
+            desc_label.set_valign(Gtk.Align.START)
+            desc_label.set_margin_bottom(8)
+            desc_label.add_css_class("dim-label")
+            # Insert after applications_label in the right panel
+            right_panel = self.applications_label.get_parent()
+            if right_panel:
+                right_panel.insert_child_after(desc_label, self.applications_label)
+            self.category_desc_label = desc_label
+
+        # Clear current applications list
+        child = self.applications_list.get_first_child()
+        while child:
+            next_child = child.get_next_sibling()
+            self.applications_list.remove(child)
+            child = next_child
+
+        # Show only packages for this group/subgroup
+        packages = group_data.get("packages", [])
+        for pkg_data in packages:
+            if self._is_valid_package(pkg_data) and self._is_arch_compatible(pkg_data):
+                pkg_row = self._create_application_row(pkg_data, group_key)
+                if pkg_row:
+                    self.applications_list.append(pkg_row)
+
+    def _create_application_row(self, pkg_data, group_key):
+        """Create an application row for the right panel"""
+        # Normalize package data
+        if isinstance(pkg_data, str):
+            name = pkg_data
+            description = ""
+            selected = False
+            immutable = False
+        else:
+            name = pkg_data.get("name", "")
+            description = pkg_data.get("description", "")
+            selected = pkg_data.get("selected", False)
+            immutable = pkg_data.get("immutable", False) or pkg_data.get("critical", False)
+        
+        if not name:
+            return None
+        
+        # Create package key (simplified for current category)
+        pkg_key = f"pkg:{group_key}/{name}"
+        
+        # Initialize selection state if not exists
+        if pkg_key not in self.selection_state:
+            self.selection_state[pkg_key] = selected
+        
         # Create action row
         action_row = Adw.ActionRow.new()
-        action_row.set_title(title=name)
+        action_row.set_title(name)
         
         if description:
             safe_description = self._escape_html(description)
-            action_row.set_subtitle(subtitle=safe_description)
+            action_row.set_subtitle(safe_description)
         
         # Create checkbox
         checkbox = Gtk.CheckButton.new()
-        checkbox.set_active(selected)
+        checkbox.set_active(self.selection_state[pkg_key])
         checkbox.set_sensitive(not immutable)
         
-        # Store state and checkbox
-        self.selection_state[pkg_key] = selected
+        # Store checkbox reference
         self.checkboxes[pkg_key] = checkbox
         
         # Connect signal
-        checkbox.connect("toggled", self._on_package_toggled, pkg_key)
+        checkbox.connect("toggled", self._on_application_toggled, pkg_key)
         
-        # Make row activatable and add checkbox
-        action_row.add_suffix(widget=checkbox)
+        # Add checkbox to row
+        action_row.add_suffix(checkbox)
         action_row.set_activatable_widget(checkbox)
         
         return action_row
 
-    def _create_group_checkbox(self, group_data, group_key):
-        """Create checkbox for group"""
-        checkbox = Gtk.CheckButton.new()
-        selected = group_data.get("selected", False)
-        immutable = group_data.get("immutable", False) or group_data.get("critical", False)
+    def _on_application_toggled(self, checkbox, pkg_key):
+        """Handle application checkbox toggle"""
+        if self._updating:
+            return
         
-        checkbox.set_active(selected)
-        checkbox.set_sensitive(not immutable)
+        active = checkbox.get_active()
+        self.selection_state[pkg_key] = active
         
-        # Store state and checkbox
-        self.selection_state[group_key] = selected
-        self.checkboxes[group_key] = checkbox
+        pkg_name = pkg_key.split("/")[-1]
+        lp(f"Application '{pkg_name}' toggled to: {active}", "debug")
+
+    def _on_search_changed(self, search_entry):
+        """Handle search in categories and packages"""
+        search_text = search_entry.get_text().lower().strip()
+
+        # Remove previous search category if present
+        def remove_search_category():
+            child = self.categories_list.get_first_child()
+            while child:
+                group_data = getattr(child, "group_data", None)
+                if isinstance(group_data, dict) and group_data.get("_is_search_category"):
+                    self.categories_list.remove(child)
+                    break
+                child = child.get_next_sibling()
+
+        remove_search_category()
+
+        # Step 1: Expand all groups and subgroups
+        def expand_all_rows():
+            child = self.categories_list.get_first_child()
+            while child:
+                if getattr(child, "has_subgroups", False) and not getattr(child, "expanded", False):
+                    self._expand_category(child, child.group_data, child.depth)
+                child = child.get_next_sibling()
+            # Recursively expand subgroups
+            expanded = True
+            while expanded:
+                expanded = False
+                child = self.categories_list.get_first_child()
+                while child:
+                    if getattr(child, "has_subgroups", False) and not getattr(child, "expanded", False):
+                        self._expand_category(child, child.group_data, child.depth)
+                        expanded = True
+                    child = child.get_next_sibling()
+
+        expand_all_rows()
+
+        # Step 2: Filter rows according to search
+        if not search_text:
+            # Show all rows if search is empty
+            child = self.categories_list.get_first_child()
+            while child:
+                child.set_visible(True)
+                # Collapse all expanded categories
+                if getattr(child, "has_subgroups", False) and getattr(child, "expanded", False):
+                    self._collapse_category(child)
+                child = child.get_next_sibling()
+            # Show applications for selected category only
+            selected_row = self.categories_list.get_selected_row()
+            if selected_row:
+                self._show_category_packages(selected_row.group_data, selected_row.group_key)
+            return
+
+        def subgroup_matches(subgroups):
+            for sg in subgroups:
+                if not isinstance(sg, dict):
+                    continue
+                sg_name = sg.get("name") or ""
+                sg_desc = sg.get("description") or ""
+                if search_text in sg_name.lower() or search_text in sg_desc.lower():
+                    return True
+                for pkg in sg.get("packages", []):
+                    if isinstance(pkg, dict):
+                        pkg_name = pkg.get("name") or ""
+                        pkg_desc = pkg.get("description") or ""
+                        if search_text in pkg_name.lower() or search_text in pkg_desc.lower():
+                            return True
+                    elif isinstance(pkg, str):
+                        if search_text in pkg.lower():
+                            return True
+                # Recurse further
+                if subgroup_matches(sg.get("subgroups", [])):
+                    return True
+            return False
+
+        # Step 3: Filter categories/subgroups
+        child = self.categories_list.get_first_child()
+        while child:
+            group_data = getattr(child, "group_data", None)
+            show_row = False
+
+            if isinstance(group_data, dict):
+                name = group_data.get("name") or ""
+                description = group_data.get("description") or ""
+                if search_text in name.lower() or search_text in description.lower():
+                    show_row = True
+                for pkg in group_data.get("packages", []):
+                    if isinstance(pkg, dict):
+                        pkg_name = pkg.get("name") or ""
+                        pkg_desc = pkg.get("description") or ""
+                        if search_text in pkg_name.lower() or search_text in pkg_desc.lower():
+                            show_row = True
+                            break
+                    elif isinstance(pkg, str):
+                        if search_text in pkg.lower():
+                            show_row = True
+                            break
+                if not show_row and subgroup_matches(group_data.get("subgroups", [])):
+                    show_row = True
+
+            child.set_visible(show_row)
+            child = child.get_next_sibling()
+
+        # Step 4: Collect all matching packages for the search category
+        def collect_matching_packages(groups):
+            matches = []
+            def recurse(grp, group_key):
+                packages = grp.get("packages", [])
+                for pkg in packages:
+                    if self._is_valid_package(pkg) and self._is_arch_compatible(pkg):
+                        if isinstance(pkg, dict):
+                            pkg_name = pkg.get("name", "")
+                            pkg_desc = pkg.get("description", "")
+                            if search_text in pkg_name.lower() or search_text in pkg_desc.lower():
+                                matches.append(pkg)
+                        elif isinstance(pkg, str):
+                            if search_text in pkg.lower():
+                                matches.append(pkg)
+                for sg in grp.get("subgroups", []):
+                    if self._is_valid_group(sg) and self._is_arch_compatible(sg):
+                        recurse(sg, group_key)
+            groups_list = groups if isinstance(groups, list) else [groups]
+            for grp in groups_list:
+                if self._is_valid_group(grp) and self._is_arch_compatible(grp):
+                    recurse(grp, grp.get("name", ""))
+            return matches
+
+        matches = collect_matching_packages(self.packages)
+
+        # Step 5: Create and insert the hidden search category
+        search_category_data = {
+            "name": "Search Results",
+            "description": "All matching applications",
+            "icon": "system-search-symbolic",
+            "packages": matches,
+            "_is_search_category": True,
+            "hidden": True,
+        }
+        search_row = Gtk.ListBoxRow.new()
+        search_row.group_data = search_category_data
+        search_row.group_key = "grp:search"
+        search_row.depth = 0
+        search_row.is_search_category = True
+        row_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, spacing=8)
+        row_box.set_margin_top(8)
+        row_box.set_margin_bottom(8)
+        row_box.set_margin_start(8)
+        row_box.set_margin_end(8)
+        icon = Gtk.Image.new_from_icon_name("system-search-symbolic")
+        icon.set_icon_size(Gtk.IconSize.NORMAL)
+        row_box.append(icon)
+        label = Gtk.Label.new("Search Results")
+        label.set_halign(Gtk.Align.START)
+        label.set_hexpand(True)
+        row_box.append(label)
+        search_row.set_child(row_box)
+        self.categories_list.insert(search_row, 0)
+        self.categories_list.select_row(search_row)
+        self._show_category_packages(search_category_data, "grp:search")
+
+    def _on_default_selections(self, button):
+        """Handle default selections button"""
+        lp("Applying default package selections", "info")
         
-        # Connect signal
-        checkbox.connect("toggled", self._on_group_toggled, group_key)
+        # Reset all selections
+        for key in self.selection_state:
+            self.selection_state[key] = False
+            checkbox = self.checkboxes.get(key)
+            if checkbox:
+                checkbox.set_active(False)
         
-        return checkbox
+        # Apply default selections from package data
+        groups = self.packages if isinstance(self.packages, list) else [self.packages]
+        self._apply_default_selections(groups, [])
+
+    def _apply_default_selections(self, groups, parent_path):
+        """Recursively apply default selections"""
+        for grp_data in groups:
+            if not (self._is_valid_group(grp_data) and self._is_arch_compatible(grp_data)):
+                continue
+            
+            name = grp_data.get("name", "Unnamed")
+            current_path = parent_path + [name]
+            
+            # Apply defaults to packages in this group
+            packages = grp_data.get("packages", [])
+            for pkg_data in packages:
+                if self._is_valid_package(pkg_data) and self._is_arch_compatible(pkg_data):
+                    if isinstance(pkg_data, dict) and pkg_data.get("selected", False):
+                        pkg_name = pkg_data.get("name", "")
+                        pkg_key = f"pkg:{self._make_group_key(current_path)}/{pkg_name}"
+                        if pkg_key in self.selection_state:
+                            self.selection_state[pkg_key] = True
+                            checkbox = self.checkboxes.get(pkg_key)
+                            if checkbox:
+                                checkbox.set_active(True)
+            
+            # Recurse into subgroups
+            subgroups = grp_data.get("subgroups", [])
+            if subgroups:
+                self._apply_default_selections(subgroups, current_path)
+
+    def _select_first_category(self):
+        """Select the first group and deepest first subgroup (recursively) if present"""
+        def select_deepest_subgroup(row):
+            # Expand and select the first subgroup if available
+            if getattr(row, "has_subgroups", False):
+                self._expand_category(row, row.group_data, row.depth)
+                # Find the next row (first subgroup after expansion)
+                next_index = self._get_row_index(row) + 1
+                subgroup_row = self.categories_list.get_row_at_index(next_index)
+                if subgroup_row and getattr(subgroup_row, "is_subgroup", False):
+                    self.categories_list.select_row(subgroup_row)
+                    self._on_category_selected(self.categories_list, subgroup_row)
+                    # Recursively go deeper if this subgroup also has subgroups
+                    select_deepest_subgroup(subgroup_row)
+
+        first_row = self.categories_list.get_row_at_index(0)
+        if first_row:
+            self.categories_list.select_row(first_row)
+            self._on_category_selected(self.categories_list, first_row)
+            select_deepest_subgroup(first_row)
+
+    def _is_valid_group(self, data):
+        """Check if group data is valid"""
+        return isinstance(data, dict) and data.get("name")
 
     def _make_group_key(self, path):
         """Create unique key for group"""
@@ -1908,117 +2567,11 @@ class packages_screen(Gtk.Box):
         """Create unique key for package"""
         return "pkg:" + "/".join(path + [name])
 
-    def _on_package_toggled(self, checkbox, pkg_key):
-        """Handle package checkbox toggle"""
-        if self._updating:
-            return
-        
-        active = checkbox.get_active()
-        self.selection_state[pkg_key] = active
-        
-        pkg_name = pkg_key.split("/")[-1]
-        lp(f"Package '{pkg_name}' toggled to: {active}", "debug")
-        
-        # Print complete package selection state
-        metadata = self.get_selected_packages_with_metadata()
-        lp(f"Complete package selection state: {metadata}", "info")
-        
-        # Update parent groups
-        self._update_parent_groups(pkg_key)
-
-    def _on_group_toggled(self, checkbox, group_key):
-        """Handle group checkbox toggle"""
-        if self._updating:
-            return
-        
-        active = checkbox.get_active()
-        
-        grp_name = group_key.split("/")[-1]
-        lp(f"Group '{grp_name}' toggled to: {active}", "debug")
-        
-        # Set all children to same state
-        self._set_group_descendants(group_key, active)
-        
-        # Print complete package selection state after group change
-        metadata = self.get_selected_packages_with_metadata()
-        lp(f"Complete package selection state after group toggle: {metadata}", "info")
-        
-        # Update parent groups
-        self._update_parent_groups(group_key)
-
-    def _set_group_descendants(self, group_key, selected):
-        """Set selection state for all descendants of a group"""
-        self._updating = True
-        try:
-            hierarchy = self.group_hierarchy.get(group_key, {})
-            
-            # Update packages
-            for pkg_key in hierarchy.get("packages", []):
-                checkbox = self.checkboxes.get(pkg_key)
-                if checkbox and checkbox.get_sensitive():
-                    checkbox.set_active(selected)
-                    self.selection_state[pkg_key] = selected
-            
-            # Update subgroups recursively
-            for sub_key in hierarchy.get("subgroups", []):
-                checkbox = self.checkboxes.get(sub_key)
-                if checkbox and checkbox.get_sensitive():
-                    checkbox.set_active(selected)
-                    self.selection_state[sub_key] = selected
-                self._set_group_descendants(sub_key, selected)
-        finally:
-            self._updating = False
-
-    def _update_parent_groups(self, child_key):
-        """Update parent group checkboxes based on children state"""
-        parent_key = self.parent_map.get(child_key)
-        if not parent_key:
-            return
-        
-        self._update_group_checkbox(parent_key)
-        self._update_parent_groups(parent_key)  # Recurse up
-
-    def _update_group_checkbox(self, group_key):
-        """Update group checkbox state based on children"""
-        checkbox = self.checkboxes.get(group_key)
-        if not checkbox:
-            return
-        
-        hierarchy = self.group_hierarchy.get(group_key, {})
-        all_children = hierarchy.get("packages", []) + hierarchy.get("subgroups", [])
-        
-        if not all_children:
-            return
-        
-        # Count selected children
-        selected_count = 0
-        total_count = 0
-        
-        for child_key in all_children:
-            child_checkbox = self.checkboxes.get(child_key)
-            if child_checkbox and child_checkbox.get_sensitive():
-                total_count += 1
-                if self.selection_state.get(child_key, False):
-                    selected_count += 1
-        
-        if total_count == 0:
-            return
-        
-        self._updating = True
-        try:
-            if selected_count == 0:
-                checkbox.set_inconsistent(False)
-                checkbox.set_active(False)
-                self.selection_state[group_key] = False
-            elif selected_count == total_count:
-                checkbox.set_inconsistent(False)
-                checkbox.set_active(True)
-                self.selection_state[group_key] = True
-            else:
-                checkbox.set_inconsistent(True)
-                self.selection_state[group_key] = False
-        finally:
-            self._updating = False
+    def _is_valid_package(self, data):
+        """Check if package data is valid"""
+        if isinstance(data, str):
+            return True
+        return isinstance(data, dict) and data.get("name")
 
     def get_selected_packages_with_metadata(self):
         """Get selected packages and post-install scripts"""
