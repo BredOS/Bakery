@@ -157,7 +157,6 @@
     opacity: 0.5;
     border: none;
     margin: 4px 0 0 0;
-    z-index: 0;
 }
 
 /* Step indicator circle styles */
@@ -172,40 +171,21 @@
     box-shadow: none;
     transition: border-color 0.2s, background 0.2s;
     padding: 0;
-    position: relative;
-    /* For stacking pseudo-elements */
-    overflow: visible;
 }
 
 .completed-step {
     background: #3584e4;
     border: 2px solid #3584e4;
-    z-index: 2;
 }
 
 .current-step {
     border: 4px solid #808080;
     background: #3584e4;
-    position: relative;
-    z-index: 3;
-}
-
-/* Optionally, add a subtle "wave" border on current step */
-.current-step::after {
-    content: "";
-    display: block;
-    position: absolute;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    border-radius: 50%;
-    border-bottom: 2px solid #3584e4;
-    pointer-events: none;
 }
 
 /* Uncompleted step: fully gray */
 .inactive-step {
     background: linear-gradient(to top, #222 50%, #222 50%);
-    position: relative;
     border: 4px solid #808080;
 }
 

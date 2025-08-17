@@ -3,7 +3,7 @@
 <!-- Created with Cambalache 0.96.1 -->
 <cambalache-project version="0.96.0" target_tk="gtk-4.0">
   <css filename="main.css" is_global="1"/>
-  <ui template-class="BakeryWindow" filename="window.ui" sha256="c0003ad41b5debfbe8607ee36a410cb306c5f2839e72bda8837e5229949d7bc2">
+  <ui template-class="BakeryWindow" filename="window.ui" sha256="c256251e3b6cb2d6e59cf0bfc7b092972adb99f32a3e0f065d899db2c6f9cc8f">
     <css-provider>main.css</css-provider>
   </ui>
   <ui template-class="partitioning_screen" filename="partitioning_screen.ui" sha256="8907df8e437e70f5016d26efa0e0444cce13d2f0b14c8f2d5484f3318f6816de"/>
@@ -15,6 +15,6 @@
   <ui filename="de_screen.ui" sha256="575f8c406026689304aa4b7f6425fd8f29bbcbb3303f5f80fc7934dbf2ef454c"/>
   <ui template-class="install_screen" filename="install_screen.ui" sha256="0c88e0282613f68bd8f329595fa20f6980d9823028012112c93d07258c311b90"/>
   <ui template-class="finish_screen" filename="finish_screen.ui" sha256="64cb99795e3b5b65eb26df16be5910a7cf00ab34a317c5ae6c21e8c38ecce632"/>
-  <ui template-class="packages_screen" filename="packages_screen.ui" sha256="046d2d8d21d971e2a562890134c0395a3d62e53549473b2371599b64d4531968"/>
+  <ui template-class="packages_screen" filename="packages_screen.ui" sha256="cd99e231a51aa64c2065663f61019abefb7f0feb809b152913c0b92640d40db9"/>
   <ui template-class="ExampleWindow" filename="../../../Downloads/MainWindow.ui" sha256="3020682d099b21ce57ee9d39ed00d2df7ee4c8d55fa761fbecd1d0fc67e7e224"/>
 </cambalache-project>

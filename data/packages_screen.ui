@@ -16,7 +16,7 @@
         <property name="vexpand-set">True</property>
         <child>
           <object class="GtkBox" id="packages_box">
-            <property name="height-request">420</property>
+            <property name="height-request">465</property>
             <property name="hexpand">True</property>
             <property name="hexpand-set">True</property>
             <property name="margin-bottom">12</property>

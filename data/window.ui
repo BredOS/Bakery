@@ -6,7 +6,7 @@
   <requires lib="gtk" version="4.10"/>
   <requires lib="libadwaita" version="1.2"/>
   <template class="BakeryWindow" parent="AdwApplicationWindow">
-    <property name="default-height">775</property>
+    <property name="default-height">800</property>
     <property name="default-width">885</property>
     <property name="title" translatable="yes">BredOS Installer</property>
     <child>

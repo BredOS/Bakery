@@ -30,7 +30,8 @@ from pyrunning import logging, LogMessage, LoggingHandler, Command, LoggingLevel
 import yaml
 
 gi.require_version("NM", "1.0")
-from gi.repository import GLib, NM
+gi.require_version("AppStream", "1.0")
+from gi.repository import NM, AppStream
 
 import config
 
@@ -1356,17 +1357,17 @@ def ensure_localdb(retries: int = 3) -> None:
         tried += 1
     if not len(os.listdir("/var/lib/pacman/sync/")):
         raise OSError("Could not update databases.")
-    
+
 
 @catch_exceptions
 def get_packages_list() -> dict:
     """
     Returns netinstall list of packages.
     """
-    
+
     with open(script_dir + "/data/packages.yaml", "r") as f:
         return yaml.safe_load(f)
-    
+
 
 @catch_exceptions
 def package_desc(packages: list) -> dict:
@@ -1403,6 +1404,77 @@ def package_desc(packages: list) -> dict:
                     cur_desc += (" " if len(cur_desc) else "") + outp[cindex]
             cindex += 1
     return res
+
+
+box = None
+
+
+def appstream_initialize() -> None:
+    global box
+    pool = AppStream.Pool()
+    pool.load()
+    box = pool.get_components()
+    pool.clear()
+
+
+def search_appstream(query: str, limit: int = 25) -> list:
+    """
+    Search AppStream database for applications matching the query.
+
+    Args:
+        query (str): Search query string
+        limit (int): Maximum number of results to return
+
+    Returns:
+        list: List of dictionaries containing app information
+    """
+    results = []
+    for component in box.as_array():
+        name = component.get_name() or ""
+        description = component.get_summary() or ""
+        origin = component.get_origin() or ""
+        if (
+            query.lower() in name.lower() or query.lower() in description.lower()
+        ) and origin != "":
+            results.append(component)
+            if len(results) >= limit:
+                break
+    return results
+
+
+def appstream_get_icon(component):
+    icons_dir = "./icons"
+    os.makedirs(icons_dir, exist_ok=True)
+    icons = component.get_icons()
+    icon_path = None
+    icon_name = "N/A"
+    # Prefer CACHED icons, fallback to LOCAL
+    for icon in icons:
+        if (
+            icon.get_kind() == AppStream.IconKind.CACHED
+            or icon.get_kind() == AppStream.IconKind.LOCAL
+        ):
+            icon_path_candidate = icon.get_filename()
+            if icon_path_candidate and os.path.isfile(icon_path_candidate):
+                icon_path = icon_path_candidate
+                icon_name = icon.get_name() or os.path.basename(icon_path_candidate)
+
+    return icon_path if icon_path else "N/A", icon_name
+
+
+def get_appstream_app_info(component) -> dict:
+    """
+    Get application information from AppStream component.
+    """
+    return {
+        "name": component.get_name(),
+        "id": component.get_id(),
+        "package": component.get_pkgname(),
+        "origin": component.get_origin(),
+        "icon": appstream_get_icon(component),
+        "description": component.get_summary(),
+        "keywords": component.get_keywords(),
+    }
 
 
 # Device functions
@@ -1936,6 +2008,26 @@ def partition_disk(partitions: dict) -> None:
                     fs != "btrfs" or fs != "ext4"
                 ):
                     format_partition(part, fs)
+
+
+# gui helper fns
+
+
+def set_margins(widget, start: int, end: int, top: int, bottom: int):
+    """
+    Set the margins for a given GUI widget.
+
+    Args:
+        widget: The GUI widget to modify.
+        left (int): The left margin.
+        right (int): The right margin.
+        top (int): The top margin.
+        bottom (int): The bottom margin.
+    """
+    widget.set_margin_top(top)
+    widget.set_margin_bottom(bottom)
+    widget.set_margin_start(start)
+    widget.set_margin_end(end)
 
 
 # ISO functions

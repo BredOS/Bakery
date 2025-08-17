@@ -32,8 +32,6 @@
               packages:
                 - name: nano
                   description: Command-line text editor, free replacement for Pico
-                - name: micro
-                  description: Modern and intuitive terminal-based text editor
         - name: Package Management
           packages:
             - name: yay
@@ -66,14 +64,6 @@
           description: A system designed to make installation and updates of packages easier
         - name: gvfs
           description: "Virtual filesystem implementation for GIO"
-        - name: gvfs-afc
-          description: "GIO (AFC backend; Apple mobile devices)"
-        - name: gvfs-gphoto2
-          description: "GIO (gphoto2 backend; PTP camera, MTP media player)"
-        - name: gvfs-mtp
-          description: "GIO (MTP backend; Android, media player)"
-        - name: gvfs-nfs
-          description: "GIO (NFS backend)"
         - name: gvfs-smb
           description: "GIO (SMB/CIFS backend; Windows client)"
       subgroups:
@@ -117,6 +107,7 @@
                   description: For PipeWire JACK sink, source and jackdbus detection
                 - name: lib32-pipewire-jack
                   description: For 32-bit PipeWire JACK sink, source and jackdbus detection
+                  arch: x86_64
                 - name: wireplumber
                   description: Session manager implementation for PipeWire
                 - name: gst-plugin-pipewire
@@ -218,7 +209,7 @@
   description: Behind-the-scenes working of your Operating System
   noncheckable: true
   expanded: false
-  selected: true
+  selected: false
   icon: applications-system-symbolic
   packages:
     - name: base-devel
@@ -258,12 +249,16 @@
         - name: linux-headers
           description: Headers and scripts for building modules for the Linux kernel
         - name: linux-lts
+          arch: x86_64
           description: The more stable long-term-support kernel
         - name: linux-lts-headers
+          arch: x86_64
           description: Headers and scripts for building modules for the LTS Linux kernel
         - name: linux-zen
+          arch: x86_64
           description: The Linux Zen kernel and modules
         - name: linux-zen-headers
+          arch: x86_64
           description: Headers and scripts for building modules for the Linux Zen kernel
     - name: Display
       description: Display Servers
@@ -392,20 +387,6 @@
               arch: x86_64
             - name: nvidia
               description: For Maxwell (NV110/GMXXX) series and newer with linux kernel
-            - name: nvidia-lts
-              description: For Maxwell (NV110/GMXXX) series and newer with linux-lts kernel
-            - name: nvidia-dkms
-              description: For Maxwell (NV110/GMXXX) series and newer with a custom kernel
-            # - name: nvidia-beta
-            #   description: (AUR) Newer drivers
-            - name: nvidia-open
-              description: For Turing (NV160/TUXXX) series and newer with linux kernel
-            - name: nvidia-open-dkms
-              description: For Turing (NV160/TUXXX) series and newer with custom kernel
-            - name: nvidia-470xx-dkms
-              description: For Kepler (NVE0/GKXXX) series
-            - name: nvidia-390xx-dkms
-              description: For Fermi (NVC0/GF1XX) series
           subgroups:
             - name: Nvidia Hybrid
               description: Nvidia Discrete with other integrated GPUs
@@ -433,8 +414,11 @@
                       description: Intel Xorg driver.
                     - name: lib32-virtualgl
                       description: A render/display bridge for 32 bit applications
-                    - lib32-nvidia-utils
+                      arch: x86_64
+                    - name: lib32-nvidia-utils
+                      arch: x86_64
                     # - lib32-nvidia-340xx-utils
+                    #   arch: x86_64
                 # - name: Optimus manager
                 #   packages:
                 #     - optimus-manager
@@ -464,10 +448,12 @@
               description: Radeon's Vulkan mesa driver
             - name: lib32-vulkan-radeon
               description: Radeon's Vulkan mesa driver with 32-bit support
+              arch: x86_64
             - name: amdvlk
               description: AMD's standalone Vulkan driver
             - name: lib32-amdvlk
               description: AMD's standalone Vulkan driver with 32bit support
+              arch: x86_64
             - name: xf86-video-ati
               description: DDX driver for 2D acceleration in Xorg
     - name: Audio
@@ -497,6 +483,7 @@
               description: For PipeWire JACK sink, source and jackdbus detection
             - name: lib32-pipewire-jack
               description: For 32-bit PipeWire JACK sink, source and jackdbus detection
+              arch: x86_64
             - name: wireplumber
               description: Session manager implementation for PipeWire
             - name: gst-plugin-pipewire
@@ -554,17 +541,6 @@
               description: Uncomplicated and easy to use CLI tool for managing a netfilter firewall
             - name: gufw
               description: Gtk frontend for ufw
-        - name: Realtek Drivers
-          noncheckable: true
-          packages:
-            - rtl8723bu-git-dkms
-            - rtl8812au-dkms-git
-            - rtl8814au-aircrack-dkms-git
-            - rtl8814au-dkms-git
-            - rtl8821ce-dkms-git
-            - rtl8821cu-dkms-git
-            - rtl88x2bu-dkms-git
-            - rtl88xxau-aircrack-dkms-git
         - name: Broadcom Drivers
           noncheckable: true
           subgroups:
@@ -576,7 +552,6 @@
             - name: broadcom-wl
               packages:
                 - broadcom-wl
-                - broadcom-wl-dkms
     - name: Bluetooth
       description: Bluetooth Drivers
       packages:
@@ -669,12 +644,14 @@
       icon: applications-system-symbolic
       subgroups:
         - name: VirtualBox
+          arch: x86_64
           packages:
             - name: virtualbox-guest-utils
               description: VirtualBox Guest utilities with X support
             - name: virtualbox-guest-utils-nox
               description: VirtualBox Guest utilities without X support
         - name: VMWare
+          arch: x86_64
           packages:
             - name: open-vm-tools
               description: Suite of open source virtualization utilities and drivers
@@ -766,18 +743,11 @@
           description: A system for building, distributing and running sandboxed desktop applications on Linux
           packages:
             - name: flatpak
-              description: Linux application sandboxing and distribution framework (formerly xdg-app)
+              description: Linux application sandboxing and distribution framework (formerly xdg-app) 
             - name: xdg-desktop-portal
               description: For flatpak apps to interact with your desktop
             - name: flatseal
               description: A permissions manager for Flatpak.
-        - name: Snap
-          description: Software deployment and package management system
-          packages:
-            - name: snapd
-              description: Service and tools for management of snap packages
-            - name: apparmor
-              description: Mandatory Access Control (MAC) using Linux Security Module (LSM)
         - name: Nix
           description: A purely functional package manager that aims to make package management reliable and reproducible
           packages:
@@ -938,12 +908,8 @@
       packages:
         - name: yay
           description: Commandline AUR helper
-        - name: paru
-          description: Commandline AUR helper
         # - name: aurora-git
         #   description: (AUR) A minimal AUR helper
-        - name: pamac-aur
-          description: Graphical package management tool
         - name: bauh
           description: Graphical package management tool
         - name: octopi
@@ -955,16 +921,6 @@
       noncheckable: true
       icon: applications-system-symbolic
       subgroups:
-        - name: VirtualBox
-          packages:
-            - name: virtualbox
-              description: Powerful x86 virtualization for enterprise as well as home use
-            - name: virtualbox-host-modules-arch
-              description: Virtualbox host kernel modules for Linux kernel
-            - name: virtualbox-host-dkms
-              description: Virtualbox host kernel modules for other kernels (Install kernel headers too)
-            - name: virtualbox-guest-iso
-              description: Install guest additions onto systems other than Arch Linux
         - name: QEMU
           packages:
             - name: qemu-full
@@ -972,7 +928,7 @@
             - name: qemu-base
               description: QEMU base without GUI
             - name: qemu-desktop
-              description: x86_64 architecture emulators for full-system emulation
+              description: Emulator for full-system emulation
             - name: qemu-emulators-full
               description: x86_64 usermode variant, arm, and other architectures
             - name: qemu-block-gluster
@@ -1094,6 +1050,7 @@
           subgroups:
             - name: Wine
               description: Windows compatibility layer
+              arch: x86_64
               noncheckable: false
               icon: application-x-ms-dos-executable-symbolic
               packages:
@@ -1105,10 +1062,13 @@
                   arch: x86_64
                 - name: wine-gecko
                   description: Wine's built-in replacement for Microsoft's Internet Explorer
+                  arch: x86_64
                 - name: wine-mono
                   description: Wine's built-in replacement for Microsoft's .NET Framework
+                  arch: x86_64
                 - name: winetricks
                   description: Script to install various redistributable runtime libraries in Wine.
+                  arch: x86_64
                 # - name: crossover
                 #   description: (AUR) Paid, commercialized version of Wine which provides more comprehensive end-user support
                 # - name: playonlinux
@@ -1136,7 +1096,8 @@
                   arch: x86_64
                 - vulkan-tools
                 - vulkan-swrast
-                - lib32-vulkan-swrast
+                - name: lib32-vulkan-swrast
+                  arch: x86_64
                 - vulkan-headers
                 - vulkan-validation-layers
               subgroups:
@@ -1316,7 +1277,11 @@
         - name: telegram-desktop
           description: Official Telegram Desktop client
         - name: discord
+          arch: x86_64
           description: "All-in-one voice and text chat for gamers"
+        - name: legcord
+          arch: aarch64
+          description: "Unofficial Discord client for Linux"
     - name: Video Players
       noncheckable: true
       icon: applications-multimedia-symbolic
@@ -1388,6 +1353,7 @@
         # - name: goodvibes
         #   description: (AUR) Lightweight internet radio player
         - name: spotify-launcher
+          arch: x86_64
           description: Manages a spotify installation in your home folder from the official spotify release server
         # - name: spotify
         #   description: (AUR) Proprietary music streaming service (requires a free account)
@@ -1456,10 +1422,6 @@
           description: Actively developed fork of KOffice, the KDE office suite
         # - name: openoffice-bin
         #   description: (AUR) Open-source office software suite for word processing, spreadsheets, presentations, graphics, databases and more
-        - name: freeoffice
-          description: (AUR) Microsoft Office-compatible proprietary office suite with a word processor, spreadsheet, and presentation graphics software
-        - name: onlyoffice-bin
-          description: (AUR) Office suite that combines text, spreadsheet and presentation editors
     - name: Email Clients
       noncheckable: true
       packages:
@@ -1475,10 +1437,6 @@
           description: Simple and light email client for GNOME
         - name: claws-mail
           description: Lightweight GTK-based email client and news reader
-        - name: betterbird-bin
-          description: "EN-US // Betterbird is a fine-tuned version of Mozilla Thunderbird, Thunderbird on steroids, if you will."
-        - name: betterbird-de-bin
-          description: "EN-US // Betterbird is a fine-tuned version of Mozilla Thunderbird, Thunderbird on steroids, if you will."
     - name: Document Viewers
       description: PDF, PS and DjVu viewing
       noncheckable: true
@@ -1553,7 +1511,7 @@
         - name: scribus
           description: Desktop publishing program. Uses hyphen and its language packs for hyphenation
 - name: Media Production
-  description: Tools for YouTubers, Twitch streamers and their ilk
+  description: Tools for YouTubers, Twitch streamers and other content creators
   noncheckable: true
   selected: false
   icon: applications-multimedia-symbolic
@@ -1703,6 +1661,7 @@
       icon: accessories-text-editor-symbolic
       packages:
         - name: code
+          arch: x86_64
           description: Open-source release of Visual Studio Code built from the official code-oss repository
         - name: sublime-text-4
           description: The sophisticated text editor for code, markup and prose
