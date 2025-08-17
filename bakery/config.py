@@ -33,9 +33,8 @@ offline_pages_on_dev = [
     "Finish",
 ]
 online_pages_on_dev = [
-        "Packages",
+    "Packages",
     "Desktops",
-
     "Locale",
     "Keyboard",
     "Timezone",
