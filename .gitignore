@@ -175,3 +175,4 @@ pkg/
 build/
 *.pkg.tar.zst
 *.pkg.tar.zst.sig
+*.gresource

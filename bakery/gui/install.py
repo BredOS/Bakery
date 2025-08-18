@@ -17,8 +17,9 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from bakery import lp, lrun, _, st_msgs
 from pyrunning import LoggingLevel
-
+from bakery.install import install
 import threading
 import gi
 
@@ -75,7 +76,7 @@ class install_screen(Adw.Bin):
         pos = message.find("%ST")
         if pos != -1:
             prs = message.rfind("%")
-            stm = bakery.st_msgs[int(message[pos + 3 : prs])]
+            stm = st_msgs[int(message[pos + 3 : prs])]
             self.progress_bar.set_fraction(stm[1] / 100)
             self.curr_action.set_label(stm[0])
         else:
@@ -135,7 +136,7 @@ class InstallThread(threading.Thread):
             "Starting install with data: "
             + str(self.window.collect_data(show_pass=False))
         )
-        res = bakery.install(install_data)
+        res = install(install_data)
         if res == 0:
             # Change to finish page
             self.window.current_page = self.window.pages.index("Finish")

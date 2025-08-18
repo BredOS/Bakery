@@ -17,8 +17,21 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import gi
+# gui helper fns
 
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gio, Gdk, GLib, Pango  # type: ignore
+
+def set_margins(widget, start: int, end: int, top: int, bottom: int):
+    """
+    Set the margins for a given GUI widget.
+
+    Args:
+        widget: The GUI widget to modify.
+        left (int): The left margin.
+        right (int): The right margin.
+        top (int): The top margin.
+        bottom (int): The bottom margin.
+    """
+    widget.set_margin_top(top)
+    widget.set_margin_bottom(bottom)
+    widget.set_margin_start(start)
+    widget.set_margin_end(end)

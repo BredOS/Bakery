@@ -17,14 +17,35 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from .. import config
-from pyrunning import LoggingHandler
+import threading
 from time import sleep
+
+from bakery import config, lp, lrun, _, log_file
+from bakery.misc import upload_log, reboot, detect_install_source
+from bredos.logging import setup_handler
+from bredos.utilities import (
+    debounce,
+    detect_device,
+    detect_session_configuration,
+    time_fn,
+)
+from pyrunning import LoggingHandler
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, Gio, Gdk, GLib  # type: ignore
+
+from .desktops import de_screen
+from .finish import finish_screen
+from .install import InstallThread, install_screen
+from .keyboard import kb_screen
+from .timezone import timezone_screen
+from .locale import locale_screen
+from .user import user_screen
+from .partitioning import partitioning_screen
+from .packages import packages_screen
+from .summary import summary_screen
 
 
 class BakeryApp(Adw.Application):
@@ -118,7 +139,7 @@ class BakeryApp(Adw.Application):
         except GLib.Error as e:
             lp(f"Error loading CSS : {e} ", mode="error")
             return None
-        lp(f"loading custom styling : {css_fn}", mode="debug")
+        lp(f"loading custom styling", mode="debug")
         return css_provider
 
     def set_styling(self):
@@ -160,7 +181,7 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.cancel_dialog.set_property("hide-on-close", True)
         self.install_type = None
         self.install_source = detect_install_source()
-        self.install_device = detect_install_device()
+        self.install_device = detect_device()
         self.session_configuration = detect_session_configuration()
         self.online_install.connect("clicked", self.main_button_clicked)
         self.offline_install.connect("clicked", self.main_button_clicked)
@@ -189,9 +210,9 @@ class BakeryWindow(Adw.ApplicationWindow):
                         "The log file could not be uploaded it can still be found at"
                     )  # pyright: ignore[reportCallIssue]
                     + '<br><a href="file://'
-                    + log_path
+                    + log_file
                     + '">'
-                    + log_path
+                    + log_file
                     + "</a>"
                 )
             else:
@@ -208,9 +229,9 @@ class BakeryWindow(Adw.ApplicationWindow):
                     + logurl
                     + "</a>"
                     + '\n<a href="file://'
-                    + log_path
+                    + log_file
                     + '">'
-                    + log_path
+                    + log_file
                     + "</a>"
                 )
             self.log_dialog.present()
@@ -569,10 +590,7 @@ class BakeryWindow(Adw.ApplicationWindow):
                 self.pages = config.offline_pages_on_dev
             self.add_pages(self.stack1, self.pages)
 
-        bakery.logging_handler = LoggingHandler(
-            logger=bakery.logger,
-            logging_functions=[all_pages["Install"].console_logging],
-        )
+        setup_handler([all_pages["Install"].console_logging])
         self.install_type = install_type
         self.current_page = 0
 

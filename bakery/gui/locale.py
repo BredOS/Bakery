@@ -17,14 +17,18 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from datetime import datetime, UTC
+from bakery import lp, lrun, _
+from bakery.locale import langs
 from babel import dates, numbers
 from babel import Locale as bLocale
+from datetime import datetime, UTC
+
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gio, Gdk, GLib, Pango  # type: ignore
+
+from gi.repository import Gtk, Adw  # type: ignore
 
 
 @Gtk.Template(resource_path="/org/bredos/bakery/ui/locale_screen.ui")

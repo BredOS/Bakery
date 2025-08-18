@@ -17,6 +17,14 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from bakery.validate import (
+    gidc,
+    validate_fullname,
+    validate_hostname,
+    uidc,
+    validate_username,
+)
+
 import gi
 
 gi.require_version("Gtk", "4.0")

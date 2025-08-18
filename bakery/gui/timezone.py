@@ -19,10 +19,15 @@
 
 from pytz import timezone
 from datetime import datetime
+from bakery import lp, lrun, _
+from bakery.network import geoip
+from bakery.timezone import tz_list
+
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
+
 from gi.repository import Gtk, Adw, GLib  # type: ignore
 
 

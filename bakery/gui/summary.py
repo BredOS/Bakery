@@ -17,6 +17,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from bakery.keyboard import kb_layouts, kb_models
+
 import gi
 
 gi.require_version("Gtk", "4.0")

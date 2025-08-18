@@ -17,6 +17,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from bakery import lp, lrun, _
+
 import gi
 
 gi.require_version("Gtk", "4.0")

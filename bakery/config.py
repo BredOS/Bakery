@@ -1,4 +1,22 @@
 "Settings for the installer"
+#!/usr/bin/env python
+#
+# Copyright 2025 BredOS
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 supported_languages = {"English": "en_US.UTF-8"}
 timezone = {"region": "Europe", "zone": "London"}
@@ -198,3 +216,15 @@ iso_packages_to_remove = [
     "mkinitcpio-archiso",
     "mkinitcpio-nfs-utils",
 ]
+
+dms = {
+    "sddm": "sddm.service",
+    "lightdm": "lightdm.service",
+    "gdm": "gdm.service",
+    "lxdm": "lxdm.service",
+    "tdm": "tdm.service",
+    "kdm": "kdm.service",
+    "mdm": "mdm.service",
+    "slim": "slim.service",
+    "entrance": "entrance.service",
+}

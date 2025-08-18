@@ -17,11 +17,17 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import platform
 import gi
+
+from bakery import lp, lrun, _
+from bakery.appstream import appstream_initialize
+from bakery.gui.helper import set_margins
+from bakery.packages import get_packages_list
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GLib  # type: ignore
+from gi.repository import Gtk, Adw, GLib, Pango  # type: ignore
 
 
 @Gtk.Template(resource_path="/org/bredos/bakery/ui/packages_screen.ui")

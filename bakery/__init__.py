@@ -16,3 +16,48 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+from datetime import datetime
+import os
+import locale
+from bredos.translations import setup_translations
+from bredos.logging import (
+    setup_logging,
+    setup_handler,
+    lp,
+    lrun,
+    dryrun,
+    expected_to_fail,
+    get_handler,
+    get_logger,
+)
+
+if dryrun:
+    # ./DRYRUN.log
+    log_path = "."
+    log_filename = "DRYRUN.log"
+else:
+    log_path = os.path.join(os.path.expanduser("~"), ".bredos", "bakery", "logs")
+    log_filename = datetime.now().strftime("BAKERY-%Y-%m-%d-%H-%M-%S.log")
+
+setup_logging("bredos-bakery", log_path, log_filename)
+setup_handler()
+lp("Logger started.")
+lp("Dry run = " + str(dryrun))
+lp("Setting up translations..")
+_, _p = setup_translations(
+    "bakery", locale.getdefaultlocale()[0]
+)  # pyright: ignore[reportGeneralTypeIssues]
+lp("Translations setup.")
+
+dryrun = dryrun
+log_file = os.path.join(log_path, log_filename)
+lp = lp
+lrun = lrun
+_p = _p
+_ = _
+expected_to_fail = expected_to_fail
+
+from bakery import misc
+
+st_msgs = misc.st_msgs

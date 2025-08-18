@@ -17,6 +17,18 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from bredos.utilities import time_fn, detect_device
+from bakery import lp, lrun, _, config
+from bakery.partitioning import (
+    check_efi,
+    list_drives,
+    get_partitions,
+    check_partition_table,
+    gen_new_partitions,
+)
+from typing import Any
+
+from time import sleep
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -73,7 +85,7 @@ class partitioning_screen(Adw.Bin):
         self.selection = {}
 
         self.is_efi = check_efi()
-        self.device = detect_install_device()
+        self.device = detect_device()
         if self.is_efi:
             self.sys_type.set_label(
                 _("System type: ") + "UEFI"

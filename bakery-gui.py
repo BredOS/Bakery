@@ -50,6 +50,7 @@ def set_resources() -> None:
 
 if __name__ == "__main__":
     set_resources()
-    # add import
+    from bakery.gui.main import BakeryApp
+
     app = BakeryApp(application_id="org.bredos.bakery")
     app.run(argv)
