@@ -26,16 +26,44 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+ignore_vars=(
+    "SHELL" "COLORTERM" "LANGUAGE" "PWD" "LOGNAME" "HOME" "LANG"
+    "TERM" "USER" "SHLVL" "PKEXEC_UID" "LC_CTYPE" "PATH" "_"
+)
+
+save_env() {
+    tmp_env=$(mktemp)
+    printenv | while IFS='=' read -r key value; do
+        skip=0
+        for ignore in "${ignore_vars[@]}"; do
+            if [[ "$key" == "$ignore" ]]; then
+                skip=1
+                break
+            fi
+        done
+        if [[ $skip -eq 0 ]]; then
+            # Escape double quotes and dollar signs
+            esc_value="${value//\"/\\\"}"
+            esc_value="${esc_value//\$/\\\$}"
+            echo "export $key=\"$esc_value\"" >> "$tmp_env"
+        fi
+    done
+    echo "$tmp_env"
+}
+
 if [[ $ui == "gui" || $ui == "tui" ]]; then
     script_name="bakery-$ui.py"
     if [[ -f "$script_dir/$script_name" ]]; then
         if [[ $ui == "gui" ]]; then
             #check if mesa-panfork/mesa-panfork-git is installed then export LIBGL_ALWAYS_SOFTWARE=1
             if pacman -Q mesa-panfork &>/dev/null || pacman -Q mesa-panfork-git &>/dev/null; then
-                export LIBGL_ALWAYS_SOFTWARE=1
+                command="export LIBGL_ALWAYS_SOFTWARE=1;"
+            else
+                command=""
             fi
         fi
-        python "$script_dir/$script_name" "${extra_args[@]}"
+
+        command+=" python $script_dir/$script_name ${extra_args[*]}"
     else
         echo "Error: bakery-$ui is not installed"
         echo "Please install bakery-$ui with 'sudo pacman -S bakery-$ui'"
@@ -44,4 +72,9 @@ if [[ $ui == "gui" || $ui == "tui" ]]; then
 else
     echo "Error: No UI specified."
     exit 1
+fi
+
+if [[ $EUID -ne 0 ]]; then
+    tmp_env_file=$(save_env)
+    exec pkexec bash -c "source \"$tmp_env_file\"; rm -f \"$tmp_env_file\"; $command"
 fi

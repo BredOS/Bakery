@@ -20,8 +20,13 @@
 import platform
 import gi
 
+from os import path
 from bakery import lp, lrun, _
-from bakery.appstream import appstream_initialize
+from bakery.appstream import (
+    appstream_initialize,
+    search_appstream,
+    get_appstream_app_info,
+)
 from bakery.gui.helper import set_margins
 from bakery.packages import get_packages_list
 from bredos.utilities import time_fn
@@ -698,7 +703,6 @@ class packages_screen(Gtk.Box):
     def on_search_changed(self, search_entry):
         """Handle search in categories and packages, including AppStream results"""
         search_text = search_entry.get_text().lower().strip()
-        lp(f"Search input: '{search_text}'", "info")
 
         # Remove previous search category if present
         def remove_search_category():
