@@ -17,7 +17,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from bakery import lp, lrun, _
+from bakery import lp, lrun, _, log_file
+from bredos.utilities import time_fn
 
 import gi
 
@@ -26,10 +27,16 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, Gio, Gdk, GLib, Pango  # type: ignore
 
 
+@time_fn
 @Gtk.Template(resource_path="/org/bredos/bakery/ui/finish_screen.ui")
 class finish_screen(Adw.Bin):
     __gtype_name__ = "finish_screen"
 
+    status_page = Gtk.Template.Child()
+
     def __init__(self, window, **kwargs) -> None:
         super().__init__(**kwargs)
         self.window = window
+        self.status_page.set_description(
+            "You can find the installation log file at: " + log_file
+        )

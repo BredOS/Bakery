@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.95.0 -->
+<!-- Created with Cambalache 0.96.1 -->
 <interface domain="bakery">
   <!-- interface-name finish_screen.ui -->
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.0"/>
   <template class="finish_screen" parent="AdwBin">
     <child>
-      <object class="AdwStatusPage">
+      <object class="AdwStatusPage" id="status_page">
         <property name="title" translatable="yes">Installation Complete!</property>
         <child>
           <object class="GtkBox"/>

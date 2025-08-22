@@ -36,39 +36,15 @@ if compile_schemas.found()
        args: ['--strict', '--dry-run', meson.current_source_dir()])
 endif
 
+compile_gresource = find_program('glib-compile-resources', required: true)
+if compile_gresource.found()
+  test('Compile GResource',
+       compile_gresource,
+       args: ['org.bredos.bakery.gresource.xml'])
+  install_data('org.bredos.bakery.gresource',
+               install_dir: join_paths(get_option('datadir'), 'bakery', 'data'))
+else
+  error('glib-compile-resources not found, cannot compile GResource')
+endif
 
-install_data('main.css',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-install_data('window.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-install_data('kb_screen.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-install_data('locale_screen.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-install_data('timezone_screen.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-install_data('user_screen.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-# de_screen.ui summary_screen.ui
-install_data('summary_screen.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-install_data('de_screen.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-install_data('install_screen.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-install_data('finish_screen.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
-install_data('partitioning_screen.ui',
-  install_dir: join_paths(get_option('datadir'), 'bakery/data')
-)
 subdir('icons')

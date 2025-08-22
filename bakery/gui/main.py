@@ -174,7 +174,6 @@ class BakeryWindow(Adw.ApplicationWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.set_deletable(False)
         # go to the first page of main stack
         self.main_stk.set_visible_child(self.main_page.get_child())
         self.cancel_dialog = self.install_cancel
@@ -192,6 +191,11 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.back_btn.connect("clicked", self.on_back_clicked)
         self.err_dialog.connect("response", self.on_err_dialog_response)
         self.log_dialog.connect("response", self.on_log_dialog_response)
+
+        # Register close button to on_cancel_clicked (with correct handler)
+        self._close_request_handler_id = self.connect(
+            "close-request", self.on_close_request
+        )
 
         # Initialize step indicators
         self.step_indicators = []
@@ -265,6 +269,8 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.current_page = self.pages.index("Install")
         page_name = self.pages[self.current_page]
         page_id = self.get_page_id(page_name)
+        self.set_deletable(False)
+        self.disconnect(self._close_request_handler_id)
         self.stack1.set_visible_child_name(page_id)
         self.button_box.set_visible(False)
         self.install_thread = InstallThread(self, all_pages["Install"])
@@ -389,16 +395,20 @@ class BakeryWindow(Adw.ApplicationWindow):
         # connect the yes button to the delete_pages function
         self.cancel_dialog.present()
 
-    def on_close_clicked(self, button) -> None:
-        # connect the yes button to the delete_pages function
+    def on_close_request(self, *args):
+        # Show the cancel dialog and prevent window from closing until user confirms
         self.cancel_dialog.present()
+        return True  # Prevent window from closing until dialog response
 
     def on_cancel_dialog_response(self, dialog, resp) -> None:
         if resp == "yes":
             self.cancel_dialog.hide()
+            # Disconnect close-request handler before closing to avoid loop
+            self.disconnect(self._close_request_handler_id)
             self.close()
         else:
             self.cancel_dialog.hide()
+            # Do not close the window
 
     def delete_pages(self, dialog, resp) -> None:
         if resp == "yes":
@@ -439,7 +449,6 @@ class BakeryWindow(Adw.ApplicationWindow):
             data["packages"] = {}
             if self.install_source == "from_iso":
                 data["packages"]["to_remove"] = config.iso_packages_to_remove
-                data["packages"]["de_packages"] = []
             try:
                 data["partitions"] = all_pages["Partitioning"].collect_data()
             except:
@@ -448,7 +457,7 @@ class BakeryWindow(Adw.ApplicationWindow):
                 data["packages"]["extra_to_install"] = all_pages[
                     "Packages"
                 ].collect_data()
-                data["packages"]["de_packages"] = []
+                data["packages"]["desktop"] = all_pages["Desktops"].collect_data()
 
             return data
         else:
@@ -590,7 +599,7 @@ class BakeryWindow(Adw.ApplicationWindow):
                 self.pages = config.offline_pages_on_dev
             self.add_pages(self.stack1, self.pages)
 
-        setup_handler([all_pages["Install"].console_logging])
+        setup_handler(all_pages["Install"].console_logging)
         self.install_type = install_type
         self.current_page = 0
 
@@ -620,7 +629,7 @@ class CheckThread(threading.Thread):
                 win.next_btn.set_sensitive(True)
             else:
                 win.next_btn.set_sensitive(False)
-            sleep(0.5)
+            sleep(0.3)
 
 
 class CheckPartitioningThread(threading.Thread):
@@ -636,4 +645,4 @@ class CheckPartitioningThread(threading.Thread):
                 win.next_btn.set_sensitive(True)
             else:
                 win.next_btn.set_sensitive(False)
-            sleep(0.5)
+            sleep(0.3)

@@ -84,6 +84,17 @@ def get_packages_list() -> dict:
 
 
 @catch_exceptions
+def get_desktops_list() -> dict:
+    """
+    Returns desktop list of packages.
+    """
+
+    data_bytes = Gio.resources_lookup_data("/org/bredos/bakery/desktops.yaml", 0)
+
+    return yaml.safe_load(data_bytes.get_data().decode("utf-8"))
+
+
+@catch_exceptions
 def package_desc(packages: list) -> dict:
     ensure_localdb()
     res = {}

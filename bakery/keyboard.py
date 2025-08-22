@@ -220,6 +220,9 @@ _kbmodelmap = {
         "Truly Ergonomic Computer Keyboard Model 229 (Standard sized Alt keys, additional "
         + "Super and Menu key)"
     ),
+    "abnt2": "Generic 104-key PC (Brazilian ABNT2 layout)",
+    "jp106": "Generic 106-key PC (Japanese layout)",
+    "kr106": "Generic 106-key PC (Korean layout)",
 }
 
 _kblangmap = {

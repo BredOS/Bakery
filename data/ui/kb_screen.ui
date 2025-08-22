@@ -62,7 +62,9 @@
                       <object class="AdwPreferencesGroup">
                         <property name="title" translatable="yes">Test your layout here!</property>
                         <child>
-                          <object class="AdwEntryRow"/>
+                          <object class="AdwEntryRow">
+                            <property name="use-markup">False</property>
+                          </object>
                         </child>
                       </object>
                     </child>

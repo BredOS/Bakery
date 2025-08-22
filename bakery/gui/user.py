@@ -24,6 +24,7 @@ from bakery.validate import (
     uidc,
     validate_username,
 )
+from bredos.utilities import time_fn
 
 import gi
 
@@ -32,6 +33,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw  # type: ignore
 
 
+@time_fn
 @Gtk.Template(resource_path="/org/bredos/bakery/ui/user_screen.ui")
 class user_screen(Adw.Bin):
     __gtype_name__ = "user_screen"

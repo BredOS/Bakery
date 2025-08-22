@@ -3,18 +3,17 @@
 <!-- Created with Cambalache 0.96.1 -->
 <cambalache-project version="0.96.0" target_tk="gtk-4.0">
   <css filename="main.css" is_global="1"/>
-  <ui template-class="BakeryWindow" filename="window.ui" sha256="c256251e3b6cb2d6e59cf0bfc7b092972adb99f32a3e0f065d899db2c6f9cc8f">
+  <ui template-class="BakeryWindow" filename="window.ui" sha256="4ec0eee9d90644222c2e38ac8d107150fbe1333d7c5abcb11872f3714b19523f">
     <css-provider>main.css</css-provider>
   </ui>
   <ui template-class="partitioning_screen" filename="partitioning_screen.ui" sha256="8907df8e437e70f5016d26efa0e0444cce13d2f0b14c8f2d5484f3318f6816de"/>
-  <ui template-class="kb_screen" filename="kb_screen.ui" sha256="622f068fedea76748999f04a30910780c5e4b5a455a766d38802ca331e4eac57"/>
+  <ui template-class="kb_screen" filename="kb_screen.ui" sha256="69699df7942831357e81e149196e68507ee0be9f7281caa3c2a4c11b36f75c16"/>
   <ui template-class="locale_screen" filename="locale_screen.ui" sha256="31f4ba67e435c431d4d6c8cf73d033e5155e99d81c9a52153005ef873f7fb3b0"/>
   <ui template-class="timezone_screen" filename="timezone_screen.ui" sha256="73f6bfb013ed86ed3de1e91d47534c56c4e64aa4f5a5c8b638069bd3706b0035"/>
   <ui template-class="user_screen" filename="user_screen.ui" sha256="11b3d076b5cc530628a026d20f25df26cf16e6b4fb08b90030ad854a82b71a50"/>
   <ui template-class="summary_screen" filename="summary_screen.ui" sha256="9a65e5436e88c6db4fca7ce76d55acfe2c1f12de48b19f8741da6006d29e6432"/>
-  <ui filename="de_screen.ui" sha256="575f8c406026689304aa4b7f6425fd8f29bbcbb3303f5f80fc7934dbf2ef454c"/>
+  <ui template-class="de_screen" filename="de_screen.ui" sha256="31872f68f01ea1b069ae56e33a78bf95631851c02798321703f96152b6689c65"/>
   <ui template-class="install_screen" filename="install_screen.ui" sha256="0c88e0282613f68bd8f329595fa20f6980d9823028012112c93d07258c311b90"/>
-  <ui template-class="finish_screen" filename="finish_screen.ui" sha256="64cb99795e3b5b65eb26df16be5910a7cf00ab34a317c5ae6c21e8c38ecce632"/>
-  <ui template-class="packages_screen" filename="packages_screen.ui" sha256="cd99e231a51aa64c2065663f61019abefb7f0feb809b152913c0b92640d40db9"/>
-  <ui template-class="ExampleWindow" filename="../../../Downloads/MainWindow.ui" sha256="3020682d099b21ce57ee9d39ed00d2df7ee4c8d55fa761fbecd1d0fc67e7e224"/>
+  <ui template-class="finish_screen" filename="finish_screen.ui" sha256="4d298783c50473933ef4b721e2027bebbe19d1d83c29146016ea3281855d5459"/>
+  <ui template-class="packages_screen" filename="packages_screen.ui" sha256="3ac5e06a1ffddf8666eca4873ad4fbdc75e7505977f1881f28d646dceabeddc3"/>
 </cambalache-project>

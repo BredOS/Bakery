@@ -19,7 +19,7 @@
 
 from bakery import lp, lrun, _
 from bakery.keyboard import kb_layouts, kb_models, kb_variants
-
+from bredos.utilities import time_fn
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -28,6 +28,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw  # type: ignore
 
 
+@time_fn
 @Gtk.Template(resource_path="/org/bredos/bakery/ui/kb_screen.ui")
 class kb_screen(Adw.Bin):
     __gtype_name__ = "kb_screen"
@@ -52,6 +53,9 @@ class kb_screen(Adw.Bin):
 
         self.models_model = Gtk.StringList()
         self.models_list.set_model(self.models_model)
+        # Set expression for search
+        expr = Gtk.PropertyExpression.new(Gtk.StringObject, None, "string")
+        self.models_list.set_expression(expr)
         for model in self.kb_models.keys():
             self.models_model.append(self.kb_models[model])
 

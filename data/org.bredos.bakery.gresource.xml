@@ -14,5 +14,19 @@
   <file preprocess="xml-stripblanks">ui/window.ui</file>
   <file>ui/main.css</file>
   <file>packages.yaml</file>
+  <file>desktops.yaml</file>
+  <file>images/cinnamon.png</file>
+  <file>images/gnome.png</file>
+  <file>images/i3.png</file>
+  <file>images/plasma.png</file>
+  <file>images/sway.png</file>
+  <file>images/tty.jpg</file>
+  <file>images/xfce.png</file>
+  <file>images/cinnamon.svg</file>
+  <file>images/plasma.svg</file>
+  <!-- <file>images/sway.svg</file> -->
+  <file>images/xfce.svg</file>
+  <file>images/i3.svg</file>
+  <file>images/gnome.svg</file>
   </gresource>
 </gresources>

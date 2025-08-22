@@ -22,6 +22,7 @@ from bakery.locale import langs
 from babel import dates, numbers
 from babel import Locale as bLocale
 from datetime import datetime, UTC
+from bredos.utilities import time_fn
 
 import gi
 
@@ -31,6 +32,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw  # type: ignore
 
 
+@time_fn
 @Gtk.Template(resource_path="/org/bredos/bakery/ui/locale_screen.ui")
 class locale_screen(Adw.Bin):
     __gtype_name__ = "locale_screen"

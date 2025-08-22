@@ -1,0 +1,759 @@
+items:
+  - id: plasma
+    name: "KDE Plasma"
+    description: "KDE Plasma is a graphical workspaces environment created by KDE primarily for Linux systems. The graphical interface was fully migrated to QML, which uses OpenGL for hardware acceleration, which resulted in better performance and reduced power consumption."
+    screenshot: "/org/bredos/bakery/images/plasma.png"
+    icon: "/org/bredos/bakery/images/plasma.svg"
+    dm: sddm
+    de: plasma
+    session: wayland
+    packages:
+      name: KDE Plasma Desktop
+      description: Options for the KDE Plasma desktop installation
+      noncheckable: true
+      ignore-share-state: true
+      subgroups:
+        - name: Base
+          description: The base desktop environment
+          selected: true
+          critical: true
+          noncheckable: false
+          subgroups:
+            - name: Core 
+              description: "Core packages to install the desktop environment"
+              selected: true
+              critical: true
+              noncheckable: false
+              packages:
+                - name: plasma-meta
+                  description: "KDE Plasma Desktop Meta Package"
+            - name: Applications 
+              description: "Application packages for the desktop environment"
+              selected: true
+              critical: true
+              noncheckable: false
+              packages:
+                - name: kde-applications 
+                  description: "KDE Applications Package Group"
+        # - name: Meta Packages Only
+        #   description: (For advanced users only) KDE Desktop installed as meta packages
+        #   selected: false
+        #   critical: true
+        #   noncheckable: false
+        #   subgroups:
+        #     - name: Base 
+        #       description: "Base packages to install the desktop environment"
+        #       selected: false
+        #       critical: true
+        #       noncheckable: false
+        #       packages:
+        #         - name: plasma-meta
+        #           description: "KDE Plasma Desktop Meta Package"
+        #     - name: Applications 
+        #       description: "Application packages for the desktop environment"
+        #       selected: false
+        #       critical: true
+        #       noncheckable: false
+        #       packages:
+        #         - name: kde-applications-meta 
+        #           description: "KDE Applications Meta Package"
+        # - name: Package Groups Only
+        #   description: (For advanced users only) KDE Desktop installed as package groups
+        #   selected: false
+        #   critical: true
+        #   noncheckable: false
+        #   subgroups:
+        #     - name: Base 
+        #       description: "Base packages to install the desktop environment"
+        #       selected: false
+        #       critical: true
+        #       noncheckable: false
+        #       packages:
+        #         - name: plasma
+        #           description: "KDE Plasma Desktop Package Group"
+        #     - name: Applications 
+        #       description: "Application packages for the desktop environment"
+        #       selected: false
+        #       critical: true
+        #       noncheckable: false
+        #       packages:
+        #         - name: kde-applications 
+        #           description: "KDE Applications Package Group"
+        # - name: Miscellaneous
+        #   description: "Miscellaneous packages for the desktop environment"
+        #   selected: true
+        #   critical: false
+        #   noncheckable: false
+        #   packages:
+        #     - egl-wayland
+        #     - layer-shell-qt5
+        #     - plasma5-integration 
+        #     - xdg-desktop-portal-gtk
+        #     - gsettings-qt
+        #     - gsettings-desktop-schemas
+        #     - gnome-settings-daemon
+        #     - kvantum
+  - id: cinnamon
+    name: "Cinnamon"
+    description: "Cinnamon is a desktop environment which combines a traditional desktop layout with modern graphical effects. The underlying technology was forked from the GNOME desktop. As of version 2.0, Cinnamon is a complete desktop environment and not merely a frontend for GNOME like GNOME Shell and Unity."
+    screenshot: "/org/bredos/bakery/images/cinnamon.png"
+    icon: "/org/bredos/bakery/images/cinnamon.svg"
+    dm: lightdm
+    de: cinnamon
+    session: wayland
+    packages:
+      name: Cinnamon Desktop
+      description: Options for the Cinnamon desktop installation
+      noncheckable: true
+      ignore-share-state: true
+      subgroups:
+        - name: Curated
+          description: Hand-picked offering of the Cinnamon desktop
+          selected: true
+          critical: true
+          packages:
+            # ===============
+            # Display Manager
+            # ===============
+            - name: lightdm
+              description: Display Manager and Login screen
+            - name: lightdm-slick-greeter
+              description: A GTK based greeter default in Linux Mint
+            # =============
+            # Screen Locker (sometimes referred to as screensaver)
+            # =============
+            - name: cinnamon-screensaver
+              description: Screensaver designed to integrate well with the Cinnamon desktop
+            # =============
+            # Compatibility (like Wayland and Nvidia support)
+            # =============
+            # - name:
+            #   description:
+            # ====
+            # Core
+            # ====
+            - name: cinnamon
+              description: The Cinnamon desktop
+            - name: cinnamon-session
+              description: The Cinnamon Session Handler
+            - name: cinnamon-menus
+              description: Cinnamon menu specifications
+            - name: caribou
+              description: A text entry and UI navigation application (on-screen keyboard)
+            - name: gsound
+              description: Small library for playing system sounds
+            - name: gstreamer
+              description: Multimedia graph framework - core
+            - name: librsvg
+              description: SVG rendering library
+            - cjs
+            - libgnomekbd
+            - libkeybinder3
+            - python-cairo
+            - python-gobject
+            - python-pam
+            - python-pexpect
+            - python-pillow
+            - python-pyinotify
+            - python-pytz
+            - python-requests
+            - python-tinycss2
+            - python-xapp
+            - name: mintlocale
+              description: Adds the ability to properly switch between locales for the cinnamon desktop
+            - name: cinnamon-translations
+              description: Translations for Cinnamon and Nemo
+            # ==============
+            # Window Manager
+            # ==============
+            - name: muffin
+              description: Cinnamon window manager based on Mutter
+            # ================
+            # Settings related
+            # ================
+            - name: cinnamon-control-center
+              description: The Control Center for Cinnamon
+            - name: cinnamon-settings-daemon
+              description: The Cinnamon Settings daemon
+            - name: libkeybinder3
+              description: A library for registering global keyboard shortcuts
+            - name: network-manager-applet
+              description: Applet for managing network connections
+            - name: timezonemap
+              description: Gtk3 timezone map widget, forked from gnome which forked from Ubiquity
+            - name: xapp
+              description: Common library for X-Apps project
+            - name: blueberry
+              description: Bluetooth support
+            - name: system-config-printer
+              description: Printer settings
+            - name: touchegg
+              description: Linux multi-touch gesture recognizer
+            # ===========
+            # XDG related (like xdg-desktop-portal-gnome, xdg-user-dirs-gtk, archlinux-xdg-menu)
+            # ===========
+            - name: xdg-desktop-portal-xapp
+              description: A backend implementation for xdg-desktop-portal
+            - name: xdg-desktop-portal-gtk
+              description: A backend implementation for xdg-desktop-portal
+            # Polkit agent
+            # ============
+            - name: polkit-gnome
+              description: Legacy polkit authentication agent for GNOME
+            # =================
+            # Extension related (extension manager, store)
+            # =================
+            # - name:
+            #   description:
+            # ===============
+            # Theming related (theming support, uniform theming, basic theme)
+            # ===============
+            # ===========
+            # Tweaking apps (like gnome-tweaks)
+            # ===========
+            # - name:
+            #   description:
+            # ========
+            # Terminal
+            # ========
+            - name: mate-terminal
+              description: MATE Terminal for Cinnamon
+            # ============
+            # File Manager
+            # ============
+            - name: nemo
+              description: "Cinnamon file manager (Nautilus fork)"
+            # ===========
+            # Text Editor
+            # ===========
+            - name: xed
+              description: A small and lightweight text editor. X-Apps Project
+            # ===============
+            # Document Viewer
+            # ===============
+            - name: xreader
+              description: Document viewer for files like PDF and Postscript. X-Apps Project.
+            # ===============
+            # Archive Manager
+            # ===============
+            - name: file-roller
+              description: Create and modify archives
+            # ============
+            # Disk Manager
+            # ============
+            - name: gparted
+              description: A Partition Magic clone, frontend to GNU Parted
+            - name: baobab
+              description: A graphical directory tree analyzer
+            # ==========
+            # Calculator
+            # ==========
+            - name: mate-calc
+              description: Calculator for the MATE desktop environment
+            # ==================
+            # Clock and Calendar
+            # ==================
+            - name: gnome-clocks
+              description: Clocks applications for GNOME
+            - name: gnome-calendar
+              description: Simple and beautiful calendar application designed to perfectly fit the GNOME desktop
+            # ===========
+            # Screenshots
+            # ===========
+            - name: gnome-screenshot
+              description: Take pictures of your screen
+            # ============
+            # Image Viewer
+            # ============
+            - name: xviewer
+              description: A simple and easy to use image viewer. X-Apps Project
+            # ============
+            # Media Player
+            # ============
+            - name: xplayer
+              description: Media player
+        - name: Miscellaneous
+          selected: false
+          critical: false
+          packages:
+            - name: cinnamon-translations
+              description: Translations for Cinnamon and Nemo
+            - mint-themes
+            - mint-themes-legacy
+            - mint-x-icons
+            - mint-y-icons
+            - mint-artwork
+            - mint-backgrounds
+  - id: gnome
+    name: "GNOME"
+    description: "GNOME (GNU Network Object Model Environment, pronounced gah-NOHM) is a graphical user interface (GUI) and set of computer desktop applications for users of the Linux operating system"
+    screenshot: "/org/bredos/bakery/images/gnome.png"
+    icon: "/org/bredos/bakery/images/gnome.svg"
+    selected: true
+    dm: gdm
+    de: gnome
+    session: wayland
+    packages:
+      name: Gnome Desktop
+      description: Options for the Gnome desktop installation
+      noncheckable: true
+      ignore-share-state: true
+      subgroups:
+        - name: Base
+          description: The base desktop environment
+          selected: true
+          critical: true
+          noncheckable: false
+          subgroups:
+            - name: Core 
+              description: "Core packages to install the desktop environment"
+              selected: true
+              critical: true
+              noncheckable: false
+              packages:
+                - name: gnome
+                  description: "Gnome Desktop Package Group"
+            - name: Applications 
+              description: "Application packages for the desktop environment"
+              selected: true
+              critical: true
+              noncheckable: false
+              packages:
+                - name: gnome-extra
+                  description: "Gnome Applications Package Group"
+        - name: Miscellaneous
+          description: "Miscellaneous packages for the desktop environment"
+          selected: true
+          critical: false
+          noncheckable: false
+          packages:
+            - name: polkit-gnome
+              description: Polkit authentication agent for Gnome
+            - name: extension-manager
+              description: A native tool for browsing, installing, and managing GNOME Shell Extensions
+            - name: gnome-tweaks
+              description: Tweaking app
+            - name: qt5ct
+              description: Qt5 Configuration Utility
+            - name: qt6ct
+              description: Qt6 Configuration Utility
+            # - gdm-settings
+  - id: xfce
+    name: "Xfce"
+    description: "Xfce is a lightweight and modular desktop environment currently based on GTK 3. To provide a complete user experience, it includes a window manager, a file manager, desktop and panel."
+    screenshot: "/org/bredos/bakery/images/xfce.png"
+    icon: "/org/bredos/bakery/images/xfce.svg"
+    dm: lightdm
+    de: xfce
+    session: x11
+    packages:
+      name: Xfce Desktop
+      description: Options for the Xfce desktop installation
+      noncheckable: true
+      ignore-share-state: true
+      subgroups:
+        - name: Base
+          description: The base desktop environment
+          selected: true
+          critical: true
+          noncheckable: false
+          subgroups:
+            - name: Core 
+              description: "Core packages to install the desktop environment"
+              selected: true
+              critical: true
+              noncheckable: false
+              packages:
+                - name:  xfce4
+                  description: "Xfce Desktop Package Group"
+            - name: Applications 
+              description: "Application packages for the desktop environment"
+              selected: true
+              critical: true
+              noncheckable: false
+              packages:
+                - name: xfce4-goodies
+                  description: "Xfce Extra Applications Package Group"
+        - name: Miscellaneous
+          description: "Miscellaneous packages for the desktop environment"
+          selected: true
+          critical: true
+          noncheckable: false
+          packages:
+            - name: lightdm
+              description: Display Manager and Login Screen
+            - name: lightdm-slick-greeter
+              description: Greeter for LightDM
+            - name: xreader
+              description: Document Viewer
+            - name: xdg-desktop-portal-gtk
+              description: XDG Desktop Portal
+            - name: xdg-desktop-portal-gnome
+              description: XDG Desktop Portal
+            - name: xfce-polkit
+              description: Polkit Agent
+            - name: gnome-icon-theme
+              description: Complete the icon set
+            - name: engrampa
+              description: Archive manipulator for MATE required for double clicking archives
+            - name: gparted
+              description: Disk Management
+            - name: galculator
+              description: "GTK+ based scientific calculator"
+            - name: xfce4-datetime-plugin
+              description: A date and time display plugin for the Xfce panel
+  - id: sway
+    name: "Sway"
+    description: "Sway is a tiling Wayland compositor and a drop-in replacement for the i3 window manager for X11."
+    screenshot: "/org/bredos/bakery/images/sway.png"
+    icon: "/org/bredos/bakery/images/sway.svg"
+    dm: sddm
+    de: sway
+    session: wayland
+    packages:
+      name: Sway Window Manager
+      description: Options for the Sway Window Manager installation
+      subgroups:
+        - name: Curated
+          description: Hand-picked offering of the Sway Window Manager
+          selected: true
+          critical: true
+          packages:
+            # ===============
+            # Display Manager
+            # ===============
+            - name: sddm
+              description: Display Manager
+            # =============
+            # Screen Locker (sometimes referred to as screensaver)
+            # =============
+            - name: swaylock
+              description: Wayland screen locker
+            # =============
+            # Compatibility (like Wayland and Nvidia support)
+            # =============
+            - name: wayland-protocols
+              description: Wayland protocol specifications
+            - name: qt6-wayland
+              description: Qt 6 Wayland platform plugin
+            # ====
+            # Core
+            # ====
+            - name: sway
+              description: i3-compatible wayland compositor
+            - name: archlinux-xdg-menu
+              description: Generate an XDG compliant menu for the desktop environment
+            - name: boost-libs
+              description: Free peer-reviewed portable C++ source libraries
+            - name: egl-wayland
+              description: Wayland EGL libraries
+            - name: gtk-layer-shell
+              description: Library for layer-shell protocol
+            - name: waybar
+              description: Highly customizable Wayland bar for Sway and Wlroots based compositors
+            - name: wofi
+              description: A launcher for wayland
+            - name: wl-clipboard
+              description: Command line copy/paste utilities for wayland
+            # ==============
+            # Window Manager
+            # ==============
+            # Provided by sway
+            # - name:
+            #   description:
+            # ================
+            # Settings related
+            # ================
+            - name: acpi
+              description: CLI to query the battery status and other ACPI information
+            - name: brightnessctl
+              description: A userspace tool for controlling device brightness
+            - name: htop
+              description: Interactive process viewer
+            - name: network-manager-applet
+              description: Network connection user interface for NetworkManager
+            - name: slurp
+              description: A tool for selecting a region under wayland
+            - name: swayidle
+              description: Idle management daemon for sway
+            - name: sysstat
+              description: Collection of performance monitoring tools for Linux
+            # ===========
+            # XDG related (like xdg-desktop-portal-gnome, xdg-user-dirs-gtk, archlinux-xdg-menu)
+            # ===========
+            - name: dex
+              description: An application launcher for wayland
+            - name: xdg-desktop-portal-wlr
+              description: An implementation of xdg-desktop-portal for wlroots compositors
+            # ============
+            # Polkit agent
+            # ============
+            - name: polkit-gnome
+              description: GNOME authentication agent for PolicyKit
+            # =================
+            # Extension related (extension manager, store)
+            # =================
+            # - name:
+            #   description:
+            # ===============
+            # Theming related (theming support, uniform theming, basic theme)
+            # ===============
+            - name: tela-icon-theme
+              description: Icon Theme
+            - name: fluent-gtk-theme
+              description: GTK Theme
+            - name: gtk-engine-murrine
+              description: GTK2 theme engine
+            - name: lxappearance
+              description: Lightweight GTK+ theme switcher
+            - name: mako
+              description: Lightweight notification daemon for wayland
+            - name: awesome-terminal-fonts
+              description: A font with icons
+            - name: swaybg
+              description: Wayland background image utility
+            - name: ttf-nerd-fonts-symbols
+              description: High number of extra glyphs from popular 'iconic fonts'
+            - name: ttf-ubuntu-font-family
+              description: Ubuntu font family
+            # ===========
+            # Tweaking apps (like gnome-tweaks)
+            # ===========
+            # name:
+            # description:
+            # ========
+            # Terminal
+            # ========
+            - name: xfce4-terminal
+              description: Terminal emulator for the Xfce desktop environment
+            # ============
+            # File Manager
+            # ============
+            - name: thunar
+              description: File manager for Xfce
+            - name: thunar-archive-plugin
+              description: Archive handling plugin for Thunar
+            - name: thunar-media-tags-plugin
+              description: Media tag handling plugin for Thunar
+            - name: thunar-volman
+              description: Device handling plugin for Thunar
+            # ===========
+            # Text Editor
+            # ===========
+            - name: xed
+              description: Lightweight text editor
+            # ===============
+            # Document Viewer
+            # ===============
+            - name: evince
+              description: Document Viewer
+            # ===============
+            # Archive Manager
+            # ===============
+            - name: file-roller
+              description: Archive Manager
+            # ============
+            # Disk Manager
+            # ============
+            - name: gparted
+              description: Disk Manager
+            # ==========
+            # Calculator
+            # ==========
+            - name: mate-calc
+              description: Calculator
+            # ==================
+            # Clock and Calendar
+            # ==================
+            - name: galculator
+              description: Calculator
+            # ============
+            # Image Viewer
+            # ============
+            - name: imv
+              description: A simple image viewer for wayland
+            - name: grim
+              description: A tool for taking screenshots under wayland
+            # ============
+            # Media Player
+            # ============
+            - name: vlc
+              description: Media Player
+  - id: i3
+    name: "i3"
+    description: "i3 is a dynamic tiling window manager inspired by wmii that is primarily targeted at developers and advanced users."
+    screenshot: "/org/bredos/bakery/images/i3.png"
+    icon: "/org/bredos/bakery/images/i3.svg"
+    dm: lightdm
+    de: i3
+    session: x11
+    packages:
+      name: i3 Window Manager
+      description: Options for the i3 Window Manager installation
+      noncheckable: true
+      ignore-share-state: true
+      subgroups:
+        - name: Curated
+          description: Hand-picked offering of the i3 Window Manager
+          selected: true
+          critical: true
+          packages:
+            # ===============
+            # Display Manager
+            # ===============
+            - name: lightdm
+              description: Display Manager and Login screen
+            - name: lightdm-slick-greeter
+              description: A GTK based greeter default in Linux Mint
+            # =============
+            # Screen Locker (sometimes referred to as screensaver)
+            # =============
+            - name: betterlockscreen
+              description: Screen Locker
+            # =============
+            # Compatibility (like Wayland and Nvidia support)
+            # =============
+            # - name:
+            #   description:
+            # ====
+            # Core
+            # ====
+            - name: i3-wm
+              description: The i3wm tiling window manager
+            - name: i3status
+              description: Generates status bar to use with i3bar, dzen2 or xmobar
+            - name: dmenu
+              description: Generic menu for X
+            # ==============
+            # Window Manager
+            # ==============
+            # Provided by i3
+            # - name:
+            #   description:
+            # ================
+            # Settings related
+            # ================
+            - name: lxappearance-gtk3
+              description: Feature-rich GTK+ theme switcher of the LXDE Desktop
+            - name: lxinput-gtk3
+              description: Small program to configure keyboard and mouse for LXDE
+            - name: arandr
+              description: A simple visual front end for XRandR
+            - name: network-manager-applet
+              description: Applet for managing network connections
+            - name: notify-osd
+              description: On-screen-display notification agent
+            - name: nitrogen
+              description: Background browser and setter for X windows
+            - name: tint2
+              description: Basic, good-looking task manager for WMs
+            - name: udiskie
+              description: Removable disk automounter using udisks
+            - name: volumeicon
+              description: Volume control for the system tray
+            # ===========
+            # XDG related (like xdg-desktop-portal-gnome, xdg-user-dirs-gtk, archlinux-xdg-menu)
+            # ===========
+            - name: xdg-desktop-portal-gtk
+              description: XDG Desktop Portal
+            # ============
+            # Polkit agent
+            # ============
+            - name: polkit-dumb-agent-git
+              description: Polkit Agent
+            # =================
+            # Extension related (extension manager, store)
+            # =================
+            # - name:
+            #   description:
+            # ===============
+            # Theming related (theming support, uniform theming, basic theme)
+            # ===============
+            - name: awesome-terminal-fonts
+              description: Fonts/icons for powerlines
+            - name: gnome-backgrounds
+              description: Wallpapers
+            # ===========
+            # Tweaking apps (like gnome-tweaks)
+            # ===========
+            - name: mousetweaks
+              description: Mouse accessibility enhancements
+            # ========
+            # Terminal
+            # ========
+            - name: alacritty
+              description: A cross-platform, GPU-accelerated terminal emulator
+            # ============
+            # File Manager
+            # ============
+            - name: pcmanfm-gtk3
+              description: File Manager
+            - name: gvfs-google
+              description: Virtual filesystem implementation for GIO (Google Drive backend)
+            - name: gvfs-mtp
+              description: Virtual filesystem implementation for GIO (MTP backend, Android, media player)
+            - name: gvfs-smb
+              description: Virtual filesystem implementation for GIO (SMB/CIFS backend, Windows client)
+            - name: python-pysmbc
+              description: Python 3 bindings for libsmbclient
+            # ===========
+            # Text Editor
+            # ===========
+            - name: mousepad
+              description: Text Editor
+            # ===============
+            # Document Viewer
+            # ===============
+            - name: evince
+              description: Document Viewer
+            # ===============
+            # Archive Manager
+            # ===============
+            - name: file-roller
+              description: Archive Manager
+            # ============
+            # Disk Manager
+            # ============
+            - name: gparted
+              description: Disk Manager
+            # ==========
+            # Calculator
+            # ==========
+            - name: mate-calc
+              description: Calculator
+            # ==================
+            # Clock and Calendar
+            # ==================
+            - name: galculator
+              description: Calculator
+            # ===========
+            # Screenshots
+            # ===========
+            - name: xfce4-screenshooter
+              description: Screenshots
+            - name: scrot
+              description: CLI Screenshots
+            # ============
+            # Image Viewer
+            # ============
+            - name: gpicview
+              description: Image Viewer
+            # ============
+            # Media Player
+            # ============
+            - name: vlc
+              description: Media Player
+  - id: none
+    name: "No Desktop"
+    description: "Do not use a graphical desktop. The system will login to a text-based tty console."
+    screenshot: "/org/bredos/bakery/images/tty.jpg"
+    icon: "/org/bredos/bakery/images/tty.svg"
+    dm: none
+    de: none
+    session: none
+    packages:
+      name: tty
+      hidden: true
+      selected: true
+      ignore-share-state: true
+      packages: []

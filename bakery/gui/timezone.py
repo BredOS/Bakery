@@ -22,8 +22,10 @@ from datetime import datetime
 from bakery import lp, lrun, _
 from bakery.network import geoip
 from bakery.timezone import tz_list
+from bredos.utilities import time_fn
 
 import gi
+import threading
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
@@ -31,6 +33,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib  # type: ignore
 
 
+@time_fn
 @Gtk.Template(resource_path="/org/bredos/bakery/ui/timezone_screen.ui")
 class timezone_screen(Adw.Bin):
     __gtype_name__ = "timezone_screen"
@@ -44,27 +47,49 @@ class timezone_screen(Adw.Bin):
         super().__init__(**kwargs)
         self.window = window
         self.tz_list = tz_list()
-        current_timezone = geoip()
         self.timezone = {}
-        self.timezone["region"] = current_timezone["region"]
-        self.timezone["zone"] = current_timezone["zone"]
         self.timezone["ntp"] = True
 
         self.zones_list.connect("notify::selected-item", self.on_zone_changed)
         self.zone_model = Gtk.StringList()
         self.zones_list.set_model(self.zone_model)
+        # Set expression for search in zones_list
+        zone_expr = Gtk.PropertyExpression.new(Gtk.StringObject, None, "string")
+        self.zones_list.set_expression(zone_expr)
 
         self.regions_list.connect("notify::selected-item", self.on_region_changed)
         self.region_model = Gtk.StringList()
         self.regions_list.set_model(self.region_model)
+        # Set expression for search in regions_list
+        region_expr = Gtk.PropertyExpression.new(Gtk.StringObject, None, "string")
+        self.regions_list.set_expression(region_expr)
+
         for item in list(self.tz_list.keys()):
             self.region_model.append(item)
 
+        # Set placeholder until geoip is fetched
+        self.change_regions_list(list(self.tz_list.keys())[0])
+        self.regions_list.set_selected(0)
+        self.select_zone(
+            list(self.tz_list.keys())[0], self.tz_list[list(self.tz_list.keys())[0]][0]
+        )
+
+        # Fetch geoip asynchronously
+        threading.Thread(target=self._fetch_geoip, daemon=True).start()
+
+    def _fetch_geoip(self):
+        current_timezone = geoip()
+        GLib.idle_add(self._apply_geoip, current_timezone)
+
+    def _apply_geoip(self, current_timezone):
+        self.timezone["region"] = current_timezone["region"]
+        self.timezone["zone"] = current_timezone["zone"]
         self.change_regions_list(current_timezone["region"])
         self.regions_list.set_selected(
             list(self.tz_list.keys()).index(current_timezone["region"])
         )
         self.select_zone(current_timezone["region"], current_timezone["zone"])
+        return False  # Stop idle_add
 
     def on_region_changed(self, dropdown, *_):
         selected = dropdown.props.selected_item

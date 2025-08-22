@@ -1,7 +1,98 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.95.0 -->
+<!-- Created with Cambalache 0.96.1 -->
 <interface>
   <!-- interface-name de_screen.ui -->
-  <requires lib="libadwaita" version="1.0"/>
-  <object class="AdwBin" id="de_screen"/>
+  <requires lib="gtk" version="4.18"/>
+  <requires lib="libadwaita" version="1.4"/>
+  <template class="de_screen" parent="AdwBin">
+    <child>
+      <object class="AdwStatusPage" id="main">
+        <property name="description">asd</property>
+        <property name="hexpand">True</property>
+        <property name="hexpand-set">True</property>
+        <property name="title">Pick a desktop</property>
+        <property name="vexpand">True</property>
+        <property name="vexpand-set">True</property>
+        <child>
+          <object class="GtkBox">
+            <property name="height-request">460</property>
+            <property name="spacing">5</property>
+            <property name="vexpand">True</property>
+            <property name="vexpand-set">True</property>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="hscrollbar-policy">never</property>
+                <child>
+                  <object class="GtkGridView" id="de_list">
+                    <property name="max-columns">1</property>
+                    <property name="width-request">150</property>
+                    <style>
+                      <class name="navigation-sidebar"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparator">
+                <property name="vexpand">True</property>
+                <property name="vexpand-set">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="hexpand">True</property>
+                <property name="hexpand-set">True</property>
+                <property name="hscrollbar-policy">never</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="vexpand">True</property>
+                    <property name="vexpand-set">True</property>
+                    <child>
+                      <object class="GtkPicture" id="screenshot">
+                        <property name="content-fit">scale-down</property>
+                        <property name="margin-end">10</property>
+                        <property name="margin-start">10</property>
+                        <property name="overflow">visible</property>
+                        <property name="width-request">320</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="description">
+                        <property name="label">Description</property>
+                        <property name="margin-bottom">10</property>
+                        <property name="margin-end">10</property>
+                        <property name="margin-start">10</property>
+                        <property name="margin-top">10</property>
+                        <property name="natural-wrap-mode">word</property>
+                        <property name="wrap">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkExpander" id="expander">
+                        <property name="label">additional shit</property>
+                        <property name="visible">False</property>
+                        <child>
+                          <object class="AdwActionRow">
+                            <property name="margin-bottom">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-top">5</property>
+                            <property name="subtitle">asdfg</property>
+                            <property name="title">asdf</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <style/>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
 </interface>

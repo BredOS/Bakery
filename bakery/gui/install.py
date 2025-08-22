@@ -20,6 +20,7 @@
 from bakery import lp, lrun, _, st_msgs
 from pyrunning import LoggingLevel
 from bakery.install import install
+from bredos.utilities import time_fn
 import threading
 import gi
 
@@ -28,6 +29,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib  # type: ignore
 
 
+@time_fn
 @Gtk.Template(resource_path="/org/bredos/bakery/ui/install_screen.ui")
 class install_screen(Adw.Bin):
     __gtype_name__ = "install_screen"
@@ -144,7 +146,9 @@ class InstallThread(threading.Thread):
             page_id = self.window.get_page_id(page_name)
             self.window.stack1.set_visible_child_name(page_id)
             self.window.button_box.set_visible(True)
+            self.window.button_box.set_halign(Gtk.Align.END)
             self.window.back_btn.set_visible(False)
+            self.window.steps_box.set_visible(False)
             self.window.next_btn.disconnect_by_func(self.window.on_install_btn_clicked)
             self.window.next_btn.connect("clicked", self.window.on_done_clicked)
             self.window.next_btn.set_label(

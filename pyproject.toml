@@ -1,0 +1,32 @@
+[build-system]
+requires = ["meson-python"]
+build-backend = "mesonpy"
+
+[project]
+name = "bakery"
+version = "1.7.0"
+description = "Bakery the bredos installer"
+readme = "README.md"
+license = { text = "GPL-3.0-or-later" }
+authors = [
+    { name = "Panda", email = "panda@bredos.org" },
+]
+requires-python = ">=3.13"
+dependencies = [
+    "pyrunning",
+    "bredos",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.13",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Natural Language :: English",
+]
+
+[project.urls]
+Homepage = "https://github.com/BredOS/Bakery"
+Source = "https://github.com/BredOS/Bakery"
+Issues = "https://github.com/BredOS/Bakery/issues"

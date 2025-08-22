@@ -41,7 +41,8 @@ def generate_gresource() -> None:
 
 def set_resources() -> None:
     """Sets the resource path for the UI files."""
-    generate_gresource()
+    if not script_path.startswith("/usr/"):
+        generate_gresource()
     resource: Gio.Resource = Gio.Resource.load(
         path.join(script_path, "data", "org.bredos.bakery.gresource")
     )

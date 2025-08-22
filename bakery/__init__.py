@@ -37,7 +37,7 @@ if dryrun:
     log_path = "."
     log_filename = "DRYRUN.log"
 else:
-    log_path = os.path.join(os.path.expanduser("~"), ".bredos", "bakery", "logs")
+    log_path = "/var/log/"
     log_filename = datetime.now().strftime("BAKERY-%Y-%m-%d-%H-%M-%S.log")
 
 setup_logging("bredos-bakery", log_path, log_filename)

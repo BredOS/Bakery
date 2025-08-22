@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from bakery.keyboard import kb_layouts, kb_models
-
+from bredos.utilities import time_fn
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -26,6 +26,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib  # type: ignore
 
 
+@time_fn
 @Gtk.Template(resource_path="/org/bredos/bakery/ui/summary_screen.ui")
 class summary_screen(Adw.Bin):
     __gtype_name__ = "summary_screen"
