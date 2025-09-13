@@ -76,5 +76,5 @@ fi
 
 if [[ $EUID -ne 0 ]]; then
     tmp_env_file=$(save_env)
-    exec pkexec bash -c "source \"$tmp_env_file\"; rm -f \"$tmp_env_file\"; $command"
+    exec pkexec bash -c "source \"$tmp_env_file\"; rm -f \"$tmp_env_file\"; cd $script_dir; $command"
 fi

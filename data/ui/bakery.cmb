@@ -3,7 +3,7 @@
 <!-- Created with Cambalache 0.96.1 -->
 <cambalache-project version="0.96.0" target_tk="gtk-4.0">
   <css filename="main.css" is_global="1"/>
-  <ui template-class="BakeryWindow" filename="window.ui" sha256="4ec0eee9d90644222c2e38ac8d107150fbe1333d7c5abcb11872f3714b19523f">
+  <ui template-class="BakeryWindow" filename="window.ui" sha256="f9e5f555686b829030e2eb00bd88eb39838cda7b9e4a3af8c893d12ed6dc50eb">
     <css-provider>main.css</css-provider>
   </ui>
   <ui template-class="partitioning_screen" filename="partitioning_screen.ui" sha256="8907df8e437e70f5016d26efa0e0444cce13d2f0b14c8f2d5484f3318f6816de"/>
