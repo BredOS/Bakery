@@ -6,7 +6,7 @@ project('bakery',
 py = import('python').find_installation()
 i18n = import('i18n')
 
-#install_data('bakery-tui.py', install_dir: join_paths(get_option('datadir'), 'bakery'))
+install_data('bakery-tui.py', install_dir: join_paths(get_option('datadir'), 'bakery'))
 install_data('bakery-gui.py', install_dir: join_paths(get_option('datadir'), 'bakery'))
 # install license
 install_data('LICENSE', install_dir: join_paths(get_option('datadir'), 'licenses/bakery'))
