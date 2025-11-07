@@ -691,6 +691,9 @@ def user_menu() -> None:
 def summary_confirm(manifest: dict) -> bool:
     sidebar = SIDEBAR.copy()
     sidebar["Summary"] = True
+    de = manifest["session_configuration"]["de"]
+    if de is None:
+        de = "None detected."
     data = [
         "Ready to install. Please and confirm:",
         "",
@@ -701,7 +704,7 @@ def summary_confirm(manifest: dict) -> bool:
         "",
         "Session Configuration:",
         " - Display Manager     : " + manifest["session_configuration"]["dm"],
-        " - Desktop Environment : " + manifest["session_configuration"]["de"],
+        " - Desktop Environment : " + de,
         " - Wayland             : "
         + str(manifest["session_configuration"]["is_wayland"]),
         "",
