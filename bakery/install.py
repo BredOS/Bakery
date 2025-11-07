@@ -69,6 +69,14 @@ def enable_services(services: list, chroot: bool = False, mnt_dir: str = None) -
         pass
 
 
+def install_packages(packages: list, mnt_dir: str = None) -> None:
+    pass
+
+
+def mark_de_dep(de: str, mnt_dir: str = None) -> None:
+    pass
+
+
 def final_setup(settings, mnt_dir: str = None) -> None:
     if settings["install_type"]["source"] == "on_device":
         lrun(["systemctl", "disable", "resizefs.service"], silent=True)
