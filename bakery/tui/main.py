@@ -14,6 +14,8 @@ from bakery.partitioning import (
     list_drives,
 )
 
+from bakery.install import install as binstall
+
 from time import sleep
 from pytz import timezone
 from datetime import datetime
@@ -750,7 +752,7 @@ def summary_confirm(manifest: dict) -> bool:
 
 def install(manifest: dict) -> bool:
     c.suspend()
-    install(manifest)
+    binstall(manifest)
     c.resume()
     return True
 
