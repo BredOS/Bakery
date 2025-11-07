@@ -815,7 +815,8 @@ def main_menu() -> None:
                     "session_configuration": detect_session_configuration(),
                     "root_password": False,
                     "layout": keyboard,
-                    "locale": timezone,
+                    "locale": locale,
+                    "timezone": timezone,
                     "hostname": user[0],
                     "user": user[1],
                     "installer": {
