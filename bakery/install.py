@@ -41,7 +41,6 @@ from .misc import is_sbc, copy_logs, populate_messages, st
 from .packages import remove_packages
 from .partitioning import mount_all_partitions, partition_disk, unmount_all
 from .timezone import tz_ntp, tz_set
-from .tweaks import load_config
 from .validate import gidc, shells, uidc
 
 
@@ -99,35 +98,6 @@ def final_setup(settings, mnt_dir: str = None) -> None:
         )
     elif settings["install_type"]["source"] == "from_iso":
         cfg = load_config()
-        if is_sbc(settings["install_type"]["device"]):
-            tweaks = cfg["devices"][settings["install_type"]["device"]].get("dt")
-            if tweaks:
-                grub_cfg(
-                    cmdline=tweaks.get("cmdline", None),
-                    dtb=tweaks.get("dtb", None),
-                    timeout=tweaks.get("timeout", 5),
-                    update=True,
-                    chroot=True,
-                    mnt_dir=mnt_dir,
-                )
-            pythontweaks = tweaks.get("tweaks", None)
-            if pythontweaks:
-                exec(pythontweaks["python"])
-        else:
-            arch = platform.machine()
-            tweaks = cfg.get(f"arch_{arch}")
-            if tweaks:
-                grub_cfg(
-                    cmdline=tweaks.get("cmdline", None),
-                    dtb=tweaks.get("dtb", None),
-                    timeout=tweaks.get("timeout", 5),
-                    update=True,
-                    chroot=True,
-                    mnt_dir=mnt_dir,
-                )
-                pythontweaks = tweaks.get("tweaks", None)
-                if pythontweaks:
-                    exec(pythontweaks["python"])
 
         if settings["install_type"]["type"] == "offline":
             enable_services(
