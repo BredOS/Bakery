@@ -822,6 +822,7 @@ def main_menu() -> None:
                     "hostname": user[0],
                     "user": user[1],
                     "installer": {
+                        "shown_pages": list(sidebar.keys()),
                         "installer_version": config.installer_version,
                         "ui": "tui",
                     },
