@@ -1,8 +1,8 @@
 # Maintainer: Bill Sideris <bill88t@feline.gr>
 pkgname=('bakery' 'bakery-gui' 'bakery-tui')
 pkgbase="bakery"
-pkgver=1.3.2
-pkgrel=5
+pkgver=1.3.3
+pkgrel=1
 pkgdesc="BredOS Installer"
 arch=('any')
 url="https://github.com/BredOS/Bakery"
