@@ -847,6 +847,8 @@ def main_menu() -> None:
                         "Press Enter to reboot into your new installation.",
                     ]
                 )
+
+                c.suspend()
                 if not DRYRUN:
                     reboot()
         except KeyboardInterrupt:
