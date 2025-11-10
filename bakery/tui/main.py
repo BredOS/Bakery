@@ -799,7 +799,7 @@ def main_menu() -> None:
                 timezone = timezone_menu()
                 stage = 2 if timezone is None else 4
             elif stage == 4:
-                if INSTALL_TYPE == "from_iso" or True:
+                if INSTALL_TYPE == "from_iso":
                     parts = partitioning_menu()
                     stage = 3 if parts is None else 5
                 else:
