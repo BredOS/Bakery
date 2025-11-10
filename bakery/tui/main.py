@@ -783,7 +783,7 @@ def main_menu() -> None:
                     sidebar=sidebar,
                 ):
                     stage = 1  # Locale
-                elif DRYRUN:
+                else:
                     return
             elif stage == 1:
                 locale = locale_menu()
