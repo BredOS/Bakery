@@ -754,6 +754,10 @@ def summary_confirm(manifest: dict) -> bool:
 
 def install(manifest: dict) -> bool:
     c.suspend()
+    print("=====================")
+    print("STARTING INSTALLATION")
+    print("     PLEASE WAIT     ")
+    print("=====================")
     binstall(manifest)
     c.resume()
     return True
