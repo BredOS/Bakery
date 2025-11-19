@@ -178,6 +178,9 @@ class BakeryWindow(Adw.ApplicationWindow):
         self.main_stk.set_visible_child(self.main_page.get_child())
         self.cancel_dialog = self.install_cancel
         self.cancel_dialog.set_property("hide-on-close", True)
+        self.online_install.set_sensitive(
+            False
+        )  # Disable online install button for now
         self.install_type = None
         self.install_source = detect_install_source()
         self.install_device = detect_device()
