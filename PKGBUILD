@@ -28,7 +28,7 @@ build() {
 
 package_bakery() {
         cd "$srcdir/$pkgbase/build"
-        depends=('object-introspection' 'gobject-introspection-runtime' 'python-gobject''python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts' 'bakery-device-tweaks' 'python-yaml' 'appstream-glib' 'archlinux-appstream-data' 'python-bredos-common>=1.8.1')
+        depends=('object-introspection' 'gobject-introspection-runtime' 'python-gobject''python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts' 'bakery-device-tweaks' 'python-yaml' 'appstream-glib' 'archlinux-appstream-data' 'python-bredos-common>=1.9.0')
         DESTDIR="$pkgdir" meson install -q
         rm -r "$pkgdir/usr/share/bakery/bakery-"{gui,tui}".py" \
               "$pkgdir/usr/lib/python3.13/site-packages/bakery/"{gui/,tui/,__pycache__/} \
