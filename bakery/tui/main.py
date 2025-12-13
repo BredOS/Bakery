@@ -852,8 +852,8 @@ def main_menu() -> None:
                     ]
                 )
 
-                c.suspend()
                 if not DRYRUN:
+                    c.suspend()
                     reboot()
         except KeyboardInterrupt:
             if DRYRUN:
