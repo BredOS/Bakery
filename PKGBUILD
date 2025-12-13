@@ -2,7 +2,7 @@
 pkgname=('bakery' 'bakery-gui' 'bakery-tui')
 pkgbase="bakery"
 pkgver=1.3.3
-pkgrel=1
+pkgrel=2
 pkgdesc="BredOS Installer"
 arch=('any')
 url="https://github.com/BredOS/Bakery"
@@ -28,7 +28,7 @@ build() {
 
 package_bakery() {
         cd "$srcdir/$pkgbase/build"
-        depends=('object-introspection' 'gobject-introspection-runtime' 'python-gobject''python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts' 'bakery-device-tweaks' 'python-yaml' 'appstream-glib' 'archlinux-appstream-data' 'python-bredos-common>=1.9.0')
+        depends=('gobject-introspection' 'gobject-introspection-runtime' 'python-gobject' 'python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts' 'bakery-device-tweaks' 'python-yaml' 'appstream-glib' 'archlinux-appstream-data' 'python-bredos-common>=1.9.0')
         DESTDIR="$pkgdir" meson install -q
         rm -r "$pkgdir/usr/share/bakery/bakery-"{gui,tui}".py" \
               "$pkgdir/usr/lib/python3.13/site-packages/bakery/"{gui/,tui/,__pycache__/} \
