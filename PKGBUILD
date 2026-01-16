@@ -2,7 +2,7 @@
 pkgname=('bakery' 'bakery-gui' 'bakery-tui')
 pkgbase="bakery"
 pkgver=1.3.3
-pkgrel=2
+pkgrel=4
 pkgdesc="BredOS Installer"
 arch=('any')
 url="https://github.com/BredOS/Bakery"
@@ -31,7 +31,7 @@ package_bakery() {
         depends=('gobject-introspection' 'gobject-introspection-runtime' 'python-gobject' 'python-pyrunning' 'python-toml' 'python-requests' 'python-pyparted' 'arch-install-scripts' 'bakery-device-tweaks' 'python-yaml' 'appstream-glib' 'archlinux-appstream-data' 'python-bredos-common>=1.9.0')
         DESTDIR="$pkgdir" meson install -q
         rm -r "$pkgdir/usr/share/bakery/bakery-"{gui,tui}".py" \
-              "$pkgdir/usr/lib/python3.13/site-packages/bakery/"{gui/,tui/,__pycache__/} \
+              "$pkgdir/usr/lib/python3.14/site-packages/bakery/"{gui/,tui/,__pycache__/} \
               "$pkgdir/usr/share/"{icons/,appdata/,applications/,glib-2.0/}
 }
 
@@ -44,7 +44,7 @@ package_bakery-gui() {
               "$pkgdir/usr/share/bakery/data/" \
               "$pkgdir/usr/share/licenses/" \
               "$pkgdir/usr/bin" \
-              "$pkgdir/usr/lib/python3.13/site-packages/bakery/"{appstream.py,__init__.py,keyboard.py,network.py,__pycache__,tweaks.py,config.py,install.py,locale.py,packages.py,timezone.py,validate.py,tui/,gui/__pycache__/,iso.py,misc.py,partitioning.py}
+              "$pkgdir/usr/lib/python3.14/site-packages/bakery/"{appstream.py,__init__.py,keyboard.py,network.py,__pycache__,tweaks.py,config.py,install.py,locale.py,packages.py,timezone.py,validate.py,tui/,gui/__pycache__/,iso.py,misc.py,partitioning.py}
 }
 
 package_bakery-tui() {
@@ -54,6 +54,6 @@ package_bakery-tui() {
         rm -r "$pkgdir/usr/share/bakery/bakery-gui.py" \
               "$pkgdir/usr/share/"{appdata/,applications/,bakery/data/,glib-2.0/,icons/,licenses/,locale/} \
               "$pkgdir/usr/bin" \
-              "$pkgdir/usr/lib/python3.13/site-packages/bakery/"{appstream.py,__init__.py,keyboard.py,network.py,__pycache__,tweaks.py,config.py,install.py,locale.py,packages.py,timezone.py,validate.py,tui/__pycache__/,gui/,iso.py,misc.py,partitioning.py}
+              "$pkgdir/usr/lib/python3.14/site-packages/bakery/"{appstream.py,__init__.py,keyboard.py,network.py,__pycache__,tweaks.py,config.py,install.py,locale.py,packages.py,timezone.py,validate.py,tui/__pycache__/,gui/,iso.py,misc.py,partitioning.py}
 
 }
